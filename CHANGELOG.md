@@ -14,6 +14,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Repeated-query detection: `QueryGuardAnalyzer` groups a completed session by fingerprint and
+  reports potential N+1 candidates as warnings, with the evidence and the limitation attached to the
+  finding. `RuleNames` publishes the rule identifiers that appear in reports.
 - Conservative SQL normalization: `ISqlNormalizer` collapses whitespace, removes comments other than
   recognized `QueryGuard:` directives, and maps every provider parameter syntax to one placeholder,
   so equivalent generated SQL shares a fingerprint. Token order is never changed. Provider SQL
