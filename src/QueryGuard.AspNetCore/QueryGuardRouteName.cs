@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
@@ -44,6 +45,18 @@ public static class QueryGuardRouteName
     /// Stands in for a request method that is not a plain HTTP token.
     /// </summary>
     private const string UnsafeMethod = "(method)";
+
+    /// <summary>
+    /// The characters an HTTP method may contain, as far as QueryGuard is concerned.
+    /// </summary>
+    /// <remarks>
+    /// A narrowed version of the HTTP token grammar. Every standard method and every custom method
+    /// anyone actually uses fits, and nothing that could break a log line does. Searched through
+    /// <see cref="SearchValues"/> so the check is a vectorized span scan rather than a per-character
+    /// loop — this runs once per request.
+    /// </remarks>
+    private static readonly SearchValues<char> MethodTokenCharacters = SearchValues.Create(
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.");
 
     /// <summary>
     /// Resolves the scope name for a request.
@@ -106,14 +119,6 @@ public static class QueryGuardRouteName
             return UnsafeMethod;
         }
 
-        foreach (var character in method)
-        {
-            if (!char.IsAsciiLetterOrDigit(character) && character is not '-' and not '_' and not '.')
-            {
-                return UnsafeMethod;
-            }
-        }
-
-        return method;
+        return method.AsSpan().ContainsAnyExcept(MethodTokenCharacters) ? UnsafeMethod : method;
     }
 }
