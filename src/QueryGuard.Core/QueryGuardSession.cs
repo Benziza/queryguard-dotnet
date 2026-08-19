@@ -26,6 +26,13 @@ public sealed class QueryGuardSession
     private readonly List<QueryRecord> _records = [];
     private readonly object _gate = new();
     private readonly Func<DateTimeOffset> _clock;
+    private readonly IQueryGuardRedactor _redactor;
+
+    /// <summary>
+    /// Fingerprints already seen, so an optional stack trace is captured for the first occurrence of
+    /// each and never for the rest.
+    /// </summary>
+    private readonly HashSet<string> _seenFingerprints = new(StringComparer.Ordinal);
 
     /// <summary>
     /// A monotonic starting point, so that a system clock adjustment during a request cannot
@@ -46,13 +53,22 @@ public sealed class QueryGuardSession
     /// What this session measures: a route pattern such as <c>GET /api/companies</c>, or a test name.
     /// </param>
     /// <param name="policy">The policy this session will be evaluated against.</param>
+    /// <param name="redactor">
+    /// Supplies the capture settings this session honours — whether a first-occurrence stack trace is
+    /// wanted, and how such a trace is filtered. Defaults to a redactor with default options, which
+    /// captures no stack traces at all.
+    /// </param>
     /// <param name="clock">
     /// An optional wall-clock source, used to make timestamps deterministic in tests. Durations
     /// always come from a monotonic source regardless of this value.
     /// </param>
     /// <exception cref="ArgumentException"><paramref name="name"/> is empty or whitespace.</exception>
     /// <exception cref="ArgumentNullException"><paramref name="policy"/> is <see langword="null"/>.</exception>
-    public QueryGuardSession(string name, QueryGuardPolicy policy, Func<DateTimeOffset>? clock = null)
+    public QueryGuardSession(
+        string name,
+        QueryGuardPolicy policy,
+        IQueryGuardRedactor? redactor = null,
+        Func<DateTimeOffset>? clock = null)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -64,6 +80,7 @@ public sealed class QueryGuardSession
         Name = name;
         Policy = policy ?? throw new ArgumentNullException(nameof(policy));
         Id = Guid.NewGuid();
+        _redactor = redactor ?? new QueryGuardRedactor();
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         StartedAt = _clock();
         _startTimestamp = Stopwatch.GetTimestamp();
@@ -161,6 +178,12 @@ public sealed class QueryGuardSession
     /// <param name="isFailed">Whether the command failed.</param>
     /// <param name="failureType">The exception type name when the command failed.</param>
     /// <param name="tags">Query tags recognized on the command.</param>
+    /// <param name="stackTraceProvider">
+    /// Produces a raw stack trace, invoked <strong>only</strong> when stack-trace capture is enabled
+    /// and this is the first occurrence of the fingerprint in this session. Passing a callback rather
+    /// than a string is what keeps the default configuration free: with capture off, nothing is
+    /// walked, formatted, or allocated.
+    /// </param>
     /// <returns>
     /// The created record, or <see langword="null"/> when the session is already completed.
     /// </returns>
@@ -179,7 +202,8 @@ public sealed class QueryGuardSession
         int parameterCount = 0,
         bool isFailed = false,
         string? failureType = null,
-        IReadOnlyList<string>? tags = null)
+        IReadOnlyList<string>? tags = null,
+        Func<string?>? stackTraceProvider = null)
     {
         ArgumentNullException.ThrowIfNull(fingerprint);
 
@@ -191,6 +215,17 @@ public sealed class QueryGuardSession
                 return null;
             }
 
+            var isFirstOccurrence = _seenFingerprints.Add(fingerprint.Id);
+
+            // Bounded to one trace per fingerprint. There is deliberately no configuration that
+            // captures a trace per command — that path does not exist in the API.
+            // See docs/decisions/0007-stack-trace-policy.md.
+            var stackTrace = isFirstOccurrence
+                && _redactor.Options.CaptureFirstStackTrace
+                && stackTraceProvider is not null
+                    ? _redactor.FilterStackTrace(stackTraceProvider())
+                    : null;
+
             var record = new QueryRecord(
                 sequence: ++_sequence,
                 kind: kind,
@@ -201,7 +236,8 @@ public sealed class QueryGuardSession
                 parameterCount: parameterCount,
                 isFailed: isFailed,
                 failureType: failureType,
-                tags: tags);
+                tags: tags,
+                stackTrace: stackTrace);
 
             _records.Add(record);
             return record;

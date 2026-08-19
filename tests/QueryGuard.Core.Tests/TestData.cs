@@ -46,5 +46,5 @@ internal static class TestData
     public static QueryGuardSession Session(
         string name = "GET /api/companies",
         QueryGuardPolicy? policy = null)
-        => new(name, policy ?? QueryGuardPolicy.Create("test"), () => FixedInstant);
+        => new(name, policy ?? QueryGuardPolicy.Create("test"), clock: () => FixedInstant);
 }

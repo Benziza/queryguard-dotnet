@@ -14,6 +14,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Optional first-occurrence stack trace: off by default, bounded to one filtered trace per
+  fingerprint, and framework frames removed so what remains is application code. False-positive
+  regression fixtures pin the repeated-query patterns that are not defects.
 - Transparent allowlists: `QueryGuardPolicy.AllowFingerprint` and `AllowQueryTag`, each requiring a
   reason, plus the `QueryGuard:Ignore` query tag. A matched finding is reported as ignored with its
   reason rather than removed, and allowlisting one fingerprint never suppresses another or a

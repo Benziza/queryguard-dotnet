@@ -42,6 +42,9 @@ public sealed class QueryRecord
     /// The exception itself is never captured, and never replaces the one the application sees.
     /// </param>
     /// <param name="tags">Query tags recognized on the command, if any.</param>
+    /// <param name="stackTrace">
+    /// A filtered stack trace for the first occurrence of this fingerprint, when capture is enabled.
+    /// </param>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="sequence"/> is less than one.</exception>
     /// <exception cref="ArgumentNullException"><paramref name="fingerprint"/> is <see langword="null"/>.</exception>
     public QueryRecord(
@@ -54,7 +57,8 @@ public sealed class QueryRecord
         int parameterCount = 0,
         bool isFailed = false,
         string? failureType = null,
-        IReadOnlyList<string>? tags = null)
+        IReadOnlyList<string>? tags = null,
+        string? stackTrace = null)
     {
         if (sequence < 1)
         {
@@ -81,6 +85,7 @@ public sealed class QueryRecord
         IsFailed = isFailed;
         FailureType = failureType;
         Tags = tags ?? Array.Empty<string>();
+        StackTrace = stackTrace;
     }
 
     /// <summary>
@@ -145,6 +150,19 @@ public sealed class QueryRecord
     /// stripped during normalization like any other comment.
     /// </remarks>
     public IReadOnlyList<string> Tags { get; }
+
+    /// <summary>
+    /// Gets a filtered stack trace for the first occurrence of this fingerprint, or
+    /// <see langword="null"/> when capture is disabled or this is not the first occurrence.
+    /// </summary>
+    /// <remarks>
+    /// "Where is this coming from?" is the first question anyone asks after seeing a finding, and this
+    /// is the only way to answer it from inside an interceptor. It is also expensive per command, so it
+    /// is off by default and bounded to one trace per fingerprint when enabled. Framework frames are
+    /// filtered out, leaving the application code that is actually actionable. See
+    /// <c>docs/decisions/0007-stack-trace-policy.md</c>.
+    /// </remarks>
+    public string? StackTrace { get; }
 
     /// <summary>
     /// Gets a value indicating whether this command counts toward read-query budgets.
