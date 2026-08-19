@@ -32,20 +32,33 @@ public sealed class QueryFingerprintFactory : IQueryFingerprintFactory
     private const int IdLength = 8;
 
     private readonly IQueryGuardRedactor _redactor;
+    private readonly ISqlNormalizer _normalizer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="QueryFingerprintFactory"/> class.
     /// </summary>
     /// <param name="redactor">
-    /// The redactor applied before hashing. Defaults to a redactor with default capture options.
+    /// The redactor applied after normalization. Defaults to a redactor with default capture options.
     /// </param>
-    public QueryFingerprintFactory(IQueryGuardRedactor? redactor = null)
-        => _redactor = redactor ?? new QueryGuardRedactor();
+    /// <param name="normalizer">
+    /// The normalizer applied first. Defaults to <see cref="SqlNormalizer"/>.
+    /// </param>
+    public QueryFingerprintFactory(IQueryGuardRedactor? redactor = null, ISqlNormalizer? normalizer = null)
+    {
+        _redactor = redactor ?? new QueryGuardRedactor();
+        _normalizer = normalizer ?? new SqlNormalizer();
+    }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// Normalize first, then redact. Normalization removes the provider noise that would otherwise
+    /// split one logical query into several groups; redaction then removes the values, so no
+    /// un-redacted text is ever hashed or retained. Doing it the other way round would leave the
+    /// redactor's placeholders to be normalized, which is one indirection for no benefit.
+    /// </remarks>
     public QueryFingerprint Create(string? commandText, QueryCommandKind kind)
     {
-        var normalized = _redactor.RedactSql(commandText);
+        var normalized = _redactor.RedactSql(_normalizer.Normalize(commandText));
         return new QueryFingerprint(ComputeId(normalized, kind), normalized);
     }
 

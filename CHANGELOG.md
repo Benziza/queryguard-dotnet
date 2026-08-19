@@ -14,6 +14,10 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Conservative SQL normalization: `ISqlNormalizer` collapses whitespace, removes comments other than
+  recognized `QueryGuard:` directives, and maps every provider parameter syntax to one placeholder,
+  so equivalent generated SQL shares a fingerprint. Token order is never changed. Provider SQL
+  fixtures pin the behavior for SQLite, PostgreSQL, SQL Server, and MySQL.
 - `QueryGuard.EntityFrameworkCore`: captures relational command execution through the official
   `DbCommandInterceptor` API on EF Core 8 and 10, covering the synchronous and asynchronous reader,
   scalar, and non-query paths plus command failures. Observes only — the generated SQL, the result,
