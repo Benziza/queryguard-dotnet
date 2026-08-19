@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QueryGuard.EntityFrameworkCore.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/QueryGuard.EntityFrameworkCore/QueryGuard.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+  <!-- SQLite gives real relational command execution with no container to start. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,41 @@
+# QueryGuard.EntityFrameworkCore
+
+Captures Entity Framework Core relational commands for
+[QueryGuard.NET](https://github.com/Benziza/queryguard-dotnet), so repeated SQL can be grouped and
+query budgets can be enforced.
+
+Capture uses the official
+[EF Core interception API](https://learn.microsoft.com/ef/core/logging-events-diagnostics/interceptors).
+QueryGuard **observes only**: it never modifies the generated SQL, suppresses a command, changes a
+result, or replaces the exception your application sees.
+
+## Registering the interceptor
+
+```csharp
+builder.Services.AddDbContext<AppDbContext>((services, db) =>
+{
+    db.UseSqlite(connectionString);
+    db.AddInterceptors(services.GetRequiredService<QueryGuardCommandInterceptor>());
+});
+```
+
+Nothing is captured unless a QueryGuard scope is open — through
+`QueryGuard.AspNetCore` middleware for a request, or `QueryGuard.Testing` for a test. With no
+active scope the interceptor does no work at all.
+
+## Privacy defaults
+
+Parameter values and connection strings are never captured, literals in SQL are redacted, and
+retained samples are bounded. See
+[SECURITY.md](https://github.com/Benziza/queryguard-dotnet/blob/main/SECURITY.md).
+
+## Supported versions
+
+| Target framework | EF Core |
+| --- | --- |
+| `net8.0` | 8.0.x |
+| `net10.0` | 10.0.x |
+
+Any **relational** EF Core provider works through the interception contract. SQLite and PostgreSQL
+are integration-tested; see the
+[provider matrix](https://github.com/Benziza/queryguard-dotnet/blob/main/docs/decisions/0009-provider-matrix.md).

@@ -14,6 +14,12 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- `QueryGuard.EntityFrameworkCore`: captures relational command execution through the official
+  `DbCommandInterceptor` API on EF Core 8 and 10, covering the synchronous and asynchronous reader,
+  scalar, and non-query paths plus command failures. Observes only — the generated SQL, the result,
+  and the original exception are never modified.
+- `IQueryFingerprintFactory` with a stable SHA-256-derived identifier, and `QueryGuardQueryTag` for
+  recognizing `QueryGuard:` directives attached with EF Core `TagWith`.
 - Central privacy and redaction policy: `QueryGuardCaptureOptions` defines what may be captured
   and `IQueryGuardRedactor` enforces it before any reporter sees a result. Parameter values and
   connection strings are never captured, literals in SQL are redacted, retained samples and SQL
