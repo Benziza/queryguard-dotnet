@@ -16,9 +16,11 @@
   <Folder Name="/src/">
     <Project Path="src/QueryGuard.Core/QueryGuard.Core.csproj" />
     <Project Path="src/QueryGuard.EntityFrameworkCore/QueryGuard.EntityFrameworkCore.csproj" />
+    <Project Path="src/QueryGuard.AspNetCore/QueryGuard.AspNetCore.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/QueryGuard.Core.Tests/QueryGuard.Core.Tests.csproj" />
     <Project Path="tests/QueryGuard.EntityFrameworkCore.Tests/QueryGuard.EntityFrameworkCore.Tests.csproj" />
+    <Project Path="tests/QueryGuard.AspNetCore.Tests/QueryGuard.AspNetCore.Tests.csproj" />
   </Folder>
 </Solution>

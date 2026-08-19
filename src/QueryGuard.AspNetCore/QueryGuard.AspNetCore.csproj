@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QueryGuard.AspNetCore</RootNamespace>
+    <Description>Opens a QueryGuard session around each ASP.NET Core request and evaluates per-endpoint query policies. Observes only: the response, its headers, and the original exception are never modified.</Description>
+    <PackageTags>aspnetcore;middleware;ef-core;n-plus-one;performance;diagnostics</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../QueryGuard.Core/QueryGuard.Core.csproj" />
+    <ProjectReference Include="../QueryGuard.EntityFrameworkCore/QueryGuard.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+  <!--
+    The shared framework rather than individual packages: this integration only ever runs inside an
+    ASP.NET Core application, which already carries it.
+  -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+</Project>
