@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QueryGuard.EntityFrameworkCore</RootNamespace>
+    <Description>Captures Entity Framework Core relational commands through the official DbCommandInterceptor API so QueryGuard.NET can group repeated SQL and evaluate query budgets. Observes only: the generated SQL, the command result, and the original exception are never modified.</Description>
+    <PackageTags>ef-core;entity-framework-core;sql;n-plus-one;interceptor;performance</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../QueryGuard.Core/QueryGuard.Core.csproj" />
+  </ItemGroup>
+
+  <!--
+    EF Core is pinned per target framework in Directory.Packages.props: net8.0 resolves the
+    EF Core 8 line and net10.0 the EF Core 10 line, so a consumer never ends up with a
+    mismatched framework and EF Core pair. See docs/decisions/0008-target-frameworks.md.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+  </ItemGroup>
+
+</Project>

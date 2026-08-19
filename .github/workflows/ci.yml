@@ -98,6 +98,44 @@ jobs:
           path: artifacts/test-results
           if-no-files-found: warn
 
+  integration-tests:
+    name: integration-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore QueryGuard.slnx
+
+      - name: Build
+        run: dotnet build QueryGuard.slnx -c Release --no-restore
+
+      # Real relational command execution against SQLite. A fake interceptor would prove
+      # nothing about which methods EF Core actually calls.
+      - name: Run integration tests
+        run: >-
+          dotnet test tests/QueryGuard.EntityFrameworkCore.Tests/QueryGuard.EntityFrameworkCore.Tests.csproj
+          -c Release --no-build
+          --logger "trx;LogFileName=integration-tests.trx"
+          --results-directory artifacts/test-results
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: integration-tests-${{ matrix.os }}
+          path: artifacts/test-results
+          if-no-files-found: warn
+
   package-validate:
     name: package-validate
     runs-on: ubuntu-latest
