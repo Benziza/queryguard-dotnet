@@ -14,6 +14,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Core contracts: immutable `QueryRecord`, `QueryFingerprint`, `QueryFingerprintGroup`,
+  `QueryFinding`, and `QueryGuardResult`; the `QueryGuardSession` lifecycle with a frozen
+  `CompletedQueryGuardSession` snapshot; and the immutable fluent `QueryGuardPolicy`.
 - Repository foundation: MIT license, community health files, issue forms, pull request
   template, CODEOWNERS, Dependabot configuration, and categorized release notes.
 - Shared build configuration with nullable reference types, warnings as errors,
