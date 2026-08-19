@@ -1,0 +1,27 @@
+# Normalize every text file to LF in the repository and in the working tree.
+#
+# The .editorconfig declares end_of_line = lf, and `dotnet format --verify-no-changes`
+# is a required check, so a CRLF checkout on Windows would fail the build for a reason
+# that has nothing to do with the change under review.
+* text=auto eol=lf
+
+# Binary assets must never be normalized.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.snk binary
+*.nupkg binary
+*.snupkg binary
+*.db binary
+
+# Keep generated diffs readable in review.
+*.svg  text eol=lf
+*.cs   text eol=lf diff=csharp
+*.csproj text eol=lf
+*.props text eol=lf
+*.targets text eol=lf
+*.slnx text eol=lf
+*.yml  text eol=lf
+*.md   text eol=lf

@@ -1,0 +1,53 @@
+## Build output
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+BenchmarkDotNet.Artifacts/
+
+## Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+
+## Test results
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+TestResults/
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+!packages/build/
+
+## SQLite databases produced by the sample and integration tests
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+## Approval / snapshot test scratch files
+*.received.*
+
+## OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## Local developer overrides
+*.local.json
+appsettings.Local.json
