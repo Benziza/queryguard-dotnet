@@ -21,6 +21,7 @@ namespace QueryGuard;
 public sealed class QueryGuardAnalyzer
 {
     private readonly IQueryGuardRedactor _redactor;
+    private readonly IQueryBudgetEvaluator _budgetEvaluator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="QueryGuardAnalyzer"/> class.
@@ -29,8 +30,17 @@ public sealed class QueryGuardAnalyzer
     /// Supplies the retention limits — how many samples a group keeps. Defaults to a redactor with
     /// default capture options.
     /// </param>
-    public QueryGuardAnalyzer(IQueryGuardRedactor? redactor = null)
-        => _redactor = redactor ?? new QueryGuardRedactor();
+    /// <param name="budgetEvaluator">
+    /// Decides whether what the session did is acceptable. Defaults to
+    /// <see cref="QueryBudgetEvaluator"/>.
+    /// </param>
+    public QueryGuardAnalyzer(
+        IQueryGuardRedactor? redactor = null,
+        IQueryBudgetEvaluator? budgetEvaluator = null)
+    {
+        _redactor = redactor ?? new QueryGuardRedactor();
+        _budgetEvaluator = budgetEvaluator ?? new QueryBudgetEvaluator();
+    }
 
     /// <summary>
     /// Analyzes a completed session.
@@ -47,7 +57,11 @@ public sealed class QueryGuardAnalyzer
         var findings = new List<QueryFinding>();
 
         AddRepeatedQueryFindings(findings, groups, policy, session.Name);
+        findings.AddRange(_budgetEvaluator.Evaluate(session, groups));
 
+        // Findings arrive from two independent sources, so ordering is applied once, here, over the
+        // whole set. Sorting each source separately would leave the combined list in an order that
+        // depends on which rules happened to fire.
         findings.Sort(CompareFindings);
 
         return new QueryGuardResult(
