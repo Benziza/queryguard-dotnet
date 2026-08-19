@@ -49,11 +49,14 @@ public sealed class QueryGuardPolicy
         QueryCommandKind.Scalar,
     ];
 
+    private static readonly QueryGuardAllowlistEntry[] NoAllowlistEntries = [];
+
     private QueryGuardPolicy(string name)
     {
         Name = name;
         RepeatedQueryThreshold = DefaultRepeatedQueryThreshold;
         CountedKinds = DefaultCountedKinds;
+        Allowlist = NoAllowlistEntries;
     }
 
     private QueryGuardPolicy(QueryGuardPolicy source)
@@ -71,6 +74,7 @@ public sealed class QueryGuardPolicy
         MaxTotalDurationSeverity = source.MaxTotalDurationSeverity;
         SlowQueryThreshold = source.SlowQueryThreshold;
         SlowQuerySeverity = source.SlowQuerySeverity;
+        Allowlist = source.Allowlist;
     }
 
     /// <summary>
@@ -152,6 +156,15 @@ public sealed class QueryGuardPolicy
     /// Gets the severity applied when a command exceeds <see cref="SlowQueryThreshold"/>.
     /// </summary>
     public QueryGuardSeverity SlowQuerySeverity { get; private set; } = QueryGuardSeverity.Warning;
+
+    /// <summary>
+    /// Gets the intentional repetitions this policy has recorded, each with its reason.
+    /// </summary>
+    /// <remarks>
+    /// An allowlisted finding is reported as ignored rather than removed, so this list narrows what
+    /// fails without narrowing what is visible.
+    /// </remarks>
+    public IReadOnlyList<QueryGuardAllowlistEntry> Allowlist { get; private set; }
 
     /// <summary>
     /// Creates a policy with default thresholds and no budgets.
@@ -341,6 +354,79 @@ public sealed class QueryGuardPolicy
     }
 
     /// <summary>
+    /// Records that a specific fingerprint's repetition is intentional.
+    /// </summary>
+    /// <param name="fingerprintId">The fingerprint identifier, for example <c>QG-FP-1A2B3C4D</c>.</param>
+    /// <param name="reason">Why the repetition is intentional.</param>
+    /// <returns>A new policy.</returns>
+    /// <exception cref="ArgumentException">The identifier or the reason is empty or whitespace.</exception>
+    /// <example>
+    /// <code>
+    /// policy = policy.AllowFingerprint(
+    ///     "QG-FP-1A2B3C4D",
+    ///     reason: "Bounded provider lookup; at most three report sections.");
+    /// </code>
+    /// </example>
+    public QueryGuardPolicy AllowFingerprint(string fingerprintId, string reason)
+        => Allow(QueryGuardAllowlistEntry.ForFingerprint(fingerprintId, reason));
+
+    /// <summary>
+    /// Records that any query carrying a given tag repeats intentionally.
+    /// </summary>
+    /// <param name="queryTag">The tag applied with EF Core's <c>TagWith</c>.</param>
+    /// <param name="reason">Why the repetition is intentional.</param>
+    /// <returns>A new policy.</returns>
+    /// <exception cref="ArgumentException">The tag or the reason is empty or whitespace.</exception>
+    public QueryGuardPolicy AllowQueryTag(string queryTag, string reason)
+        => Allow(QueryGuardAllowlistEntry.ForQueryTag(queryTag, reason));
+
+    /// <summary>
+    /// Adds an allowlist entry.
+    /// </summary>
+    /// <param name="entry">The entry.</param>
+    /// <returns>A new policy.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="entry"/> is <see langword="null"/>.</exception>
+    public QueryGuardPolicy Allow(QueryGuardAllowlistEntry entry)
+    {
+        ArgumentNullException.ThrowIfNull(entry);
+
+        var entries = new QueryGuardAllowlistEntry[Allowlist.Count + 1];
+        for (var i = 0; i < Allowlist.Count; i++)
+        {
+            entries[i] = Allowlist[i];
+        }
+
+        entries[^1] = entry;
+
+        return new QueryGuardPolicy(this) { Allowlist = entries };
+    }
+
+    /// <summary>
+    /// Finds the reason a finding is allowlisted, if it is.
+    /// </summary>
+    /// <param name="fingerprintId">The finding's fingerprint identifier, if it has one.</param>
+    /// <param name="tags">The tags recognized on the finding's query.</param>
+    /// <returns>The reason, or <see langword="null"/> when no entry matches.</returns>
+    /// <remarks>
+    /// A <c>QueryGuard:Ignore</c> directive on the query itself is handled separately, by the
+    /// detector. Both routes produce the same outcome — a finding marked ignored, with its reason —
+    /// so a user can declare an exception wherever it belongs: next to the query, or next to the
+    /// policy that guards the endpoint.
+    /// </remarks>
+    public string? FindAllowlistReason(string? fingerprintId, IReadOnlyList<string>? tags)
+    {
+        for (var i = 0; i < Allowlist.Count; i++)
+        {
+            if (Allowlist[i].Matches(fingerprintId, tags))
+            {
+                return Allowlist[i].Reason;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// Determines whether a command of the given kind counts toward this policy's budgets.
     /// </summary>
     /// <param name="kind">The command kind.</param>
@@ -390,6 +476,11 @@ public sealed class QueryGuardPolicy
         target.MaxTotalDurationSeverity = MaxTotalDurationSeverity;
         target.SlowQueryThreshold = SlowQueryThreshold;
         target.SlowQuerySeverity = SlowQuerySeverity;
+
+        // The ASP.NET Core integration renames the default policy per route. Dropping the allowlist
+        // here would resurrect every suppressed finding on every endpoint.
+        target.Allowlist = Allowlist;
+
         return target;
     }
 }
