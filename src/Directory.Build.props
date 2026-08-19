@@ -1,0 +1,50 @@
+<Project>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!-- Every project under src/ is a shipping NuGet package. -->
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+
+    <!-- The public surface of a library is a contract; document all of it. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Package identity and discoverability. -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Benziza/queryguard-dotnet</PackageProjectUrl>
+    <PackageReadmeFile>PACKAGE.md</PackageReadmeFile>
+    <PackageIcon>queryguard-icon.png</PackageIcon>
+    <PackageReleaseNotes>See https://github.com/Benziza/queryguard-dotnet/blob/main/CHANGELOG.md</PackageReleaseNotes>
+    <PackageTags>dotnet;ef-core;entity-framework-core;performance;n-plus-one;query-budget;testing;diagnostics</PackageTags>
+
+    <!-- Debugging and source stepping for consumers. -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <DebugType>portable</DebugType>
+
+    <!-- Fail the build when a shipped package would break its own compatibility promise. -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="PACKAGE.md" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)../docs/assets/queryguard-icon.png" Pack="true" PackagePath="\" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)../LICENSE" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+
+  <!--
+    Public members are exposed to the sibling test projects so that internal
+    invariants can be verified without widening the shipped API surface.
+  -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+  </ItemGroup>
+
+</Project>

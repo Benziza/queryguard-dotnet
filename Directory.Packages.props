@@ -1,0 +1,48 @@
+<Project>
+
+  <!--
+    Central package version management.
+
+    Entity Framework Core and the Microsoft.Extensions.* abstractions are pinned per
+    target framework so that a net8.0 consumer resolves the EF Core 8 line and a
+    net10.0 consumer resolves the EF Core 10 line. See docs/decisions/0008-target-frameworks.md.
+  -->
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <EntityFrameworkCoreVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.30</EntityFrameworkCoreVersion>
+    <EntityFrameworkCoreVersion Condition="'$(EntityFrameworkCoreVersion)' == ''">10.0.11</EntityFrameworkCoreVersion>
+    <MicrosoftExtensionsVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.2</MicrosoftExtensionsVersion>
+    <MicrosoftExtensionsVersion Condition="'$(MicrosoftExtensionsVersion)' == ''">10.0.11</MicrosoftExtensionsVersion>
+    <MicrosoftExtensionsLoggingVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.3</MicrosoftExtensionsLoggingVersion>
+    <MicrosoftExtensionsLoggingVersion Condition="'$(MicrosoftExtensionsLoggingVersion)' == ''">10.0.11</MicrosoftExtensionsLoggingVersion>
+    <AspNetCoreTestingVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.30</AspNetCoreTestingVersion>
+    <AspNetCoreTestingVersion Condition="'$(AspNetCoreTestingVersion)' == ''">10.0.11</AspNetCoreTestingVersion>
+  </PropertyGroup>
+
+  <ItemGroup Label="Product dependencies">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EntityFrameworkCoreVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="$(MicrosoftExtensionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Label="Test dependencies">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EntityFrameworkCoreVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(AspNetCoreTestingVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Label="Provider integration dependencies (net10.0 only)">
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.14.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Benchmark dependencies">
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
+  </ItemGroup>
+
+</Project>

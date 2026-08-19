@@ -1,0 +1,137 @@
+name: CI
+
+# Third-party actions are pinned to a full commit SHA and updated by Dependabot.
+# See docs/decisions/0012-trusted-publishing.md for the release-side hardening.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  format:
+    name: format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore QueryGuard.slnx
+
+      - name: Verify formatting
+        run: dotnet format QueryGuard.slnx --verify-no-changes --no-restore
+
+  build:
+    name: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore QueryGuard.slnx
+
+      # TreatWarningsAsErrors is enabled repository-wide, so a warning fails here.
+      - name: Build
+        run: dotnet build QueryGuard.slnx -c Release --no-restore
+
+  unit-tests:
+    name: unit-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore QueryGuard.slnx
+
+      - name: Build
+        run: dotnet build QueryGuard.slnx -c Release --no-restore
+
+      - name: Run unit tests
+        run: >-
+          dotnet test tests/QueryGuard.Core.Tests/QueryGuard.Core.Tests.csproj
+          -c Release --no-build
+          --logger "trx;LogFileName=unit-tests.trx"
+          --results-directory artifacts/test-results
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: unit-tests-${{ matrix.os }}
+          path: artifacts/test-results
+          if-no-files-found: warn
+
+  package-validate:
+    name: package-validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore QueryGuard.slnx
+
+      - name: Build
+        run: dotnet build QueryGuard.slnx -c Release --no-restore
+
+      - name: Pack
+        run: dotnet pack QueryGuard.slnx -c Release --no-build -o artifacts/packages
+
+      - name: Show package contents
+        run: |
+          for package in artifacts/packages/*.nupkg; do
+            echo "::group::$(basename "$package")"
+            unzip -l "$package"
+            echo "::endgroup::"
+          done
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: packages
+          path: |
+            artifacts/packages/*.nupkg
+            artifacts/packages/*.snupkg
+          if-no-files-found: error

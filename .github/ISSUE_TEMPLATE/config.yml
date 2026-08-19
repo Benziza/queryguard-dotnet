@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Benziza/queryguard-dotnet/security/policy
+    about: Report vulnerabilities privately according to SECURITY.md.
+  - name: Usage question or design discussion
+    url: https://github.com/Benziza/queryguard-dotnet/discussions
+    about: Ask questions and discuss API design without opening a bug.
+  - name: Documentation
+    url: https://github.com/Benziza/queryguard-dotnet#readme
+    about: Read the quickstart, limitations, and troubleshooting guide.

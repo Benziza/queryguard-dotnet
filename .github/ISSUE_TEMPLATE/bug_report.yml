@@ -1,0 +1,109 @@
+name: Bug report
+description: Report unexpected QueryGuard behavior or a regression
+title: "[Bug]: "
+labels:
+  - "type:bug"
+  - "status:needs-triage"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve QueryGuard.NET.
+        Do not include production credentials, connection strings, customer data,
+        private URLs, or unredacted SQL parameter values.
+
+  - type: input
+    id: queryguard-version
+    attributes:
+      label: QueryGuard version
+      placeholder: "0.1.0-preview.1"
+    validations:
+      required: true
+
+  - type: input
+    id: dotnet-version
+    attributes:
+      label: .NET SDK/runtime version
+      placeholder: "10.0.100 / net10.0"
+    validations:
+      required: true
+
+  - type: input
+    id: efcore-version
+    attributes:
+      label: EF Core version
+      placeholder: "10.0.11"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Database provider
+      options:
+        - Microsoft.EntityFrameworkCore.Sqlite
+        - Npgsql.EntityFrameworkCore.PostgreSQL
+        - Microsoft.EntityFrameworkCore.SqlServer
+        - Pomelo.EntityFrameworkCore.MySql
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: integration
+    attributes:
+      label: QueryGuard integration
+      options:
+        - ASP.NET Core middleware
+        - Explicit QueryGuardScope
+        - QueryGuard testing API
+        - Reporter only
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Include the exact behavior and why it is unexpected.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Link a minimal public repository or paste synthetic code.
+      placeholder: |
+        1. Configure QueryGuard...
+        2. Execute endpoint/test...
+        3. Observe...
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Redacted QueryGuard output
+      description: Remove secrets, identifiers, private schema names, and parameter values.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Required checks
+      options:
+        - label: I searched existing issues and discussions.
+          required: true
+        - label: The reproduction does not contain employer/customer code or data.
+          required: true
+        - label: I removed secrets, connection strings, and parameter values.
+          required: true
