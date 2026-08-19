@@ -100,7 +100,7 @@ public sealed class QueryBudgetEvaluator : IQueryBudgetEvaluator
                 continue;
             }
 
-            var isIgnored = QueryGuardQueryTag.HasIgnoreDirective(group.Tags);
+            var ignoreReason = QueryGuardAnalyzer.ResolveIgnoreReason(policy, group);
 
             findings.Add(new QueryFinding(
                 kind: QueryFindingKind.FingerprintOccurrenceBudget,
@@ -123,8 +123,8 @@ public sealed class QueryBudgetEvaluator : IQueryBudgetEvaluator
                         $"First seen at command #{group.FirstSequence}, last at command #{group.LastSequence}"),
                     string.Create(CultureInfo.InvariantCulture, $"SQL: {group.Fingerprint.NormalizedSql}"),
                 ],
-                isIgnored: isIgnored,
-                ignoreReason: isIgnored ? QueryGuardQueryTag.GetIgnoreReason(group.Tags) : null));
+                isIgnored: ignoreReason is not null,
+                ignoreReason: ignoreReason));
         }
     }
 

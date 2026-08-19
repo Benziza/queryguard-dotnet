@@ -14,6 +14,10 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Transparent allowlists: `QueryGuardPolicy.AllowFingerprint` and `AllowQueryTag`, each requiring a
+  reason, plus the `QueryGuard:Ignore` query tag. A matched finding is reported as ignored with its
+  reason rather than removed, and allowlisting one fingerprint never suppresses another or a
+  session-wide budget.
 - Query budgets: total count, per-fingerprint repetition, duplicate-group count, total database
   duration, and slow-query thresholds, each with configurable severity and each producing a finding
   that carries expected and actual values. Command failures are reported as informational evidence

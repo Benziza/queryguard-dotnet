@@ -139,7 +139,10 @@ public sealed class QueryGuardAnalyzer
                 continue;
             }
 
-            var isIgnored = QueryGuardQueryTag.HasIgnoreDirective(group.Tags);
+            // Two routes to the same outcome: a QueryGuard:Ignore directive on the query itself, or an
+            // allowlist entry on the policy. A user should be able to declare an exception wherever it
+            // belongs - next to the query, or next to the policy guarding the endpoint.
+            var ignoreReason = ResolveIgnoreReason(policy, group);
 
             findings.Add(new QueryFinding(
                 kind: QueryFindingKind.RepeatedQueryCandidate,
@@ -154,9 +157,29 @@ public sealed class QueryGuardAnalyzer
                 expected: policy.RepeatedQueryThreshold,
                 actual: group.Occurrences,
                 evidence: BuildRepeatedQueryEvidence(group, policy),
-                isIgnored: isIgnored,
-                ignoreReason: isIgnored ? QueryGuardQueryTag.GetIgnoreReason(group.Tags) : null));
+                isIgnored: ignoreReason is not null,
+                ignoreReason: ignoreReason));
         }
+    }
+
+    /// <summary>
+    /// Resolves why a group's findings are ignored, if they are.
+    /// </summary>
+    /// <remarks>
+    /// A directive on the query wins over a policy entry when both apply, because the directive is
+    /// physically closer to the code and more likely to be current.
+    /// </remarks>
+    internal static string? ResolveIgnoreReason(QueryGuardPolicy policy, QueryFingerprintGroup group)
+    {
+        if (QueryGuardQueryTag.HasIgnoreDirective(group.Tags))
+        {
+            // A directive without a stated reason still suppresses, but the report says the reason is
+            // missing rather than pretending one was given.
+            return QueryGuardQueryTag.GetIgnoreReason(group.Tags)
+                ?? "Marked intentional by a QueryGuard:Ignore query tag with no reason given.";
+        }
+
+        return policy.FindAllowlistReason(group.Fingerprint.Id, group.Tags);
     }
 
     private static IReadOnlyList<string> BuildRepeatedQueryEvidence(
