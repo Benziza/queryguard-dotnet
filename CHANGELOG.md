@@ -14,6 +14,10 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- `QueryGuard.AspNetCore`: `AddQueryGuard` registration, `UseQueryGuard` middleware that opens a
+  session per request, per-route-pattern policy resolution, and a structured summary with stable
+  event IDs. The middleware observes only — the response, its headers, and the original exception are
+  never modified.
 - Optional first-occurrence stack trace: off by default, bounded to one filtered trace per
   fingerprint, and framework frames removed so what remains is application code. False-positive
   regression fixtures pin the repeated-query patterns that are not defects.
