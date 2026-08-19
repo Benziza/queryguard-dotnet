@@ -104,21 +104,34 @@ public class AsyncLocalQueryGuardSessionAccessorTests
             TestData.Session("level-3"),
         };
 
+        // Disposal order is what this test is about, so the activations are held individually
+        // rather than in `using` blocks. The finally clause makes a failing assertion mid-way
+        // leave nothing activated — double disposal is a documented no-op.
         var activations = new IQueryGuardSessionActivation[sessions.Length];
-        for (var i = 0; i < sessions.Length; i++)
+        try
         {
-            activations[i] = accessor.Activate(sessions[i]);
-            Assert.Same(sessions[i], accessor.Current);
-        }
+            for (var i = 0; i < sessions.Length; i++)
+            {
+                activations[i] = accessor.Activate(sessions[i]);
+                Assert.Same(sessions[i], accessor.Current);
+            }
 
-        for (var i = sessions.Length - 1; i >= 0; i--)
+            for (var i = sessions.Length - 1; i >= 0; i--)
+            {
+                activations[i].Dispose();
+                var expected = i == 0 ? null : sessions[i - 1];
+                Assert.Same(expected, accessor.Current);
+            }
+
+            Assert.Equal(0, accessor.OutOfOrderDisposalCount);
+        }
+        finally
         {
-            activations[i].Dispose();
-            var expected = i == 0 ? null : sessions[i - 1];
-            Assert.Same(expected, accessor.Current);
+            for (var i = activations.Length - 1; i >= 0; i--)
+            {
+                activations[i]?.Dispose();
+            }
         }
-
-        Assert.Equal(0, accessor.OutOfOrderDisposalCount);
     }
 
     [Fact]
@@ -130,12 +143,12 @@ public class AsyncLocalQueryGuardSessionAccessorTests
 
         using (accessor.Activate(parent))
         {
-            var childActivation = accessor.Activate(child);
+            using var childActivation = accessor.Activate(child);
             childActivation.Dispose();
             childActivation.Dispose();
 
             // The second disposal must not walk another level up and silently stop capturing for
-            // the parent.
+            // the parent. The `using` adds a third disposal at scope exit, which must also be inert.
             Assert.Same(parent, accessor.Current);
         }
     }
@@ -147,15 +160,13 @@ public class AsyncLocalQueryGuardSessionAccessorTests
         var parent = TestData.Session("parent");
         var child = TestData.Session("child");
 
-        var parentActivation = accessor.Activate(parent);
-        var childActivation = accessor.Activate(child);
+        using var parentActivation = accessor.Activate(parent);
+        using var childActivation = accessor.Activate(child);
 
         parentActivation.Dispose();
 
         Assert.Equal(1, accessor.OutOfOrderDisposalCount);
         Assert.Null(accessor.Current);
-
-        childActivation.Dispose();
     }
 
     [Fact]
@@ -200,9 +211,8 @@ public class AsyncLocalQueryGuardSessionAccessorTests
 
         await Task.Run(() =>
         {
-            var activation = accessor.Activate(TestData.Session("inner"));
+            using var activation = accessor.Activate(TestData.Session("inner"));
             Assert.NotNull(accessor.Current);
-            activation.Dispose();
         });
 
         Assert.Null(accessor.Current);

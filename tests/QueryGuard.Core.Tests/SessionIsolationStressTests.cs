@@ -201,10 +201,11 @@ public class SessionIsolationStressTests
 
             startGate.SetResult();
             await Task.WhenAll(writers);
-            var completed = await completer;
+            await completer;
 
-            // Refresh the drop count now that every writer has finished.
-            completed = session.Complete();
+            // Completion is idempotent, so this returns the same snapshot the racing completer
+            // produced — but with the drop count refreshed now that every writer has finished.
+            var completed = session.Complete();
 
             Assert.Equal(completed.Records.Count, accepted.Count);
             Assert.Equal(accepted.Count, accepted.Distinct().Count());
