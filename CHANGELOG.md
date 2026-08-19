@@ -14,6 +14,10 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Central privacy and redaction policy: `QueryGuardCaptureOptions` defines what may be captured
+  and `IQueryGuardRedactor` enforces it before any reporter sees a result. Parameter values and
+  connection strings are never captured, literals in SQL are redacted, retained samples and SQL
+  length are bounded, and stack traces are off by default.
 - Async-safe session propagation: `IQueryGuardSessionAccessor` with an `AsyncLocal`-backed
   default, nested scopes that restore the parent session on both the normal and the exception
   path, and out-of-order disposal detection.
