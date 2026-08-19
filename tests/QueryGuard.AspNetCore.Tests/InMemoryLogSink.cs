@@ -29,6 +29,8 @@ internal sealed class InMemoryLogSink : ILoggerProvider
 
     internal void Clear()
     {
+        // Drain rather than replace the queue, so a logger already holding this instance keeps writing
+        // to the collection the test reads.
         while (_entries.TryDequeue(out _))
         {
         }

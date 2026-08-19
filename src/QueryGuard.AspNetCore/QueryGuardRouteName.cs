@@ -31,6 +31,21 @@ public static class QueryGuardRouteName
     public const string Unmatched = "(unmatched)";
 
     /// <summary>
+    /// The longest HTTP method accepted into a scope name.
+    /// </summary>
+    /// <remarks>
+    /// The longest standard method is <c>PROPPATCH</c> at nine characters. Anything longer is not a
+    /// method QueryGuard needs to name accurately, and a bounded length keeps a hostile request from
+    /// padding a log line.
+    /// </remarks>
+    private const int MaxMethodLength = 16;
+
+    /// <summary>
+    /// Stands in for a request method that is not a plain HTTP token.
+    /// </summary>
+    private const string UnsafeMethod = "(method)";
+
+    /// <summary>
     /// Resolves the scope name for a request.
     /// </summary>
     /// <param name="context">The request context.</param>
@@ -49,7 +64,11 @@ public static class QueryGuardRouteName
             return Unmatched;
         }
 
-        var method = context.Request.Method;
+        // The route pattern comes from the application's own route table and is trusted. The method
+        // comes from the request, and this name is written to logs — so a method containing a newline
+        // could forge a log entry. Kestrel rejects such methods, but QueryGuard does not get to assume
+        // which server it is hosted in.
+        var method = SanitizeMethod(context.Request.Method);
 
         if (endpoint is RouteEndpoint routeEndpoint)
         {
@@ -69,5 +88,32 @@ public static class QueryGuardRouteName
         return string.IsNullOrEmpty(endpoint.DisplayName)
             ? Unmatched
             : $"{method} {endpoint.DisplayName}";
+    }
+
+    /// <summary>
+    /// Reduces a request method to a plain HTTP token, or replaces it entirely.
+    /// </summary>
+    /// <remarks>
+    /// An HTTP method is a token: letters, digits, and a small set of punctuation. Anything else is
+    /// either a malformed request or an attempt to forge a log entry, and in both cases the exact
+    /// characters are not worth reproducing. Rejecting the whole method rather than stripping the bad
+    /// characters keeps two different hostile methods from collapsing into the same scope name.
+    /// </remarks>
+    private static string SanitizeMethod(string? method)
+    {
+        if (string.IsNullOrEmpty(method) || method.Length > MaxMethodLength)
+        {
+            return UnsafeMethod;
+        }
+
+        foreach (var character in method)
+        {
+            if (!char.IsAsciiLetterOrDigit(character) && character is not '-' and not '_' and not '.')
+            {
+                return UnsafeMethod;
+            }
+        }
+
+        return method;
     }
 }
