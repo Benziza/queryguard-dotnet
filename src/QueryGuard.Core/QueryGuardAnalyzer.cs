@@ -158,12 +158,34 @@ public sealed class QueryGuardAnalyzer
                 actual: group.Occurrences,
                 evidence: BuildRepeatedQueryEvidence(group, policy),
                 isIgnored: ignoreReason is not null,
-                ignoreReason: ignoreReason));
+                ignoreReason: ignoreReason,
+                stackTrace: FindFirstStackTrace(group)));
         }
     }
 
     /// <summary>
-    /// Resolves why a group's findings are ignored, if they are.
+    /// Finds the retained first-occurrence stack trace for a group, if one was captured.
+    /// </summary>
+    /// <remarks>
+    /// The trace is on a record rather than on the group, because capture happens during the request
+    /// while grouping happens afterwards. Samples are ordered by sequence, so the first one carrying a
+    /// trace is the first occurrence.
+    /// </remarks>
+    private static string? FindFirstStackTrace(QueryFingerprintGroup group)
+    {
+        for (var i = 0; i < group.Samples.Count; i++)
+        {
+            if (group.Samples[i].StackTrace is { } trace)
+            {
+                return trace;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Resolves why a group.s findings are ignored, if they are.
     /// </summary>
     /// <remarks>
     /// A directive on the query wins over a policy entry when both apply, because the directive is

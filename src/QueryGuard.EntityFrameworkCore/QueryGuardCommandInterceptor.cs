@@ -198,7 +198,12 @@ public sealed class QueryGuardCommandInterceptor : DbCommandInterceptor
             parameterCount: command.Parameters.Count,
             isFailed: failureType is not null,
             failureType: failureType,
-            tags: QueryGuardQueryTag.Extract(commandText));
+            tags: QueryGuardQueryTag.Extract(commandText),
+
+            // A callback, not a string. The session invokes it only when capture is enabled and this
+            // is the first occurrence of the fingerprint, so with the default configuration no stack
+            // is walked, formatted, or allocated on the command path.
+            stackTraceProvider: static () => Environment.StackTrace);
     }
 
     /// <summary>
