@@ -14,6 +14,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- `QueryGuard.Testing`: `QueryGuardScope` for opening an explicit session in an integration test, and
+  `QueryGuardAssert` for turning a query budget into an assertion. Takes no test framework dependency,
+  so the same package works with xUnit, NUnit, MSTest, or TUnit.
 - `QueryGuard.AspNetCore`: `AddQueryGuard` registration, `UseQueryGuard` middleware that opens a
   session per request, per-route-pattern policy resolution, and a structured summary with stable
   event IDs. The middleware observes only — the response, its headers, and the original exception are

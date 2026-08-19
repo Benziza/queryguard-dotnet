@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QueryGuard.Testing</RootNamespace>
+    <Description>Open an explicit QueryGuard scope in an integration test and assert that a query budget held. Takes no dependency on any test framework, so it works with xUnit, NUnit, MSTest, or TUnit unchanged.</Description>
+    <PackageTags>integration-testing;query-budget;ci;n-plus-one;ef-core;testing</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../QueryGuard.Core/QueryGuard.Core.csproj" />
+  </ItemGroup>
+
+</Project>
