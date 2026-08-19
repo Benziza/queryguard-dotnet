@@ -14,6 +14,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Async-safe session propagation: `IQueryGuardSessionAccessor` with an `AsyncLocal`-backed
+  default, nested scopes that restore the parent session on both the normal and the exception
+  path, and out-of-order disposal detection.
 - Core contracts: immutable `QueryRecord`, `QueryFingerprint`, `QueryFingerprintGroup`,
   `QueryFinding`, and `QueryGuardResult`; the `QueryGuardSession` lifecycle with a frozen
   `CompletedQueryGuardSession` snapshot; and the immutable fluent `QueryGuardPolicy`.
