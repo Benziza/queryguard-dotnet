@@ -1,0 +1,36 @@
+changelog:
+  exclude:
+    labels:
+      - "skip-changelog"
+    authors:
+      - "dependabot[bot]"
+
+  categories:
+    - title: "Features"
+      labels:
+        - "type:feature"
+
+    - title: "Fixes"
+      labels:
+        - "type:bug"
+
+    - title: "False-positive improvements"
+      labels:
+        - "false-positive"
+
+    - title: "Performance"
+      labels:
+        - "type:performance"
+
+    - title: "Security"
+      labels:
+        - "type:security"
+
+    - title: "Documentation"
+      labels:
+        - "type:docs"
+
+    - title: "Maintenance"
+      labels:
+        - "type:chore"
+        - "dependencies"

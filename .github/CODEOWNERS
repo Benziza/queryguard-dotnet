@@ -1,0 +1,19 @@
+# Ownership and future review routing.
+#
+# While QueryGuard has a single maintainer, code-owner review is intentionally
+# NOT required by the main branch ruleset: a solo maintainer cannot provide an
+# independent approval. The paths below are split ahead of time so that adding a
+# second maintainer is a one-line change rather than a governance redesign.
+#
+# See docs/decisions/0001-public-personal-repo.md.
+
+*                                       @Benziza
+
+/src/QueryGuard.Core/                   @Benziza
+/src/QueryGuard.EntityFrameworkCore/    @Benziza
+/src/QueryGuard.AspNetCore/             @Benziza
+/src/QueryGuard.Testing/                @Benziza
+/src/QueryGuard.Reporting/              @Benziza
+
+/.github/workflows/                     @Benziza
+/docs/decisions/                        @Benziza

@@ -1,0 +1,95 @@
+name: False-positive report
+description: Report a legitimate query pattern identified as a repeated-query or N+1 candidate
+title: "[False positive]: "
+labels:
+  - "type:bug"
+  - "false-positive"
+  - "status:needs-triage"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        QueryGuard intentionally reports evidence as a *potential* N+1 or repeated-query
+        candidate. This form helps us improve defaults, evidence, and allowlist behavior.
+        Use only synthetic or fully redacted SQL.
+
+  - type: input
+    id: version
+    attributes:
+      label: QueryGuard version
+      placeholder: "0.1.0-preview.1"
+    validations:
+      required: true
+
+  - type: input
+    id: provider
+    attributes:
+      label: EF Core provider and version
+      placeholder: "Npgsql.EntityFrameworkCore.PostgreSQL 10.0.3"
+    validations:
+      required: true
+
+  - type: input
+    id: scope
+    attributes:
+      label: Route, endpoint, or test scope
+      placeholder: "GET /api/reports/{id}"
+    validations:
+      required: true
+
+  - type: input
+    id: fingerprint
+    attributes:
+      label: QueryGuard fingerprint ID
+      placeholder: "QG-FP-1A2B3C4D"
+    validations:
+      required: true
+
+  - type: input
+    id: occurrences
+    attributes:
+      label: Number of occurrences
+      placeholder: "12"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Why is this repeated pattern intentional?
+      description: Explain the bounded behavior and why a single/batched query is not appropriate.
+    validations:
+      required: true
+
+  - type: textarea
+    id: sql
+    attributes:
+      label: Redacted normalized SQL
+      render: sql
+    validations:
+      required: true
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: QueryGuard policy and allowlist configuration
+      render: csharp
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal synthetic reproduction
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Required checks
+      options:
+        - label: I removed real table/customer names where necessary.
+          required: true
+        - label: I removed all parameter values and secrets.
+          required: true
+        - label: I tested the documented allowlist mechanism.
+          required: false

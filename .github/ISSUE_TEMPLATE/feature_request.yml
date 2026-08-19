@@ -1,0 +1,75 @@
+name: Feature request
+description: Propose a focused QueryGuard capability or developer-experience improvement
+title: "[Feature]: "
+labels:
+  - "type:feature"
+  - "status:needs-triage"
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe the workflow pain before proposing an API.
+      placeholder: "When..., I need..., because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-workaround
+    attributes:
+      label: Current workaround
+      description: How do you solve this today, and why is it insufficient?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior or API
+      description: A code sketch is welcome, but the problem statement matters more.
+      render: csharp
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Core session model
+        - EF Core interception
+        - SQL fingerprinting
+        - Repeated-query detector
+        - Query budgets and policies
+        - ASP.NET Core integration
+        - Testing API
+        - Reporting
+        - Provider compatibility
+        - Documentation or samples
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Impact
+      options:
+        - Blocks adoption
+        - Frequent workflow pain
+        - Useful improvement
+        - Nice to have
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I can help validate the design.
+        - label: I can provide a synthetic reproduction.
+        - label: I am willing to submit a pull request after the issue is accepted.

@@ -8,6 +8,21 @@
   <strong>Fail fast on EF Core query regressions.</strong>
 </p>
 
+<p align="center">
+  <a href="https://github.com/Benziza/queryguard-dotnet/actions/workflows/ci.yml">
+    <img alt="CI" src="https://github.com/Benziza/queryguard-dotnet/actions/workflows/ci.yml/badge.svg">
+  </a>
+  <a href="https://github.com/Benziza/queryguard-dotnet/actions/workflows/codeql.yml">
+    <img alt="CodeQL" src="https://github.com/Benziza/queryguard-dotnet/actions/workflows/codeql.yml/badge.svg">
+  </a>
+  <a href="./LICENSE">
+    <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg">
+  </a>
+  <a href="https://dotnet.microsoft.com/en-us/platform/support/policy">
+    <img alt="Targets .NET 8 and .NET 10" src="https://img.shields.io/badge/targets-net8.0%20%7C%20net10.0-512BD4.svg">
+  </a>
+</p>
+
 QueryGuard.NET records Entity Framework Core database commands inside an HTTP request or an
 integration test, groups repeated SQL fingerprints, and evaluates explicit query budgets.
 
@@ -68,6 +83,14 @@ configuration detail. By default it does **not** capture parameter values or con
 strings, does **not** inject anything into HTTP responses, does **not** collect stack traces,
 and bounds how many samples it retains per fingerprint. Redaction is applied centrally
 before any reporter writes output.
+
+## Documentation
+
+- [Roadmap](./docs/roadmap.md) — v0.1 scope, explicit non-goals, and how priority is decided.
+- [Architecture decision records](./docs/decisions/README.md) — why QueryGuard behaves the way
+  it does, and what would make each decision change.
+- [Coding standards](./docs/coding-standards.md) and
+  [testing strategy](./docs/testing-strategy.md).
 
 ## Contributing
 

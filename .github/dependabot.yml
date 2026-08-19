@@ -1,0 +1,52 @@
+version: 2
+
+updates:
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "type:chore"
+      - "dependencies"
+    groups:
+      # Test tooling churns often and carries no consumer risk when grouped.
+      test-tooling:
+        patterns:
+          - "xunit*"
+          - "Microsoft.NET.Test.Sdk"
+          - "coverlet.*"
+          - "Testcontainers.*"
+        update-types:
+          - minor
+          - patch
+      # EF Core and the extension abstractions are the product's public contract.
+      # They are reviewed individually rather than grouped.
+      microsoft-extensions:
+        patterns:
+          - "Microsoft.Extensions.*"
+        update-types:
+          - patch
+    ignore:
+      # Major EF Core upgrades change the supported target framework matrix and
+      # require an ADR, not a dependency bump.
+      - dependency-name: "Microsoft.EntityFrameworkCore.*"
+        update-types:
+          - version-update:semver-major
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci(deps)"
+    labels:
+      - "type:chore"
+      - "dependencies"

@@ -1,0 +1,78 @@
+name: Provider compatibility report
+description: Report behavior specific to an EF Core relational provider
+title: "[Provider]: "
+labels:
+  - "type:bug"
+  - "area:provider"
+  - "status:needs-triage"
+body:
+  - type: input
+    id: queryguard-version
+    attributes:
+      label: QueryGuard version
+    validations:
+      required: true
+
+  - type: input
+    id: provider-package
+    attributes:
+      label: Provider package and version
+      placeholder: "Microsoft.EntityFrameworkCore.SqlServer 10.0.11"
+    validations:
+      required: true
+
+  - type: input
+    id: database-version
+    attributes:
+      label: Database server version
+      placeholder: "SQL Server 2025 / PostgreSQL 18 / SQLite 3.x"
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Command capture
+        - SQL normalization
+        - Fingerprint mismatch
+        - Timing
+        - Async behavior
+        - Failure handling
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: sql
+    attributes:
+      label: Synthetic or redacted SQL
+      render: sql
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal synthetic reproduction
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety checks
+      options:
+        - label: No production connection string, credential, or customer data is included.
+          required: true

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="QueryGuard.NET logo: a shield containing three query rows, the last one highlighted">
+  <defs>
+    <linearGradient id="qg-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b2d42"/>
+      <stop offset="1" stop-color="#0d1b2a"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="128" height="128" rx="23" fill="url(#qg-bg)"/>
+
+  <!-- Shield: flat top, rounded shoulders, tapering to a point. -->
+  <path d="M28.16 28.7 L64 20.48 L99.84 28.7
+           C99.84 68.1 89.1 88.1 64 102.4
+           C38.9 88.1 28.16 68.1 28.16 28.7 Z"
+        fill="none" stroke="#2dd4bf" stroke-width="7" stroke-linejoin="round"/>
+
+  <!-- Three captured queries; the third one broke the budget. -->
+  <rect x="45.3" y="41.8" width="37.4" height="7" fill="#e9f1f7"/>
+  <rect x="45.3" y="54.9" width="37.4" height="7" fill="#94b0c4"/>
+  <rect x="45.3" y="68.0" width="37.4" height="7" fill="#fbbf24"/>
+</svg>
