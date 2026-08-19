@@ -14,6 +14,11 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Query budgets: total count, per-fingerprint repetition, duplicate-group count, total database
+  duration, and slow-query thresholds, each with configurable severity and each producing a finding
+  that carries expected and actual values. Command failures are reported as informational evidence
+  beside the original exception. Every budget is opt-in and replaceable through
+  `IQueryBudgetEvaluator`.
 - Repeated-query detection: `QueryGuardAnalyzer` groups a completed session by fingerprint and
   reports potential N+1 candidates as warnings, with the evidence and the limitation attached to the
   finding. `RuleNames` publishes the rule identifiers that appear in reports.
