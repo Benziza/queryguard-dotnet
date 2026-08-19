@@ -185,6 +185,14 @@ dotnet_naming_symbols.private_field_symbols.applicable_accessibilities = private
 dotnet_naming_style.camel_case_underscore.required_prefix = _
 dotnet_naming_style.camel_case_underscore.capitalization = camel_case
 
+# A local constant reads as a constant, so it follows constant casing rather than local casing.
+# Declared before the general parameter/local rule because the first matching rule wins.
+dotnet_naming_rule.local_constants_are_pascal_case.severity = warning
+dotnet_naming_rule.local_constants_are_pascal_case.symbols = local_constant_symbols
+dotnet_naming_rule.local_constants_are_pascal_case.style = pascal_case
+dotnet_naming_symbols.local_constant_symbols.applicable_kinds = local
+dotnet_naming_symbols.local_constant_symbols.required_modifiers = const
+
 dotnet_naming_rule.parameters_and_locals_are_camel_case.severity = warning
 dotnet_naming_rule.parameters_and_locals_are_camel_case.symbols = parameter_and_local_symbols
 dotnet_naming_rule.parameters_and_locals_are_camel_case.style = camel_case
