@@ -78,11 +78,22 @@ public sealed class QueryGuardRedactor : IQueryGuardRedactor
 
         var builder = new StringBuilder();
         var kept = 0;
+        var position = 0;
 
-        foreach (var line in stackTrace.Split('\n'))
+        // Walked as spans rather than split into an array: a stack trace is a few dozen lines and
+        // this runs once per finding, so there is no reason to allocate a string per frame only to
+        // discard most of them.
+        while (position < stackTrace.Length)
         {
-            var frame = line.TrimEnd('\r');
-            if (frame.Length == 0 || IsFilteredFrame(frame))
+            var lineEnd = stackTrace.IndexOf('\n', position);
+            var frame = lineEnd < 0
+                ? stackTrace.AsSpan(position)
+                : stackTrace.AsSpan(position, lineEnd - position);
+
+            position = lineEnd < 0 ? stackTrace.Length : lineEnd + 1;
+
+            frame = frame.TrimEnd('\r');
+            if (frame.IsEmpty || IsFilteredFrame(frame))
             {
                 continue;
             }
@@ -134,11 +145,11 @@ public sealed class QueryGuardRedactor : IQueryGuardRedactor
             ? value
             : string.Concat(value.AsSpan(0, maxLength), TruncationMarker);
 
-    private bool IsFilteredFrame(string frame)
+    private bool IsFilteredFrame(ReadOnlySpan<char> frame)
     {
         // Frames look like "   at Some.Namespace.Type.Method(...) in file:line 42". Skip the
         // leading "at " so a filter prefix is matched against the namespace itself.
-        var span = frame.AsSpan().TrimStart();
+        var span = frame.TrimStart();
         if (span.StartsWith("at ", StringComparison.Ordinal))
         {
             span = span[3..];
