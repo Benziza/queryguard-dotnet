@@ -73,7 +73,12 @@ public class QueryFingerprintTests
         var fingerprint = TestData.Fingerprint();
 
         Assert.False(fingerprint.Equals(null));
-        Assert.False(fingerprint.Equals("QG-FP-1A2B3C4D"));
+
+        // A fingerprint is not equal to its own identifier string. Reporters and dictionary
+        // lookups pass values through `object`, so the `Equals(object)` overload has to handle an
+        // unrelated type by returning false rather than throwing.
+        object identifierAsObject = fingerprint.Id;
+        Assert.False(fingerprint.Equals(identifierAsObject));
     }
 
     [Fact]
