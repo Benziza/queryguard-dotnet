@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Xunit;
 
 namespace QueryGuard.Tests;
@@ -106,7 +105,7 @@ public class QueryGuardAllowlistTests
         // The whole point: narrow what fails without narrowing what is visible.
         var policy = QueryGuardPolicy.Create("p").AllowFingerprint(BusyFingerprint, "bounded provider lookup");
 
-        var result = Analyze(policy, ("busy", 12));
+        var result = Analyze(policy, new Executed("busy", 12));
         var finding = Assert.Single(result.Findings);
 
         Assert.True(finding.IsIgnored);
@@ -123,7 +122,7 @@ public class QueryGuardAllowlistTests
             .WithMaxOccurrencesPerFingerprint(2)
             .AllowFingerprint(BusyFingerprint, "bounded provider lookup");
 
-        var result = Analyze(policy, ("busy", 12));
+        var result = Analyze(policy, new Executed("busy", 12));
 
         Assert.All(result.Findings, finding => Assert.True(finding.IsIgnored));
         Assert.True(result.IsSuccess);
@@ -137,7 +136,7 @@ public class QueryGuardAllowlistTests
         // configuration, because it is indistinguishable from uninstalling the tool.
         var policy = QueryGuardPolicy.Create("p").AllowFingerprint(BusyFingerprint, "bounded provider lookup");
 
-        var result = Analyze(policy, ("busy", 12), ("other", 9));
+        var result = Analyze(policy, new Executed("busy", 12), new Executed("other", 9));
 
         Assert.Equal(2, result.Findings.Count);
         Assert.Equal(1, result.IgnoredFindingCount);
@@ -154,7 +153,7 @@ public class QueryGuardAllowlistTests
             .WithMaxQueries(5)
             .AllowFingerprint(BusyFingerprint, "bounded provider lookup");
 
-        var result = Analyze(policy, ("busy", 12));
+        var result = Analyze(policy, new Executed("busy", 12));
 
         var totalBudget = Assert.Single(
             result.Findings,
@@ -170,7 +169,7 @@ public class QueryGuardAllowlistTests
         // The directive sits next to the code, so it is the more likely of the two to be current.
         var policy = QueryGuardPolicy.Create("p").AllowFingerprint(BusyFingerprint, "reason from the policy");
 
-        var result = Analyze(policy, ("busy", 12, ["QueryGuard:Ignore reason=reason-from-the-query"]));
+        var result = Analyze(policy, new Executed("busy", 12, ["QueryGuard:Ignore reason=reason-from-the-query"]));
 
         Assert.Equal("reason-from-the-query", Assert.Single(result.Findings).IgnoreReason);
     }
@@ -178,7 +177,7 @@ public class QueryGuardAllowlistTests
     [Fact]
     public void A_directive_without_a_reason_says_so_rather_than_inventing_one()
     {
-        var result = Analyze(QueryGuardPolicy.Create("p"), ("busy", 12, ["QueryGuard:Ignore"]));
+        var result = Analyze(QueryGuardPolicy.Create("p"), new Executed("busy", 12, ["QueryGuard:Ignore"]));
         var finding = Assert.Single(result.Findings);
 
         Assert.True(finding.IsIgnored);
@@ -200,9 +199,16 @@ public class QueryGuardAllowlistTests
     public void A_null_entry_is_rejected()
         => Assert.Throws<ArgumentNullException>(() => QueryGuardPolicy.Create("p").Allow(null!));
 
-    private QueryGuardResult Analyze(
-        QueryGuardPolicy policy,
-        params (string Fingerprint, int Times, IReadOnlyList<string>? Tags)[] commands)
+    /// <summary>
+    /// One statement executed a number of times, optionally carrying query tags.
+    /// </summary>
+    /// <remarks>
+    /// A named type rather than a tuple: a tuple with an optional tag list needs an explicit cast on
+    /// `null` to infer its type, which reads like an accident rather than a decision.
+    /// </remarks>
+    private sealed record Executed(string Fingerprint, int Times, IReadOnlyList<string>? Tags = null);
+
+    private QueryGuardResult Analyze(QueryGuardPolicy policy, params Executed[] commands)
     {
         var session = new QueryGuardSession("GET /api/reports/{id}", policy);
 
@@ -220,7 +226,4 @@ public class QueryGuardAllowlistTests
 
         return _analyzer.Analyze(session.Complete());
     }
-
-    private QueryGuardResult Analyze(QueryGuardPolicy policy, params (string Fingerprint, int Times)[] commands)
-        => Analyze(policy, commands.Select(c => (c.Fingerprint, c.Times, (IReadOnlyList<string>?)null)).ToArray());
 }
