@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 namespace QueryGuard.EntityFrameworkCore.Tests;
 
@@ -69,23 +68,39 @@ public sealed class Department
 }
 
 /// <summary>
-/// An in-memory SQLite database that lives as long as the fixture holds its connection.
+/// A real SQLite database, held in memory for the lifetime of the fixture.
 /// </summary>
 /// <remarks>
-/// SQLite in shared-cache memory mode gives real relational command execution — real SQL generation,
-/// real parameters, real provider behavior — with no container to start and no file to clean up. The
-/// connection has to be held open, because the database ceases to exist when the last connection to
-/// it closes.
+/// <para>
+/// SQLite gives real relational command execution — real SQL generation, real parameters, real
+/// provider behavior — with no container to start and no file to clean up.
+/// </para>
+/// <para>
+/// It uses a <em>named</em> shared-cache in-memory database rather than a bare <c>:memory:</c>
+/// connection, so that each context can open its own connection to the same data. Sharing a single
+/// <see cref="SqliteConnection"/> across contexts is not safe when commands run concurrently, and
+/// the concurrency tests here exist precisely to run commands concurrently. One connection is held
+/// open for the fixture's lifetime because a shared in-memory database ceases to exist when the last
+/// connection to it closes.
+/// </para>
+/// <para>
+/// The database name includes a GUID so that parallel test classes never collide.
+/// </para>
 /// </remarks>
 public sealed class SqliteFixture : IDisposable
 {
-    private readonly SqliteConnection _connection;
+    private readonly SqliteConnection _keepAlive;
+    private readonly string _connectionString;
     private bool _isDisposed;
 
     public SqliteFixture(int companies = 5, int departmentsPerCompany = 3)
     {
-        _connection = new SqliteConnection("Filename=:memory:");
-        _connection.Open();
+        _connectionString = string.Create(
+            CultureInfo.InvariantCulture,
+            $"Data Source=queryguard-{Guid.NewGuid():N};Mode=Memory;Cache=Shared");
+
+        _keepAlive = new SqliteConnection(_connectionString);
+        _keepAlive.Open();
 
         using var context = CreateContext();
         context.Database.EnsureCreated();
@@ -98,7 +113,7 @@ public sealed class SqliteFixture : IDisposable
     public SampleDbContext CreateContext(params Microsoft.EntityFrameworkCore.Diagnostics.IInterceptor[] interceptors)
     {
         var builder = new DbContextOptionsBuilder<SampleDbContext>()
-            .UseSqlite(_connection);
+            .UseSqlite(_connectionString);
 
         if (interceptors.Length > 0)
         {
@@ -116,7 +131,7 @@ public sealed class SqliteFixture : IDisposable
         }
 
         _isDisposed = true;
-        _connection.Dispose();
+        _keepAlive.Dispose();
     }
 
     private static void Seed(SampleDbContext context, int companies, int departmentsPerCompany)
