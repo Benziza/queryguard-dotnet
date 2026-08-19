@@ -14,7 +14,7 @@
     <EntityFrameworkCoreVersion Condition="'$(EntityFrameworkCoreVersion)' == ''">10.0.11</EntityFrameworkCoreVersion>
     <MicrosoftExtensionsVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.2</MicrosoftExtensionsVersion>
     <MicrosoftExtensionsVersion Condition="'$(MicrosoftExtensionsVersion)' == ''">10.0.11</MicrosoftExtensionsVersion>
-    <MicrosoftExtensionsLoggingVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.3</MicrosoftExtensionsLoggingVersion>
+    <MicrosoftExtensionsLoggingVersion Condition="'$(TargetFramework)' == 'net8.0'">10.0.11</MicrosoftExtensionsLoggingVersion>
     <MicrosoftExtensionsLoggingVersion Condition="'$(MicrosoftExtensionsLoggingVersion)' == ''">10.0.11</MicrosoftExtensionsLoggingVersion>
     <AspNetCoreTestingVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.30</AspNetCoreTestingVersion>
     <AspNetCoreTestingVersion Condition="'$(AspNetCoreTestingVersion)' == ''">10.0.11</AspNetCoreTestingVersion>
