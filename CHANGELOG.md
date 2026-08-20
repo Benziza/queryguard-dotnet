@@ -12,6 +12,11 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+## [0.1.0-preview.2] - 2026-08-20
+
+The activation release. One package and one line are now enough to capture a query, SQL Server is
+integration-tested rather than assumed, and a baseline can replace a guessed budget.
+
 ### Fixed
 
 - **A write was counted as a read on SQL Server.** EF Core prefixes its insert batch with
@@ -156,5 +161,6 @@ release.
   `Properties/launchSettings.json`, and corrected the query and warning counts quoted in
   `samples/README.md` to what the sample actually logs.
 
-[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.1...main
+[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.2...main
+[0.1.0-preview.2]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.2
 [0.1.0-preview.1]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.1

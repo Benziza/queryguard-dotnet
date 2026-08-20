@@ -43,7 +43,7 @@
   <!-- Shared version and identity information. -->
   <PropertyGroup>
     <VersionPrefix>0.1.0</VersionPrefix>
-    <VersionSuffix Condition="'$(VersionSuffix)' == '' AND '$(IsReleaseBuild)' != 'true'">preview.1</VersionSuffix>
+    <VersionSuffix Condition="'$(VersionSuffix)' == '' AND '$(IsReleaseBuild)' != 'true'">preview.2</VersionSuffix>
     <Authors>Mohamed Benziza</Authors>
     <Company>Mohamed Benziza</Company>
     <Product>QueryGuard.NET</Product>
