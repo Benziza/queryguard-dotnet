@@ -107,8 +107,8 @@ The action posts that table as a sticky pull request comment. See [baselines](ba
 
 ## Scope
 
-**Tested against real SQL Server, PostgreSQL, and SQLite** in CI, on EF Core 8 and 10. Any relational
-EF Core provider is captured through the same official interception contract.
+**Tested against real SQL Server, PostgreSQL, MySQL, and SQLite** in CI, on EF Core 8 and 10. Any
+relational EF Core provider is captured through the same official interception contract.
 
 It does not prove an N+1, does not see Dapper or raw ADO.NET, produces no execution plans or profiler
 UI, and will not fix your code. Profilers and APM answer *what is slow in production?* QueryGuard

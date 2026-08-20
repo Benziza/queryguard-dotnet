@@ -24,8 +24,8 @@ public sealed class DockerFactAttribute : FactAttribute
     {
         if (!DockerAvailability.IsAvailable)
         {
-            Skip = "Docker is not available, so the PostgreSQL provider suite cannot run here. "
-                + "It runs in CI.";
+            Skip = "Docker is not available, so the container-backed provider suites cannot run here. "
+                + "They run in CI.";
         }
     }
 }

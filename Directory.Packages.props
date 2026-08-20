@@ -41,6 +41,13 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.14.0" />
     <PackageVersion Include="Testcontainers.MsSql" Version="4.14.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EntityFrameworkCoreVersion)" />
+    <!--
+      Oracle's provider rather than Pomelo. Pomelo is the more widely used MySQL provider for EF Core,
+      but its latest release is 9.0.0 and there is no EF Core 10 line, which this project targets. See
+      docs/decisions/0009-provider-matrix.md for what that means for the claim being made.
+    -->
+    <PackageVersion Include="MySql.EntityFrameworkCore" Version="10.0.9" />
+    <PackageVersion Include="Testcontainers.MySql" Version="4.14.0" />
   </ItemGroup>
 
   <ItemGroup Label="Benchmark dependencies">
