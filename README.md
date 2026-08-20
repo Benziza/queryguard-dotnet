@@ -24,6 +24,18 @@
 </p>
 
 <p align="center">
+  <a href="./docs/providers/README.md">
+    <img alt="SQL Server: integration-tested" src="https://img.shields.io/badge/SQL%20Server-integration--tested-107C10.svg">
+  </a>
+  <a href="./docs/providers/README.md">
+    <img alt="PostgreSQL: integration-tested" src="https://img.shields.io/badge/PostgreSQL-integration--tested-336791.svg">
+  </a>
+  <a href="./docs/providers/README.md">
+    <img alt="SQLite: integration-tested" src="https://img.shields.io/badge/SQLite-integration--tested-003B57.svg">
+  </a>
+</p>
+
+<p align="center">
   <img src="./docs/assets/queryguard-demo.svg" width="820" alt="Terminal output: QueryGuard fails a query budget for GET /api/companies, reporting 51 read queries and one fingerprint executed 50 times.">
 </p>
 
@@ -33,6 +45,9 @@ many round trips produced it.
 
 QueryGuard counts the EF Core queries your code actually runs, groups the repeated ones, and turns that
 into something a test can fail on.
+
+**Tested against real SQL Server, PostgreSQL, and SQLite** in CI, on EF Core 8 and 10. Any relational
+EF Core provider is captured through the same official interception contract.
 
 > It reports repeated-query **candidates**. Repeated SQL is strong evidence of an N+1, not proof — some
 > repetition is correct. Every finding says so, and every intentional exception is recorded with a
@@ -132,8 +147,8 @@ fingerprints too, and tracks them separately in a baseline for the same reason.
   `DbCommandInterceptor`.
 - **No execution plans, no profiler UI, no hosted service.** It counts queries and groups SQL.
 - **It will not fix your code.** No automatic `Include`, no rewritten LINQ.
-- **Three providers are integration-tested** in CI — SQLite, PostgreSQL, and SQL Server. Others work
-  through the same contract, but their fingerprint *quality* is unverified; see
+- **Fingerprint quality is verified on three providers** — SQL Server, PostgreSQL, SQLite. Others are
+  captured correctly but their SQL formatting is unverified, which is a weaker claim; see
   [provider support](./docs/providers/README.md).
 - **.NET 8 and .NET 10.** .NET 9 is skipped on purpose ([ADR-0008](./docs/decisions/0008-target-frameworks.md)).
 - **Preview.** The API will change before `1.0.0`. The report JSON carries a `schemaVersion` so a
