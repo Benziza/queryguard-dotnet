@@ -16,24 +16,24 @@
   </g>
 
   <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="12.25" xml:space="preserve">
-  <text x="20" y="44" fill="#7ee787">$ dotnet test samples/QueryGuard.SampleTests</text>
-  <text x="20" y="82" fill="#ff7b72" font-weight="600">QueryGuard FAILED: GET /api/companies (policy ‘companies’)</text>
-  <text x="20" y="101" fill="#adbac7">  51 read queries in 2 distinct queries, 1.6 ms database time</text>
-  <text x="20" y="120" fill="#adbac7">  1 failures, 1 warnings, 0 ignored</text>
-  <text x="20" y="158" fill="#79c0ff">Queries by frequency:</text>
-  <text x="20" y="177" fill="#d2a8ff">  QG-FP-FDB5F469  x50        0.7 ms  SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?</text>
-  <text x="20" y="196" fill="#8b949e">  QG-FP-EBC3AACB  x1         0.9 ms  SELECT "c"."Id", "c"."City", "c"."Name" FROM "Companies" AS "c"</text>
-  <text x="20" y="234" fill="#79c0ff">Findings:</text>
-  <text x="20" y="253" fill="#ff7b72">  [FAIL] max-occurrences-per-fingerprint: Fingerprint QG-FP-FDB5F469 executed 50 times; the budget is 5.</text>
-  <text x="20" y="272" fill="#adbac7">          Occurrences: 50 (budget: 5)</text>
-  <text x="20" y="291" fill="#adbac7">          First seen at command #2, last at command #51</text>
-  <text x="20" y="310" fill="#adbac7">          SQL: SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?</text>
-  <text x="20" y="329" fill="#e3b341">  [WARN] repeated-query: Potential N+1 pattern in GET /api/companies: fingerprint QG-FP-FDB5F469 executed 50 times.</text>
-  <text x="20" y="348" fill="#adbac7">          Occurrences: 50 (warning threshold: 3)</text>
-  <text x="20" y="367" fill="#768390" font-style="italic">          Repeated SQL is strong evidence, not proof of an application-level N+1 defect.</text>
-  <text x="20" y="386" fill="#768390" font-style="italic">          Review eager loading, projection, or batching — or record an allowlist entry with a reason.</text>
-  <text x="20" y="424" fill="#7ee787" font-weight="600">Passed!  - Failed: 0, Passed: 5, Skipped: 0, Total: 5</text>
-  <text x="20" y="462" fill="#636e7b" font-style="italic"># 200 OK, correct data, 51 queries. A passing test about a failing budget.</text>
+  <text x="20.0" y="44" fill="#7ee787">$ dotnet test samples/QueryGuard.SampleTests</text>
+  <text x="20.0" y="82" fill="#ff7b72" font-weight="600">QueryGuard FAILED: GET /api/companies (policy ‘companies’)</text>
+  <text x="34.7" y="101" fill="#adbac7">51 read queries in 2 distinct queries, 1.6 ms database time</text>
+  <text x="34.7" y="120" fill="#adbac7">1 failures, 1 warnings, 0 ignored</text>
+  <text x="20.0" y="158" fill="#79c0ff">Queries by frequency:</text>
+  <text x="34.7" y="177" fill="#d2a8ff">QG-FP-FDB5F469  x50        0.7 ms  SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?</text>
+  <text x="34.7" y="196" fill="#8b949e">QG-FP-EBC3AACB  x1         0.9 ms  SELECT "c"."Id", "c"."City", "c"."Name" FROM "Companies" AS "c"</text>
+  <text x="20.0" y="234" fill="#79c0ff">Findings:</text>
+  <text x="34.7" y="253" fill="#ff7b72">[FAIL] max-occurrences-per-fingerprint: Fingerprint QG-FP-FDB5F469 executed 50 times; the budget is 5.</text>
+  <text x="93.5" y="272" fill="#adbac7">Occurrences: 50 (budget: 5)</text>
+  <text x="93.5" y="291" fill="#adbac7">First seen at command #2, last at command #51</text>
+  <text x="93.5" y="310" fill="#adbac7">SQL: SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?</text>
+  <text x="34.7" y="329" fill="#e3b341">[WARN] repeated-query: Potential N+1 pattern in GET /api/companies: fingerprint QG-FP-FDB5F469 executed 50 times.</text>
+  <text x="93.5" y="348" fill="#adbac7">Occurrences: 50 (warning threshold: 3)</text>
+  <text x="93.5" y="367" fill="#768390" font-style="italic">Repeated SQL is strong evidence, not proof of an application-level N+1 defect.</text>
+  <text x="93.5" y="386" fill="#768390" font-style="italic">Review eager loading, projection, or batching — or record an allowlist entry with a reason.</text>
+  <text x="20.0" y="424" fill="#7ee787" font-weight="600">Passed!  - Failed: 0, Passed: 5, Skipped: 0, Total: 5</text>
+  <text x="20.0" y="462" fill="#636e7b" font-style="italic"># 200 OK, correct data, 51 queries. A passing test about a failing budget.</text>
   </g>
 
   <rect x="20" y="471" width="7.35" height="14" fill="#7ee787">
