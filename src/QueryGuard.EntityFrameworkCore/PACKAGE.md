@@ -47,5 +47,5 @@ Any **relational** EF Core provider works through the interception contract, so 
 captured and grouped. Whether your provider's SQL formatting produces equally good fingerprint
 *grouping* is a separate claim: SQLite and PostgreSQL are integration-tested in CI, SQL Server is
 verified against captured SQL fixtures, and everything else is unverified. The
-[provider matrix](https://github.com/Benziza/queryguard-dotnet/blob/main/docs/providers/README.md)
+[provider matrix](https://benziza.github.io/queryguard-dotnet/providers/README.html)
 keeps those tiers apart rather than blurring them.

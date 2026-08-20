@@ -48,7 +48,7 @@ accessor: services.GetRequiredService<IQueryGuardSessionAccessor>()
 With `WebApplicationFactory` there is one more thing to know: `TestServer` does not flow
 `ExecutionContext` into requests unless asked, and QueryGuard finds the active session through
 `AsyncLocal`. See
-[troubleshooting](https://github.com/Benziza/queryguard-dotnet/blob/main/docs/troubleshooting/README.md).
+[troubleshooting](https://benziza.github.io/queryguard-dotnet/troubleshooting/README.html).
 
 ## No test framework dependency
 
@@ -60,7 +60,7 @@ drag a framework into your project.
 Because there is no framework-native formatting to lean on, the exception message carries the evidence:
 the policy, expected against actual, the top repeated fingerprint with its redacted SQL, any ignored
 findings, and where to read about false positives. See
-[ADR-0010](https://github.com/Benziza/queryguard-dotnet/blob/main/docs/decisions/0010-testing-api.md).
+[ADR-0010](https://benziza.github.io/queryguard-dotnet/decisions/0010-testing-api.html).
 
 Prefer your own assertions? `CompleteAsync` returns the `QueryGuardResult`; assert on it however you like.
 

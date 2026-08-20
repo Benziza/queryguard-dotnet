@@ -16,7 +16,9 @@
 
     <!-- Package identity and discoverability. -->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/Benziza/queryguard-dotnet</PackageProjectUrl>
+    <!-- The documentation site rather than the repository: nuget.org renders this as "Project website"
+         and RepositoryUrl separately as "Source repository", so a consumer gets both. -->
+    <PackageProjectUrl>https://benziza.github.io/queryguard-dotnet/</PackageProjectUrl>
     <PackageReadmeFile>PACKAGE.md</PackageReadmeFile>
     <PackageIcon>queryguard-icon.png</PackageIcon>
     <PackageReleaseNotes>See https://github.com/Benziza/queryguard-dotnet/blob/main/CHANGELOG.md</PackageReleaseNotes>

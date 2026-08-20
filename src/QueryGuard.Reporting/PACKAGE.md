@@ -21,7 +21,7 @@ await new QueryGuardJUnitReporter().WriteAsync(result, "artifacts/queryguard.jun
 Two runs over the same result produce byte-identical output, so a snapshot test on it is meaningful.
 JSON carries an explicit `schemaVersion`: additive fields bump the minor version, and removing or
 repurposing a field is a breaking change even in a preview. See
-[ADR-0011](https://github.com/Benziza/queryguard-dotnet/blob/main/docs/decisions/0011-versioning.md).
+[ADR-0011](https://benziza.github.io/queryguard-dotnet/decisions/0011-versioning.html).
 
 ## Redaction cannot be bypassed
 
