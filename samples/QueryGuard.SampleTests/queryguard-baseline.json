@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0",
+  "scopes": [
+    {
+      "scope": "GET /api/companies",
+      "readCommands": 51,
+      "distinctQueries": 2,
+      "topFingerprintOccurrences": 50
+    },
+    {
+      "scope": "GET /api/companies/projected",
+      "readCommands": 1,
+      "distinctQueries": 1,
+      "topFingerprintOccurrences": 1
+    },
+    {
+      "scope": "GET /api/reports/summary",
+      "readCommands": 3,
+      "distinctQueries": 1,
+      "topFingerprintOccurrences": 3
+    }
+  ]
+}
