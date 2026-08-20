@@ -18,6 +18,11 @@ First public preview. Published to nuget.org with trusted publishing; packages, 
 generated release notes are attached to the [`v0.1.0-preview.1`](https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.1)
 release.
 
+### Changed
+
+- Test tooling: `Microsoft.NET.Test.Sdk` 18.9.0, `xunit.runner.visualstudio` 4.0.0, and
+  `coverlet.collector` 10.0.1. Test-only; no shipped dependency changed.
+
 ### Added
 
 - Launch drafts under `docs/launch/`: the technical article, a demo script, and community posts, each
