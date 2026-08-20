@@ -6,6 +6,10 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/QueryGuard.EntityFrameworkCore/QueryGuard.EntityFrameworkCore.csproj" />
+
+    <!-- The one-line wiring tests exercise UseQueryGuard together with QueryGuardScope, because the
+         two defaults pointing at the same accessor is the behaviour under test. -->
+    <ProjectReference Include="../../src/QueryGuard.Testing/QueryGuard.Testing.csproj" />
   </ItemGroup>
 
   <!-- SQLite gives real relational command execution with no container to start. -->

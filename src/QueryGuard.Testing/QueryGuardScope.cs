@@ -31,16 +31,6 @@ namespace QueryGuard.Testing;
 /// </example>
 public sealed class QueryGuardScope : IDisposable, IAsyncDisposable
 {
-    /// <summary>
-    /// The accessor used when a caller does not supply one.
-    /// </summary>
-    /// <remarks>
-    /// A test host normally resolves the accessor from dependency injection and passes it in — the
-    /// interceptor has to be looking at the <em>same</em> accessor, or the scope captures nothing. This
-    /// shared instance exists for the case where a test constructs everything by hand.
-    /// </remarks>
-    private static readonly AsyncLocalQueryGuardSessionAccessor SharedAccessor = new();
-
     private readonly IQueryGuardSessionActivation _activation;
     private readonly QueryGuardAnalyzer _analyzer;
     private QueryGuardResult? _result;
@@ -65,11 +55,11 @@ public sealed class QueryGuardScope : IDisposable, IAsyncDisposable
     /// Gets the default accessor, for wiring an interceptor when a test constructs one by hand.
     /// </summary>
     /// <remarks>
-    /// The interceptor and the scope must share an accessor. Passing this to
-    /// <c>new QueryGuardCommandInterceptor(QueryGuardScope.DefaultAccessor, …)</c> is the shortest way
-    /// to guarantee that in a test with no dependency injection container.
+    /// The same instance as <see cref="AsyncLocalQueryGuardSessionAccessor.Shared"/>, which is what
+    /// <c>UseQueryGuard()</c> attaches an interceptor to. Both defaults land here, so a scope opened
+    /// without an accessor and an interceptor wired without one are already looking at each other.
     /// </remarks>
-    public static IQueryGuardSessionAccessor DefaultAccessor => SharedAccessor;
+    public static IQueryGuardSessionAccessor DefaultAccessor => AsyncLocalQueryGuardSessionAccessor.Shared;
 
     /// <summary>
     /// Opens a scope.
@@ -105,7 +95,7 @@ public sealed class QueryGuardScope : IDisposable, IAsyncDisposable
 
         var effectiveRedactor = redactor ?? new QueryGuardRedactor();
         var session = new QueryGuardSession(name, policy ?? QueryGuardPolicy.Create(name), effectiveRedactor);
-        var effectiveAccessor = accessor ?? SharedAccessor;
+        var effectiveAccessor = accessor ?? AsyncLocalQueryGuardSessionAccessor.Shared;
 
         return new QueryGuardScope(
             session,

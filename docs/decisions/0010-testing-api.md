@@ -58,6 +58,17 @@ the person who knows what evidence matters.
   change to it is visible in review.
 - Because the result object is public and stable, a community adapter for any framework is a small
   wrapper. That is the intended path, once the core API has settled.
+- **`QueryGuard.Testing` depends on `QueryGuard.EntityFrameworkCore`.** "No test framework
+  dependency" was read too broadly at first and the package shipped depending only on
+  `QueryGuard.Core`, which meant `dotnet add package QueryGuard.Testing` installed the scope and the
+  assertions and nothing that could capture a command. A first run recorded zero queries and every
+  assertion failed for a reason unrelated to the code under test. The rule this decision is about is
+  xUnit, NUnit, MSTest and TUnit; EF Core is the thing being measured, so depending on it is not a
+  compromise of the rule but a requirement of being usable.
+- The ambient accessor lives in `QueryGuard.Core` as
+  `AsyncLocalQueryGuardSessionAccessor.Shared`, so `UseQueryGuard()` and `QueryGuardScope.Start`
+  reach the same default. The accessor mismatch was the single largest source of "it captured
+  nothing" and it is now unreachable without opting in.
 
 ## Revisit when
 

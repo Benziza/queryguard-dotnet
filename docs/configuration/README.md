@@ -31,7 +31,7 @@ app.UseQueryGuard();   // after UseRouting — see below
 Two things people miss:
 
 - **Attaching the interceptor is a separate step.** Registering services is not enough; EF Core has to be
-  told about it.
+  told about it. Outside a container, `options.UseQueryGuard()` does it in one call.
 - **`UseQueryGuard()` goes after `UseRouting()`.** The scope name comes from the matched route pattern, so
   earlier means every request lands in one `(unmatched)` scope.
 
@@ -149,16 +149,22 @@ application exceeding a budget, so alerting on `Error` stays meaningful.
 ## In tests
 
 ```csharp
+// Where the context is configured.
+options.UseSqlite(connectionString).UseQueryGuard();
+
+// In the test.
 await using var scope = QueryGuardScope.Start(
     "GET /api/companies",
-    QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(1),
-    accessor: services.GetRequiredService<IQueryGuardSessionAccessor>());
+    QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(1));
 
 var response = await client.GetAsync("/api/companies");
 
 QueryGuardAssert.Passes(await scope.CompleteAsync());
 ```
 
-The scope and the interceptor must read the **same accessor**. With `WebApplicationFactory`, also set
-`TestServerOptions.PreserveExecutionContext` — see
+`UseQueryGuard()` and `QueryGuardScope.Start` default to the same ambient accessor, so there is nothing
+to match up and calling `UseQueryGuard()` twice is a no-op rather than a double count. Pass an accessor
+explicitly only when the interceptor came from a container.
+
+With `WebApplicationFactory`, also set `TestServerOptions.PreserveExecutionContext` — see
 [troubleshooting](../troubleshooting/README.md#4-testserver-is-not-flowing-executioncontext).

@@ -38,8 +38,15 @@ builder.Services.AddDbContext<AppDbContext>((provider, db) =>
 
 ### 3. The scope and the interceptor read different accessors
 
-They have to agree. If the interceptor came from dependency injection, pass that container's accessor
-to the scope:
+The simplest fix is not to have two. `UseQueryGuard()` and `QueryGuardScope.Start` both default to the
+same ambient accessor, so this cannot happen unless you opt into it:
+
+```csharp
+options.UseSqlite(connectionString).UseQueryGuard();
+```
+
+It only applies when the interceptor came from a dependency injection container. Then hand the scope
+that container's accessor:
 
 ```csharp
 await using var scope = QueryGuardScope.Start(
