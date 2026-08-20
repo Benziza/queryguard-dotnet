@@ -1,33 +1,39 @@
 # QueryGuard.NET documentation
 
-## Start here
+## Using QueryGuard
 
-- [Roadmap](./roadmap.md) — what v0.1 covers, what it deliberately does not, and how priority
-  is decided.
-- [Architecture decision records](./decisions/README.md) — why QueryGuard behaves the way it
-  does, and what would make each decision change.
+- [How it works](./concepts/README.md) — sessions, the stateless interceptor, fingerprints, redaction,
+  and analysis, in the order a command travels through them.
+- [Configuration](./configuration/README.md) — every budget and option, what it defaults to, and the
+  reasoning behind each default.
+- [Troubleshooting](./troubleshooting/README.md) — nothing recorded, fingerprints not grouping,
+  `(unmatched)` scope names, dropped commands.
+- [When a finding is wrong](./troubleshooting/false-positives.md) — what repeated SQL does and does not
+  prove, and the four ways to record an intentional exception.
+- [Provider support](./providers/README.md) — what is integration-tested, what is fixture-verified,
+  and why those are different claims.
+- [Benchmarks](./benchmarks.md) — what QueryGuard costs on the command path, with raw output and the
+  reasons not to turn any of it into a production latency figure.
+
+## Understanding the design
+
+- [Architecture decision records](./decisions/README.md) — why QueryGuard behaves the way it does, and
+  what would make each decision change. The most complete explanation of the design.
+- [Roadmap](./roadmap.md) — what v0.1 covers, what it deliberately does not, and how priority is
+  decided.
 
 ## For contributors
 
-- [Coding standards](./coding-standards.md) — the rules that come up in review, with the
-  reasoning behind them.
-- [Testing strategy](./testing-strategy.md) — the layers, the critical scenarios that must
-  never regress, and the benchmark honesty rules.
-- [Benchmarks](./benchmarks.md) — what QueryGuard costs on the command path, with the raw
-  output and the caveats that limit it.
-- [Releasing](./releasing.md) — the release runbook: one-time setup, the per-release checklist,
-  and what to do when a publish goes wrong.
-- [CONTRIBUTING.md](../CONTRIBUTING.md) — workflow, branch and commit conventions, and how to
-  get a change merged.
-
-## Reference
-
-Concept guides, configuration reference, provider notes, and the troubleshooting guide ship
-with the first preview. Until then the decision records are the most complete explanation of
-the design, and the [issue backlog](https://github.com/Benziza/queryguard-dotnet/issues)
-carries the acceptance criteria for work in progress.
+- [CONTRIBUTING.md](../CONTRIBUTING.md) — workflow, branch and commit conventions, and how to get a
+  change merged.
+- [Coding standards](./coding-standards.md) — the rules that come up in review, with the reasoning
+  behind them.
+- [Testing strategy](./testing-strategy.md) — the layers, the critical scenarios that must never
+  regress, and the benchmark honesty rules.
+- [Releasing](./releasing.md) — the release runbook: one-time setup, the per-release checklist, and
+  what to do when a publish goes wrong.
 
 ## Assets
 
-`assets/` holds the logo, package icon, and social preview image. They are generated from
-simple shapes rather than a design tool so they stay editable and reviewable in a diff.
+`assets/` holds the logo, package icon, and social preview image. They are generated from simple shapes
+rather than a design tool so they stay editable and reviewable in a diff.
