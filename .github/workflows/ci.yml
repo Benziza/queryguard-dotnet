@@ -165,6 +165,45 @@ jobs:
           path: artifacts/test-results
           if-no-files-found: warn
 
+  # A second dialect, so an assumption baked into SQLite's SQL cannot pass as a general rule.
+  # Ubuntu only: this needs a Docker daemon, and the Windows runners do not offer a Linux one.
+  provider-tests:
+    name: provider-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore QueryGuard.slnx
+
+      - name: Build
+        run: dotnet build QueryGuard.slnx -c Release --no-restore
+
+      # The suite skips its PostgreSQL tests when no daemon answers, so this proves the daemon is
+      # there rather than letting the job pass green on a silent skip.
+      - name: Confirm Docker is available
+        run: docker version
+
+      - name: Run provider tests
+        run: >-
+          dotnet test tests/QueryGuard.ProviderTests/QueryGuard.ProviderTests.csproj
+          -c Release --no-build
+          --logger "trx;LogFileName=provider-tests.trx"
+          --results-directory artifacts/test-results
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: provider-tests
+          path: artifacts/test-results
+          if-no-files-found: warn
+
   package-validate:
     name: package-validate
     runs-on: ubuntu-latest

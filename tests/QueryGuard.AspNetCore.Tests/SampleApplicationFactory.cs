@@ -144,6 +144,21 @@ internal sealed class SampleApplication : IAsyncDisposable
                         return company is null ? Results.NotFound() : Results.Ok(new { company.Id, company.Name });
                     });
 
+                    // Three reads, fixed: a third distinct per-route count, so the isolation stress
+                    // suite can tell routes apart by their totals alone.
+                    endpoints.MapGet("/api/reports/rollup", static async (SampleDbContext db) =>
+                    {
+                        var companies = await db.Companies.AsNoTracking().CountAsync();
+                        var departments = await db.Departments.AsNoTracking().CountAsync();
+                        var largest = await db.Companies
+                            .AsNoTracking()
+                            .Select(company => company.Departments.Count)
+                            .OrderByDescending(count => count)
+                            .FirstOrDefaultAsync();
+
+                        return Results.Ok(new { companies, departments, largest });
+                    });
+
                     endpoints.MapGet("/api/boom", static async (SampleDbContext db) =>
                     {
                         _ = await db.Companies.AsNoTracking().CountAsync();
