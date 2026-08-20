@@ -14,6 +14,8 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Launch drafts under `docs/launch/`: the technical article, a demo script, and community posts, each
+  written under stated rules about what may and may not be claimed.
 - Documentation set: a problem-first README with real verified output, plus concept, configuration,
   provider-support, and troubleshooting guides, and a false-positive guide covering the allowlist
   workflow end to end.

@@ -32,6 +32,8 @@
   regress, and the benchmark honesty rules.
 - [Releasing](./releasing.md) — the release runbook: one-time setup, the per-release checklist, and
   what to do when a publish goes wrong.
+- [Launch materials](./launch/README.md) — announcement drafts, and the rules limiting what they
+  may claim.
 
 ## Assets
 
