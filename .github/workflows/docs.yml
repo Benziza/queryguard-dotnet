@@ -14,12 +14,10 @@ on:
       - 'src/**'
       - '.config/dotnet-tools.json'
       - '.github/workflows/docs.yml'
+  # Deliberately unfiltered, unlike the push trigger. This is a required check, and a required check
+  # that is skipped by a path filter never reports — it leaves every pull request touching nothing else
+  # waiting for a status that will not arrive. A minute of build time is the cheaper problem.
   pull_request:
-    paths:
-      - 'docs/**'
-      - 'src/**'
-      - '.config/dotnet-tools.json'
-      - '.github/workflows/docs.yml'
   workflow_dispatch:
 
 permissions:
@@ -36,7 +34,7 @@ env:
 
 jobs:
   build:
-    name: build
+    name: build site
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -67,7 +65,7 @@ jobs:
           path: docs/_site
 
   deploy:
-    name: deploy
+    name: deploy site
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
