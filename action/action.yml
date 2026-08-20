@@ -57,4 +57,8 @@ runs:
         QG_REPO: ${{ github.repository }}
         QG_EVENT: ${{ github.event_name }}
         QG_PR: ${{ github.event.pull_request.number }}
-      run: ${{ github.action_path }}/publish.sh
+      # Invoked through bash rather than executed directly. The executable bit is easy to lose — it does
+      # not survive being authored on Windows unless someone remembers `git update-index --chmod=+x`,
+      # and the resulting failure is a permission-denied that looks nothing like a missing file mode.
+      # This works either way.
+      run: bash "${{ github.action_path }}/publish.sh"
