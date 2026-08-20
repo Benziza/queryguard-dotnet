@@ -146,6 +146,32 @@ Event IDs are stable and documented on `QueryGuardEventIds` — they are part of
 a dashboard can be built on them. `LogLevel.Error` is reserved for QueryGuard's own failures, never for an
 application exceeding a budget, so alerting on `Error` stays meaningful.
 
+## Where a repeated query came from
+
+A test scope records the call site of each distinct query by default, so a failure names the code rather
+than only the SQL:
+
+```text
+  [FAIL] max-occurrences-per-fingerprint: QG-FP-FDB5F469 executed 50 times; the budget is 5.
+          SQL: SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?
+          origin: samples/QueryGuard.SampleApi/Program.cs:line 89
+```
+
+One trace per distinct query, never one per execution. Framework and generated frames are filtered out,
+so a named method is shown by name and a lambda is shown by file and line — a minimal-API endpoint
+compiles to something like `Program.<>c.<<<Main>$>b__0_3>d.MoveNext()`, which carries no information the
+location does not.
+
+Turn it off with `captureOrigin: false`, or supply your own redactor to control capture exactly:
+
+```csharp
+await using var scope = QueryGuardScope.Start("GET /api/companies", policy, captureOrigin: false);
+```
+
+This is on in a scope and **off** on a request path, because it costs 20–30× the rest of the capture
+path — free in a test, not free in production. See
+[ADR-0007](../decisions/0007-stack-trace-policy.md) and [benchmarks](../benchmarks.md).
+
 ## In tests
 
 ```csharp

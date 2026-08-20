@@ -77,6 +77,11 @@ public sealed class QueryGuardScope : IDisposable, IAsyncDisposable
     /// The capture settings to honour. Defaults to privacy-first defaults.
     /// </param>
     /// <param name="analyzer">The analyzer. Defaults to one built from <paramref name="redactor"/>.</param>
+    /// <param name="captureOrigin">
+    /// Whether to record where each distinct query was first executed, so a failure can name the call
+    /// site instead of only the SQL. Defaults to <see langword="true"/> because a scope is a
+    /// measurement, not a hot path. Ignored when <paramref name="redactor"/> is supplied.
+    /// </param>
     /// <returns>The open scope.</returns>
     /// <exception cref="ArgumentException"><paramref name="name"/> is empty or whitespace.</exception>
     public static QueryGuardScope Start(
@@ -84,7 +89,8 @@ public sealed class QueryGuardScope : IDisposable, IAsyncDisposable
         QueryGuardPolicy? policy = null,
         IQueryGuardSessionAccessor? accessor = null,
         IQueryGuardRedactor? redactor = null,
-        QueryGuardAnalyzer? analyzer = null)
+        QueryGuardAnalyzer? analyzer = null,
+        bool captureOrigin = true)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -93,7 +99,21 @@ public sealed class QueryGuardScope : IDisposable, IAsyncDisposable
                 nameof(name));
         }
 
-        var effectiveRedactor = redactor ?? new QueryGuardRedactor();
+        // Stack-trace capture defaults ON here, unlike everywhere else.
+        //
+        // ADR-0007 turns it off by default because it costs 20-30x the rest of the capture path, and
+        // that reasoning is about the request path in a running application. A scope exists only in a
+        // test or an explicit measurement, where 150 microseconds is free and knowing the call site is
+        // the difference between "this endpoint has a repeated query" and "line 87 has a repeated
+        // query". Paying for it in the one place it is worth paying for is the whole point of having
+        // the option.
+        //
+        // Still bounded to one trace per fingerprint, still filtered to application frames, and a
+        // caller who supplies a redactor gets exactly what they asked for.
+        var effectiveRedactor = redactor ?? new QueryGuardRedactor(new QueryGuardCaptureOptions
+        {
+            CaptureFirstStackTrace = captureOrigin,
+        });
         var session = new QueryGuardSession(name, policy ?? QueryGuardPolicy.Create(name), effectiveRedactor);
         var effectiveAccessor = accessor ?? AsyncLocalQueryGuardSessionAccessor.Shared;
 
