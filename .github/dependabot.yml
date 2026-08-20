@@ -37,6 +37,13 @@ updates:
       - dependency-name: "Microsoft.EntityFrameworkCore.*"
         update-types:
           - version-update:semver-major
+      # The Microsoft.Extensions.* versions are pinned per target framework on purpose: a net8.0
+      # consumer resolves the 8.x line so QueryGuard does not raise their floor to a 10.x package.
+      # A major bump here rewrites the net8.0 pin to 10.x, which is a supported-framework decision
+      # and belongs in an ADR rather than a dependency PR.
+      - dependency-name: "Microsoft.Extensions.*"
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: "/"

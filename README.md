@@ -26,6 +26,10 @@
   </a>
 </p>
 
+<p align="center">
+  <img src="./docs/assets/queryguard-demo.svg" width="820" alt="Terminal output: QueryGuard fails a query budget for GET /api/companies, reporting 51 read queries and one fingerprint executed 50 times.">
+</p>
+
 QueryGuard.NET counts the Entity Framework Core queries your code actually runs — inside a request or
 inside a test — groups the repeated ones, and fails the build when a budget you set is exceeded.
 
