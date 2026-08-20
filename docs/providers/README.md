@@ -15,7 +15,8 @@ is how a support matrix becomes a lie.
 | SQLite | **Integration-tested** | Real commands run in CI, on Ubuntu and Windows, on `net8.0` and `net10.0` |
 | PostgreSQL (Npgsql) | **Integration-tested** | Focused Testcontainers suite in CI |
 | SQL Server | **Integration-tested** | Real commands run in CI through Testcontainers |
-| MySQL / MariaDB | Community | No tests, no promises. Fingerprint quality unverified |
+| MySQL | **Integration-tested** | Real commands run in CI through Testcontainers, via Oracle's provider — [see the caveat](#the-mysql-provider-caveat) |
+| MariaDB | Community | No tests, no promises. Wire-compatible with MySQL, which is evidence and not verification |
 | Other relational providers | Best effort | Works through the official interception contract |
 | Non-relational EF providers | **Unsupported** | `DbCommand` interception is relational only |
 
@@ -23,10 +24,12 @@ is how a support matrix becomes a lie.
 checked against captured SQL from that provider, but nothing live runs. See
 [ADR-0009](../decisions/0009-provider-matrix.md).
 
-SQL Server was fixture-verified until a live suite was added, and the first run found a real bug — see
-[below](#what-the-live-sql-server-suite-found).
+Every one of those live suites has found something. SQL Server was fixture-verified until a live suite
+was added, and the first run found [a shipped bug](#what-the-live-sql-server-suite-found). MySQL found
+[a reporting bug affecting every provider](#what-the-live-mysql-suite-found). That is the argument for
+the tier distinction, restated twice.
 
-## Why these three, specifically
+## Why these four, specifically
 
 **SQLite is the workhorse.** Real relational execution, no container, fast enough to run the whole
 surface — interception, fingerprinting, budgets, middleware, failure paths — on every pull request.
@@ -38,8 +41,13 @@ caught the case that had to be handled explicitly: PostgreSQL's `::` cast operat
 a named parameter, and treating it as one silently merged queries that differ by type.
 
 **SQL Server is the provider most .NET developers check first**, so "probably works" was not a good
-enough answer for it. It also has the most distinctive generated SQL of the three — a parameter
+enough answer for it. It also has the most distinctive generated SQL of the four — a parameter
 declaration prologue in front of the actual statement — which turned out to matter more than expected.
+
+**MySQL brings the third quoting style and the inlining case.** Backticks are a distinct third form
+after `"` and `[]`, and MySQL inlines some constants the other providers parameterize — so where the
+SQL Server suite exercises the parameter path, MySQL exercises literal redaction. Both have to end up
+hiding the value, and only running both shows that they do.
 
 ## What the live SQL Server suite found
 
@@ -65,6 +73,54 @@ is what noticed it existed.
 
 The general lesson, which is why the tier distinction is kept: a fixture proves the normalizer still
 does what it did when the fixture was written. It cannot notice SQL the fixture never contained.
+
+## The MySQL provider caveat
+
+The suite runs against **`MySql.EntityFrameworkCore`**, Oracle's provider — not Pomelo.
+
+Pomelo is the more widely used of the two by a wide margin, so this is worth stating plainly rather
+than leaving in a package file: its latest release is `9.0.0` and there is no EF Core 10 line, while
+this project targets EF Core 8 and 10. There was no version of Pomelo the suite could have used.
+
+What is verified, precisely: QueryGuard captures and groups MySQL SQL **as Oracle's provider generates
+it**. Since a fingerprint is derived from the SQL text, a Pomelo user's SQL may differ in ways this
+suite cannot see. Capture is unaffected — that goes through EF Core's interception contract, which both
+providers implement identically.
+
+If you run Pomelo and see either failure mode from [the table below](#using-an-untested-provider), it is
+worth reporting even though MySQL reads as integration-tested. When Pomelo ships an EF Core 10 line,
+running the same suite against it is a small change.
+
+## What the live MySQL suite found
+
+Not a MySQL bug. A bug in what **every** provider reported.
+
+`TagWith` emits the tag as a line comment, and normalization collapses runs of whitespace — including
+the line break that terminated the comment. A recognized `QueryGuard:` directive has to survive that
+pass, because it changes behaviour, and it was being kept in the form it arrived in:
+
+```text
+--QueryGuard:Ignore reason=bounded-reference-lookup SELECT `c`.`Id`, `c`.`City` FROM `Companies` AS `c`
+```
+
+One line, and everything after the `--` is inside the comment. Every reporter prints that text, so the
+SQL shown for any tagged query read as entirely commented out — and pasting it into a client ran
+nothing. An ignored finding is still reported, with its reason, so this was on a path users see.
+
+A directive is now normalized to a block comment whichever way it was written:
+
+```text
+/*QueryGuard:Ignore reason=bounded-reference-lookup*/ SELECT `c`.`Id`, `c`.`City` FROM `Companies` AS `c`
+```
+
+The block-comment branch was already correct, and a test named for exactly this concern already covered
+it. The line-comment branch had the same intent and the opposite outcome, and the assertions on it
+checked that `QueryGuard:Ignore` appeared somewhere in the string — which stayed true throughout. A
+substring assertion cannot see a delimiter bug.
+
+Two smaller consequences, both improvements: the same directive written `--` or `/* */` now produces one
+fingerprint instead of two, which is right because the delimiter is not part of what the query does; and
+fingerprints of tagged queries changed, so a baseline recorded before this needs re-recording.
 
 ## Parameter syntaxes the normalizer handles
 
@@ -97,7 +153,7 @@ than one provider.
 # SQLite only — no Docker needed
 dotnet test tests/QueryGuard.ProviderTests
 
-# With Docker running, the PostgreSQL and SQL Server tests execute too (about a minute)
+# With Docker running, the PostgreSQL, SQL Server, and MySQL tests execute too (a few minutes)
 docker info && dotnet test tests/QueryGuard.ProviderTests
 ```
 

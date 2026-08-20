@@ -1,9 +1,9 @@
-# ADR-0009: SQLite, PostgreSQL, and SQL Server are integration-tested; everything else is stated honestly
+# ADR-0009: SQLite, PostgreSQL, SQL Server, and MySQL are integration-tested; everything else is stated honestly
 
 - **Status:** Accepted
 - **Date:** 2026-08-19
 - **Deciders:** Mohamed Benziza
-- **Related:** QG-047, QG-048, R-008
+- **Related:** QG-047, QG-048, QG-067, R-008
 
 ## Context
 
@@ -22,14 +22,15 @@ flaky tests, and none of it moves the core product forward.
 
 ## Decision
 
-**Three distinct support tiers, stated separately, and never blurred.**
+**Distinct support tiers, stated separately, and never blurred.**
 
 | Provider | Tier | What that means |
 | --- | --- | --- |
 | SQLite | Integration-tested | Real commands run in CI on Ubuntu and Windows, on both target frameworks |
 | PostgreSQL (Npgsql) | Integration-tested | Focused Testcontainers suite in CI |
 | SQL Server | Integration-tested | Real commands run in CI through Testcontainers |
-| MySQL / MariaDB | Community | No tests, no promises |
+| MySQL | Integration-tested | Real commands run in CI through Testcontainers, via Oracle's provider |
+| MariaDB | Community | No tests, no promises |
 | Other relational providers | Best effort | Works through the official interception contract |
 | Non-relational EF providers | Unsupported | `DbCommand` interception is relational only |
 
@@ -43,6 +44,10 @@ Rules that keep the tiers meaningful:
 - SQL Server is integration-tested because it is the provider most .NET developers evaluate first,
   and because "probably works" was the weakest claim on this page. Adding it found a real bug on the
   first run — see below.
+- MySQL is integration-tested for the third quoting style — backticks — and because it inlines some
+  constants the other providers parameterize, which is the only live coverage of literal redaction.
+  It runs against Oracle's `MySql.EntityFrameworkCore` and not Pomelo, because Pomelo has no EF Core
+  10 line; the tier is still "integration-tested" but the provider is named wherever the claim is made.
 - The container-backed suites skip themselves when Docker is unavailable, so a contributor without
   Docker is not blocked. They still run in CI.
 - The README, `SUPPORT.md`, and the package descriptions use these exact words. "Supports all
@@ -94,10 +99,36 @@ which is licensed for development and testing.
 - Container flakiness is treated as a bug in our test setup, not something to paper over with
   blind retries.
 
+## Amendment, 2026-08-20: MySQL moved from Community to Integration-tested
+
+The original "Revisit when" said a provider moves up on a community contribution that arrives with its
+own upkeep. That is still the bar for a *request*. MySQL was promoted without waiting for one, for a
+reason the earlier entry did not anticipate: the existing suites had no coverage of literal redaction
+against a live provider, because SQLite, PostgreSQL, and SQL Server all parameterize the constant in
+`Where(c => c.City == "Paris")`. MySQL inlines it. That was a gap in the *test matrix*, not a gap in
+provider support, and it is the kind of gap a fixture cannot close.
+
+It paid for itself the same way SQL Server did. The live run surfaced a bug in what every provider
+reported: a `QueryGuard:` directive arriving as a line comment survived normalization as `--directive`,
+and since normalization collapses the line break that ended the comment, the rest of the reported SQL
+sat inside it. `TagWith` always emits a line comment, so this was every tagged query everywhere. The
+directive is now normalized to a block comment regardless of how it was written.
+
+Two constraints this amendment does not resolve:
+
+- **Pomelo is the provider most MySQL users actually run**, and it has no EF Core 10 release. The suite
+  therefore verifies Oracle's SQL generation. Capture is provider-independent, but fingerprints are
+  derived from SQL text, so this is a narrower claim than "MySQL works" and is written as such in
+  `docs/providers/README.md`.
+- **MariaDB stays Community.** Wire compatibility with MySQL is evidence, not verification, and adding a
+  fourth container to buy a claim nobody has asked for is exactly the trade this ADR exists to refuse.
+
 ## Revisit when
 
 - A community contribution brings both a provider integration suite and someone willing to
   maintain it.
+- Pomelo ships an EF Core 10 line. Running the existing MySQL suite against it as a second
+  configuration is a small change and would close the caveat above.
 - Provider support becomes a demonstrated adoption blocker — a user who would use QueryGuard but
   cannot because their provider's fingerprints are wrong. That is worth a provider-specific
   normalizer; a hypothetical user is not.

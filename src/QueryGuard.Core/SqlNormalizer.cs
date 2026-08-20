@@ -209,14 +209,20 @@ public sealed class SqlNormalizer : ISqlNormalizer
             // A QueryGuard directive is the one comment that changes behavior, so it has to survive
             // normalization and therefore participates in the fingerprint. A tagged query is a
             // distinct call site the user chose to single out.
+            //
+            // Emitted as a block comment even though it arrived as a line comment, because this pass
+            // collapses the line break that terminated it. Kept as "--" it would comment out the rest
+            // of the normalized text, and every reporter prints that text: a tagged query would show
+            // SQL that reads as entirely commented out. EF Core's TagWith always emits a line comment,
+            // so that was every tagged query on every provider.
+            //
+            // It also means the same directive written either way normalizes identically, which is
+            // right — how the comment was delimited is not part of what the query does.
             AppendSeparator(builder);
-            builder.Append("--").Append(comment);
-            AppendSeparator(builder);
+            builder.Append("/*").Append(comment).Append("*/");
         }
-        else
-        {
-            AppendSeparator(builder);
-        }
+
+        AppendSeparator(builder);
 
         return end < 0 ? text.Length : end + 1;
     }

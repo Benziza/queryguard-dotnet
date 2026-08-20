@@ -30,6 +30,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Testcontainers.PostgreSql" />
     <PackageReference Include="Testcontainers.MsSql" />
+    <PackageReference Include="MySql.EntityFrameworkCore" />
+    <PackageReference Include="Testcontainers.MySql" />
   </ItemGroup>
 
 </Project>

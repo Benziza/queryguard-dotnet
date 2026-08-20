@@ -107,6 +107,37 @@ public class SqlNormalizerTests
     }
 
     [Fact]
+    public void A_line_comment_directive_does_not_comment_out_the_statement()
+    {
+        // The directive arrives as a line comment - TagWith always emits one - and this pass collapses
+        // the line break that terminated it. Left as "--" the rest of the normalized text sits inside
+        // the comment, and every reporter prints that text, so a tagged query showed SQL that reads as
+        // entirely commented out. Asserting the delimiter rather than just the substring, because
+        // Contains("QueryGuard:Ignore") passed throughout the bug.
+        var normalized = _normalizer.Normalize(ProviderSqlFixtures.SqliteTaggedIgnore);
+
+        Assert.DoesNotContain("--", normalized, StringComparison.Ordinal);
+        Assert.Contains("/*", normalized, StringComparison.Ordinal);
+        Assert.Contains("*/", normalized, StringComparison.Ordinal);
+
+        // The statement has to survive outside the comment, not merely appear in the string.
+        var afterComment = normalized[(normalized.IndexOf("*/", StringComparison.Ordinal) + 2)..];
+        Assert.Contains("SELECT", afterComment, StringComparison.Ordinal);
+        Assert.Contains("FROM \"Companies\"", afterComment, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_same_directive_written_either_way_normalizes_identically()
+    {
+        // How the comment was delimited is not part of what the query does, so the two spellings must
+        // not produce two fingerprints for one call site.
+        var line = _normalizer.Normalize("-- QueryGuard:Ignore reason=polling\nSELECT 1");
+        var block = _normalizer.Normalize("/* QueryGuard:Ignore reason=polling */ SELECT 1");
+
+        Assert.Equal(line, block);
+    }
+
+    [Fact]
     public void A_queryguard_directive_in_a_block_comment_also_survives()
     {
         var normalized = _normalizer.Normalize("/* QueryGuard:Ignore reason=polling */ SELECT 1");

@@ -22,9 +22,30 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 - Package metadata points at the site. `PackageProjectUrl` is now the documentation site rather than a
   second link to the repository, which nuget.org already shows separately as the source repository, so a
   consumer gets both instead of the same destination twice.
+- **MySQL is integration-tested.** A Testcontainers suite runs real commands against MySQL 8.4 in CI,
+  covering backtick quoting, parameter placeholders, literal redaction, both write shapes, failures, and
+  query tags. It moves MySQL from Community to Integration-tested in
+  [ADR-0009](docs/decisions/0009-provider-matrix.md), with one caveat stated wherever the claim appears:
+  the suite runs against Oracle's `MySql.EntityFrameworkCore`, because Pomelo — the more widely used
+  MySQL provider — has no EF Core 10 release. MariaDB deliberately stays Community.
 
 ### Fixed
 
+- **A tagged query reported SQL that was entirely commented out.** `TagWith` emits its tag as a line
+  comment, and normalization collapses runs of whitespace including the line break that ended it. A
+  recognized `QueryGuard:` directive has to survive that pass, and it was kept in the form it arrived
+  in — so the normalized text became `--QueryGuard:Ignore reason=x SELECT ...` on one line, with the
+  statement inside the comment. Every reporter prints that text, and an ignored finding is still
+  reported with its reason, so this was on a path users see. A directive is now normalized to a block
+  comment however it was written, which the block-comment branch was already doing correctly.
+
+  Two consequences. The same directive written `--` or `/* */` now produces one fingerprint rather than
+  two, which is right — the delimiter is not part of what the query does. And **fingerprints of tagged
+  queries have changed**, so a baseline recorded before this release needs re-recording, and an
+  allowlist entry keyed on a tagged query's fingerprint needs updating. Allowlisting by tag is
+  unaffected.
+
+  Found by running the new MySQL suite; it was never MySQL-specific.
 - `queryguard --version` reported the assembly version, `0.1.0.0`, which every preview shares — a bug
   report quoting it could not say which build it came from. It now reports the informational version,
   `0.1.0-preview.3+62d58ff…`, carrying the prerelease suffix and the commit SourceLink stamped in.
