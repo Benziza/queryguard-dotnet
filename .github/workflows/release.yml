@@ -47,21 +47,29 @@ jobs:
             8.0.x
             10.0.x
 
-      # A tag that disagrees with the packaged version would publish something nobody asked for,
-      # under a name that can never be corrected — a published NuGet version is immutable. On a
-      # manual run there is no tag to check, so this reports the version that would ship instead.
+      - name: Restore
+        run: dotnet restore QueryGuard.slnx
+
+      # A tag that disagrees with the packaged version would publish something nobody asked for, under
+      # a name that can never be corrected — a published NuGet version is immutable.
+      #
+      # Asked of MSBuild rather than parsed out of XML. The first version of this step used a regex
+      # over Directory.Build.props containing a variable-length lookbehind, which PCRE rejects: grep
+      # failed, the `|| true` swallowed the failure, the suffix silently became empty, and the step
+      # resolved 0.1.0 for a tag that said 0.1.0-preview.1. The tag comparison caught it, but only
+      # because a tag was involved. This asks for the same property `dotnet pack` stamps on the
+      # package, so the two cannot disagree by construction.
       - name: Resolve and check the version
         id: version
         run: |
           set -euo pipefail
 
-          prefix=$(grep -oPm1 '(?<=<VersionPrefix>)[^<]+' Directory.Build.props)
-          suffix=$(grep -oPm1 '(?<=<VersionSuffix Condition="[^"]*">)[^<]+' Directory.Build.props || true)
+          version=$(dotnet msbuild src/QueryGuard.Core/QueryGuard.Core.csproj \
+            -getProperty:PackageVersion -p:TargetFramework=net10.0 | tr -d '[:space:]')
 
-          if [ -n "$suffix" ]; then
-            version="${prefix}-${suffix}"
-          else
-            version="$prefix"
+          if [ -z "$version" ]; then
+            echo "::error::Could not resolve the package version from MSBuild."
+            exit 1
           fi
 
           echo "Package version: $version"
@@ -75,13 +83,18 @@ jobs:
               exit 1
             fi
           else
+            # A rehearsal has no tag to compare against, so it checks the shape instead. Without this
+            # a broken version resolution passes every dry run and fails only on the tag — which is
+            # exactly how the bug above survived two rehearsals.
+            if ! printf '%s' "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+              echo "::error::Resolved version '$version' is not a valid semantic version."
+              exit 1
+            fi
+
             echo "::notice::Dry run for version $version. Nothing will be published."
           fi
 
           echo "version=$version" >> "$GITHUB_OUTPUT"
-
-      - name: Restore
-        run: dotnet restore QueryGuard.slnx
 
       - name: Build
         run: dotnet build QueryGuard.slnx -c Release --no-restore

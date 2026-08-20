@@ -55,8 +55,10 @@ environment only, and revoked immediately afterwards. That is a fallback, not a 
 Rehearse first. A dry run costs a few minutes and has caught real problems here.
 
 1. **Dry run.** Trigger the `Release` workflow manually from the branch you intend to tag. `verify`
-   runs end to end, including the consumer smoke test, and nothing is published. Confirm the version
-   in its log is the one you expect.
+   runs end to end, including the consumer smoke test, and nothing is published. **Read the resolved
+   version in its log** rather than trusting a green tick: a rehearsal has no tag to compare against,
+   so it validates only that the version resolves and is shaped like a semantic version. A wrong-but-
+   well-formed version still passes here and fails on the tag.
 2. **Version.** Set `VersionPrefix` and `VersionSuffix` in `Directory.Build.props`. A preview keeps a
    suffix (`preview.2`); a stable release removes it. The tag must equal the resulting version with a
    `v` prefix, or `verify` fails on purpose.
@@ -101,3 +103,17 @@ completes the set rather than failing on the first duplicate. This is why the fl
 **A bad version reached nuget.org.** It cannot be replaced. Unlist it, publish a fixed version, and
 say what happened in `CHANGELOG.md`. Unlisting stops new consumers finding it; it does nothing for
 anyone who already depends on it. This is the outcome every check above exists to avoid.
+
+## A note on why the tag check earns its keep
+
+The first real tag push failed here, correctly. The version-resolution step had parsed
+`Directory.Build.props` with a regex containing a variable-length lookbehind — invalid in PCRE — so
+`grep` failed, a `|| true` swallowed the failure, the version suffix silently became empty, and the step
+resolved `0.1.0` for a tag that said `0.1.0-preview.1`. Nothing was published, because the tag
+comparison refused it.
+
+Two lessons are now built into the workflow. The version comes from MSBuild rather than from parsing
+XML, so it is the same property `dotnet pack` stamps on the package and the two cannot disagree. And a
+dry run validates the version it resolved instead of ignoring it, because the original bug passed two
+rehearsals without complaint — a check that only runs when a tag exists is a check that cannot protect
+the rehearsal.
