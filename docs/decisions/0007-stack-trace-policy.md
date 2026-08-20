@@ -30,8 +30,28 @@ means local directory structure, and in a build means the CI workspace layout.
 - Frames belonging to QueryGuard, EF Core, and the BCL are filtered out, so what remains is the
   application code that is actually actionable.
 - The cost is **measured**, not asserted: a benchmark compares off / first-only across 1 and 10
-  fingerprint groups, and the documentation states the numbers with the hardware and runtime they
-  came from. No claim of "negligible overhead" appears anywhere without that data.
+  fingerprint groups, and the numbers are recorded below with the hardware and runtime they came
+  from. No claim of "negligible overhead" appears anywhere without that data.
+
+## Measurement
+
+The numbers this decision was waiting for, from
+[docs/benchmarks.md](../benchmarks.md) — commit `46ec17e`, `ShortRun`, Intel Core Ultra 5 225F,
+.NET 10.0.10. Both rows record ten commands per fingerprint, so the only difference is one captured
+and filtered trace per distinct query:
+
+| Distinct fingerprints | Off (default) | On, first occurrence only | Slower by | More allocation by |
+| --- | --- | --- | --- | --- |
+| 1 | 722 ns | 15,720 ns | 22× | 18× |
+| 10 | 5,337 ns | 153,702 ns | 29× | 26× |
+
+One trace per fingerprint costs 20–30× the entire rest of the capture path and allocates roughly
+350 KB across ten fingerprints. That is decisive for the default, and it also justifies the absence
+of a per-command option: at ten commands per fingerprint, that would be another order of magnitude.
+
+It does not argue for removing the feature. On a development request spent hunting a repeated query,
+150 µs is nothing and the call site is worth far more. The decision is about the default, not about
+whether the capability should exist.
 
 ## Rejected alternatives
 
@@ -43,10 +63,11 @@ API does not expose it even as an option.
 evidence QueryGuard could offer. "Where is this coming from?" is the first question every user
 asks after seeing a finding.
 
-**On by default, first occurrence only.** Tempting — the bounded cost is small in absolute
-terms. Rejected because QueryGuard's core promise is that installing it does not change how your
-application behaves. A default that adds hot-path allocation undermines that promise for a
-feature not everyone needs.
+**On by default, first occurrence only.** Tempting while the cost was only a guess: bounded per
+fingerprint, and surely small in absolute terms. The measurement above says otherwise — 22–29×
+the rest of the capture path, and hundreds of kilobytes allocated. Rejected on the data as well
+as on principle, since QueryGuard's core promise is that installing it does not change how your
+application behaves.
 
 ## Consequences
 

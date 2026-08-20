@@ -204,6 +204,37 @@ jobs:
           path: artifacts/test-results
           if-no-files-found: warn
 
+  # A smoke run, not a measurement. `--job Dry` executes every benchmark once, which proves the
+  # harness still compiles and runs; it says nothing about timing. A benchmark job that gated a pull
+  # request would be either too slow to be useful or too short to be accurate, and CI runners are
+  # shared hardware. Published numbers come from a quiet machine and disclose it — see
+  # docs/benchmarks.md.
+  benchmark-smoke:
+    name: benchmark-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Run every benchmark once
+        run: >-
+          dotnet run -c Release --project benchmarks/QueryGuard.Benchmarks
+          -- --filter "*" --job Dry --artifacts artifacts/benchmarks
+
+      # Raw CSV, JSON, HTML and the full BenchmarkDotNet header, kept alongside the run that produced
+      # them. A summary table without its raw output is a number nobody can check.
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: benchmark-artifacts
+          path: artifacts/benchmarks
+          if-no-files-found: warn
+
   package-validate:
     name: package-validate
     runs-on: ubuntu-latest
@@ -222,16 +253,20 @@ jobs:
       - name: Build
         run: dotnet build QueryGuard.slnx -c Release --no-restore
 
+      # The src projects explicitly, not the solution: packing the solution also walks the samples,
+      # which are deliberately not packable and produce a warning saying so on every run.
       - name: Pack
-        run: dotnet pack QueryGuard.slnx -c Release --no-build -o artifacts/packages
-
-      - name: Show package contents
         run: |
-          for package in artifacts/packages/*.nupkg; do
-            echo "::group::$(basename "$package")"
-            unzip -l "$package"
-            echo "::endgroup::"
+          for project in src/*/*.csproj; do
+            dotnet pack "$project" -c Release --no-build -o artifacts/packages
           done
+
+      # Assertions, not a printed listing a human is trusted to read. A NuGet version cannot be
+      # replaced once published, only unlisted, so wrong metadata is permanent. The script ends by
+      # installing the packages into a throwaway project from a local feed and running code against
+      # them, which is the only check that proves they work as packages.
+      - name: Verify packages
+        run: eng/verify-packages.sh artifacts/packages
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
