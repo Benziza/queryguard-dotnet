@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>QueryGuard.Cli</RootNamespace>
+    <AssemblyName>queryguard</AssemblyName>
+
+    <!--
+      A tool, not a library. It installs with "dotnet tool install -g QueryGuard.Cli" and runs as
+      "queryguard".
+
+      Multi-targeted like the rest of the solution, so a team on the .NET 8 SDK and a team on .NET 10 can
+      both install it — the tool host picks the framework that is present. Single-targeting net8.0 would
+      have worked for consumers and made the tool untestable on a machine with only the .NET 10 runtime
+      installed, which is how this was found.
+    -->
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>queryguard</ToolCommandName>
+    <PackageId>QueryGuard.Cli</PackageId>
+    <Description>Command-line companion for QueryGuard.NET. Records a query baseline from JSON reports and verifies later runs against it, so a query-count regression can be caught in CI without writing baseline plumbing by hand.</Description>
+    <PackageTags>dotnet-tool;cli;ef-core;n-plus-one;query-budget;ci;baseline</PackageTags>
+
+    <!-- Invariant globalization is fine here and keeps the tool from depending on host culture. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../QueryGuard.Core/QueryGuard.Core.csproj" />
+    <ProjectReference Include="../QueryGuard.Reporting/QueryGuard.Reporting.csproj" />
+  </ItemGroup>
+
+  <!--
+    Named explicitly, because the shared rule in src/Directory.Build.props grants to
+    $(AssemblyName).Tests — and this project's assembly is "queryguard", so the convention would grant
+    to "queryguard.Tests" and the test project could not see anything.
+  -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="QueryGuard.Cli.Tests" />
+  </ItemGroup>
+
+</Project>

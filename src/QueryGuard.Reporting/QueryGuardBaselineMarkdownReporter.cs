@@ -85,7 +85,7 @@ public sealed class QueryGuardBaselineMarkdownReporter
             var worst = comparison.Regressions[0];
 
             builder
-                .Append(CultureInfo.InvariantCulture, $"**{Plural(regressions, "scope")} now run more queries than the baseline.** ")
+                .Append(CultureInfo.InvariantCulture, $"**{Plural(regressions, "scope")} now {Agree(regressions, "runs", "run")} more queries than the baseline.** ")
                 .Append(CultureInfo.InvariantCulture, $"`{worst.Scope}` went from {worst.Baseline!.ReadCommands} to {worst.Current.ReadCommands}.\n\n");
 
             return;
@@ -94,7 +94,7 @@ public sealed class QueryGuardBaselineMarkdownReporter
         if (improvements > 0)
         {
             builder
-                .Append(CultureInfo.InvariantCulture, $"**{Plural(improvements, "scope")} run fewer queries than the baseline.** ")
+                .Append(CultureInfo.InvariantCulture, $"**{Plural(improvements, "scope")} {Agree(improvements, "runs", "run")} fewer queries than the baseline.** ")
                 .Append("Nothing got worse.\n\n");
 
             return;
@@ -200,6 +200,17 @@ public sealed class QueryGuardBaselineMarkdownReporter
             + "If this change is intended, regenerate the baseline and commit it, so the diff records "
             + "the decision.\n");
     }
+
+    /// <summary>
+    /// Picks the verb form that agrees with a count.
+    /// </summary>
+    /// <remarks>
+    /// The noun was already pluralised and the verb was not, so a single regression read "1 scope now
+    /// run more queries". It is the first line of the pull request comment, which makes it the most
+    /// read sentence the tool produces.
+    /// </remarks>
+    private static string Agree(int count, string singular, string plural)
+        => count == 1 ? singular : plural;
 
     private static string Plural(int count, string noun)
         => count == 1

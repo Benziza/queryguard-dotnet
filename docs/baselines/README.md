@@ -72,6 +72,52 @@ if (comparison.HasRegressions)
 the library does not get to make it — the same reason a repeated-query finding is a warning rather than
 a failure.
 
+## Without writing any plumbing
+
+The library can do all of this from a test. The command-line tool does the file handling for you:
+
+```bash
+dotnet tool install -g QueryGuard.Cli
+```
+
+Have the test run write JSON reports:
+
+```csharp
+await new QueryGuardJsonReporter().WriteAsync(result, "artifacts/queryguard/companies.json");
+```
+
+Record once, and commit the file:
+
+```bash
+queryguard baseline record
+```
+
+Then on every run:
+
+```bash
+queryguard verify --summary artifacts/queryguard/summary.md
+```
+
+```text
+2 report(s), 2 scope(s) compared.
+  REGRESSION GET /api/companies: 3 -> 51
+             GET /api/users: unchanged
+
+1 scope(s) run more queries than the baseline.
+If that is intended, re-record the baseline and commit it.
+```
+
+Add `--fail-on-regression` to make that exit non-zero. Without it the tool reports and exits 0, because
+more queries is a fact and whether it is a defect is a judgement.
+
+Recording **merges** rather than replaces, so a run that measured three endpoints does not delete the
+baseline for every endpoint it did not exercise. Files that are not QueryGuard reports are skipped, so a
+coverage file in the same directory does not stop the run.
+
+The tool does not run your tests. Measurement happens in the test process where the `DbContext` lives; a
+tool that owned that would have to guess your test command, your target framework, and your fixture
+wiring.
+
 ## In a pull request
 
 ```csharp
