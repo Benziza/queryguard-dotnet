@@ -262,7 +262,9 @@ The most valuable report right now is a **false positive**: a repeated query Que
 correct. That is the failure mode that decides whether a tool like this is worth keeping.
 
 - Bugs and compatibility: [issue forms](https://github.com/Benziza/queryguard-dotnet/issues/new/choose)
-- Design questions: [Discussions](https://github.com/Benziza/queryguard-dotnet/discussions)
+- Design questions: [Discussions](https://github.com/Benziza/queryguard-dotnet/discussions). Three are open
+  right now — the primary guard, allowlist brittleness, and where this belongs in the lifecycle:
+  [#80](https://github.com/Benziza/queryguard-dotnet/discussions/80)
 - Security: [SECURITY.md](./SECURITY.md)
 
 ## License
