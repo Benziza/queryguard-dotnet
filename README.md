@@ -9,14 +9,11 @@
 </p>
 
 <p align="center">
-  <a href="https://www.nuget.org/packages/QueryGuard.AspNetCore">
-    <img alt="NuGet" src="https://img.shields.io/nuget/vpre/QueryGuard.AspNetCore?color=004880&label=nuget">
+  <a href="https://www.nuget.org/packages/QueryGuard.Testing">
+    <img alt="NuGet" src="https://img.shields.io/nuget/vpre/QueryGuard.Testing?color=004880&label=nuget">
   </a>
   <a href="https://github.com/Benziza/queryguard-dotnet/actions/workflows/ci.yml">
     <img alt="CI" src="https://github.com/Benziza/queryguard-dotnet/actions/workflows/ci.yml/badge.svg">
-  </a>
-  <a href="https://github.com/Benziza/queryguard-dotnet/actions/workflows/codeql.yml">
-    <img alt="CodeQL" src="https://github.com/Benziza/queryguard-dotnet/actions/workflows/codeql.yml/badge.svg">
   </a>
   <a href="./LICENSE">
     <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg">
@@ -30,251 +27,159 @@
   <img src="./docs/assets/queryguard-demo.svg" width="820" alt="Terminal output: QueryGuard fails a query budget for GET /api/companies, reporting 51 read queries and one fingerprint executed 50 times.">
 </p>
 
-QueryGuard.NET counts the Entity Framework Core queries your code actually runs — inside a request or
-inside a test — groups the repeated ones, and fails the build when a budget you set is exceeded.
+A refactor keeps the response correct, keeps the status `200`, keeps every test green — and turns one
+query into fifty. Nothing about the response says so, because tests assert *what came back*, not how
+many round trips produced it.
 
-It exists for the regression that survives code review: the response is correct, the status is `200`,
-the tests pass, and one query became fifty.
+QueryGuard counts the EF Core queries your code actually runs, groups the repeated ones, and turns that
+into something a test can fail on.
 
-> QueryGuard reports **repeated-query candidates**. Repeated SQL is strong evidence of an N+1 pattern,
-> not proof of one — some repetition is correct. Every finding says so, and every intentional exception
-> is recorded with a reason instead of hidden.
-
-## See it in under three minutes
-
-```bash
-git clone https://github.com/Benziza/queryguard-dotnet.git
-cd queryguard-dotnet
-dotnet test samples/QueryGuard.SampleTests
-```
-
-Five tests pass. One of them is a passing test *about a failing budget*, and it prints what a developer
-would actually see:
-
-```text
-QueryGuard FAILED: GET /api/companies (policy 'companies')
-  51 read queries in 2 distinct queries, 1.6 ms database time
-  1 failures, 1 warnings, 0 ignored
-
-Queries by frequency:
-  QG-FP-FDB5F469  x50        0.6 ms  SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?
-  QG-FP-EBC3AACB  x1         1.0 ms  SELECT "c"."Id", "c"."City", "c"."Name" FROM "Companies" AS "c"
-
-Findings:
-  [FAIL] max-occurrences-per-fingerprint: Fingerprint QG-FP-FDB5F469 executed 50 times; the budget is 5.
-          Occurrences: 50 (budget: 5)
-          Total database time: 0.6 ms
-          First seen at command #2, last at command #51
-          SQL: SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?
-  [WARN] repeated-query: Potential N+1 pattern in GET /api/companies: fingerprint QG-FP-FDB5F469 executed 50 times.
-          Occurrences: 50 (warning threshold: 3)
-          Total database time: 0.6 ms (average 0.01 ms)
-          First seen at command #2, last at command #51
-          SQL: SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?
-          Repeated SQL is strong evidence, not proof of an application-level N+1 defect.
-          Review eager loading, projection, or batching — or record an allowlist entry with a reason if the repetition is intentional.
-```
-
-The endpoint returned `200 OK` with correct data for all 50 companies. It took 51 queries to do it, and
-nothing in the response, the status code, or a conventional test would have told you.
-
-Prefer to watch it happen in a running app?
-
-```bash
-dotnet run --project samples/QueryGuard.SampleApi
-```
-
-```bash
-curl http://localhost:5000/api/companies
-```
-
-`200 OK`, correct JSON, and this in the log:
-
-```text
-warn: QueryGuard.AspNetCore.QueryGuardMiddleware[1000]
-      QueryGuard GET /api/companies -> 200: 51 read queries in 2 groups, 0.9 ms database time, 1 failures, 2 warnings, 0 ignored.
-```
-
-Then the fixed endpoint, returning byte-identical data:
-
-```bash
-curl http://localhost:5000/api/companies/projected
-```
-
-```text
-info: QueryGuard.AspNetCore.QueryGuardMiddleware[1000]
-      QueryGuard GET /api/companies/projected -> 200: 1 read queries in 1 groups, 0.1 ms database time, 0 failures, 0 warnings, 0 ignored.
-```
-
-Fifty-one queries became one. A test in the sample asserts both endpoints return identical data, because
-a "fix" that returns something cheaper and different is not a fix.
-
-See [`samples/`](./samples/) for the whole walkthrough, including an *intentional* repetition that is
-reported as ignored with its reason rather than silently suppressed.
+> It reports repeated-query **candidates**. Repeated SQL is strong evidence of an N+1, not proof — some
+> repetition is correct. Every finding says so, and every intentional exception is recorded with a
+> reason instead of hidden.
 
 ## Install
 
 ```bash
-dotnet add package QueryGuard.AspNetCore --version 0.1.0-preview.1
-dotnet add package QueryGuard.Testing --version 0.1.0-preview.1
-dotnet add package QueryGuard.Reporting --version 0.1.0-preview.1
+dotnet add package QueryGuard.Testing --prerelease
 ```
 
-`QueryGuard.Core` and `QueryGuard.EntityFrameworkCore` come in as dependencies; reference them directly
-only if you are using QueryGuard without ASP.NET Core.
+One package for testing: it brings the EF Core interceptor with it. Add `QueryGuard.AspNetCore` if you
+also want per-request reports from a running app, and `QueryGuard.Reporting` for JSON, JUnit, or
+Markdown output.
 
-*`0.1.0-preview.1` is the first preview: the API will change before `1.0.0`, and the report JSON carries
-an explicit `schemaVersion` so a breaking change to it is a visible event rather than a surprise.*
+*The one-line setup below needs `0.1.0-preview.2` or later. On `0.1.0-preview.1` you construct the
+interceptor by hand — see [configuration](./docs/configuration/README.md).*
 
-## Use it in ASP.NET Core
+## Use it
+
+Two lines of setup. Attach QueryGuard where the context is configured:
 
 ```csharp
-builder.Services.AddQueryGuard(options =>
-{
-    // Development and test only, for the first preview. QueryGuard observes the database command
-    // path, and enabling that in production should be a deliberate act.
-    options.Enabled = builder.Environment.IsDevelopment();
-
-    // A warning, not a failure. A new tool should tell you what it sees before it starts failing
-    // anything — that is what makes it safe to add to an existing project.
-    options.DefaultPolicy = QueryGuardPolicy.Create("default")
-        .WithMaxQueries(20, QueryGuardSeverity.Warning)
-        .WithRepeatedQueryThreshold(3);
-
-    // A per-fingerprint budget is the rule that actually catches an N+1: a total-count budget can
-    // stay satisfied while one query quietly repeats.
-    options.ForEndpoint(
-        "GET /api/companies",
-        policy => policy.WithMaxOccurrencesPerFingerprint(5, QueryGuardSeverity.Failure));
-});
-
-builder.Services.AddDbContext<CatalogDbContext>((provider, options) =>
-{
-    options.UseSqlite(connectionString);
-
-    // The one line that connects QueryGuard to EF Core.
-    options.AddInterceptors(provider.GetRequiredService<QueryGuardCommandInterceptor>());
-});
-
-var app = builder.Build();
-
-app.UseRouting();
-
-// After UseRouting, so a scope is named by its matched route pattern rather than by its URL.
-app.UseQueryGuard();
+options.UseSqlite(connectionString).UseQueryGuard();
 ```
 
-The middleware **observes**. It does not touch the response body, add headers, or replace the exception
-your application threw — there is a test that runs the same request with and without QueryGuard and
-compares the bytes.
-
-## Use it in a test
-
-This is where a budget stops being a dashboard and starts being a build failure.
+Then assert:
 
 ```csharp
 await using var scope = QueryGuardScope.Start(
-    "GET /api/companies/projected",
-    QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(5),
+    "GET /api/companies",
+    QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(5));
 
-    // Pass the accessor the interceptor was built with. Omit this only when the interceptor also
-    // uses QueryGuardScope.DefaultAccessor — otherwise the scope records nothing and every count
-    // assertion fails for a reason that has nothing to do with the code under test.
-    accessor: factory.SessionAccessor);
+await client.GetAsync("/api/companies");
 
-var response = await client.GetAsync("/api/companies/projected");
-
-var result = await scope.CompleteAsync();
-
-QueryGuardAssert.Passes(result);
-QueryGuardAssert.ExecutedQueryCount(1, result);
+QueryGuardAssert.Passes(await scope.CompleteAsync());
 ```
 
-`QueryGuard.Testing` takes no dependency on any test framework, so it works unchanged with xUnit, NUnit,
-MSTest, or TUnit. Failure messages carry the counts, the SQL, and the fingerprint — enough to act on
-without opening a profiler.
+That is the whole API for the common case. No interceptor to construct, no session accessor to match
+up. Outside a scope nothing is captured, so leaving the call in place costs about a nanosecond per
+command and no allocation.
 
-## In CI
+`QueryGuard.Testing` references no test framework, so xUnit, NUnit, MSTest, and TUnit all work
+unchanged.
 
-`QueryGuard.Reporting` renders a result three ways:
+## What a failure tells you
 
-| Reporter | For |
-| --- | --- |
-| `QueryGuardConsoleReporter` | A CI log, read by a person with nothing else in front of them |
-| `QueryGuardJsonReporter` | A dashboard or a trend, with an explicit `schemaVersion` so parsing it is safe |
-| `QueryGuardJUnitReporter` | Almost every CI system natively — a budget failure appears where a failing test does |
+```text
+QueryGuard FAILED: GET /api/companies (policy 'companies')
+  51 read queries in 2 distinct queries
 
-A warning never fails the JUnit suite. Turning a repeated-query candidate into a red build by default
-is how a tool gets switched off instead of tuned.
+  [FAIL] max-occurrences-per-fingerprint: QG-FP-FDB5F469 executed 50 times; the budget is 5.
+          SQL: SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?
+```
+
+Try it in three minutes — `git clone`, then:
+
+```bash
+dotnet test samples/QueryGuard.SampleTests
+```
+
+The sample has the broken endpoint, the same endpoint fixed with a projection, a test asserting both
+return identical data, and an *intentional* repetition that is reported as ignored with its reason.
+See [`samples/`](./samples/).
+
+## Or skip picking a number entirely
+
+`WithMaxOccurrencesPerFingerprint(5)` needs someone to know that five is right. On an endpoint nobody
+has measured, nobody does.
+
+So record what it costs today and report what changed:
+
+| Scope | Before | Now | Change |
+| --- | --: | --: | --- |
+| `GET /api/companies` | 3 | 51 | +48, most-repeated query +48 |
+| `GET /api/orders` | 8 | 8 | most-repeated query +7 |
+| `GET /api/users` | 4 | 4 | unchanged |
+| `GET /api/reports` | 12 | 3 | -9 (improved) |
+
+No threshold to guess, and `3 → 51` needs no explanation. The `orders` row is the one worth a second
+look: the read count did not move, but one query is now running seven more of them — which a
+total-count budget cannot see.
+
+The baseline is a small JSON file you commit, so accepting a regression means regenerating it and
+letting the diff record the decision. Wire the table into `$GITHUB_STEP_SUMMARY` and it lands on the
+workflow run page. See [baselines](./docs/baselines/README.md).
+
+## Why not just count total queries?
+
+Because twenty legitimate queries can hide one query pattern repeating fifteen times. A total-count
+budget stays satisfied while the thing you care about gets worse. QueryGuard budgets individual SQL
+fingerprints too, and tracks them separately in a baseline for the same reason.
 
 ## What it does not do
 
-Stated up front, because a tool that hides its limits gets distrusted the first time someone finds one.
+- **It does not prove an N+1.** All it knows is that the same normalized SQL ran N times. Some
+  repetition is correct, which is why findings say *candidate* and why every allowlist entry needs a
+  written reason.
+- **EF Core only.** Dapper and raw ADO.NET are invisible to it — it hooks EF Core's official
+  `DbCommandInterceptor`.
+- **No execution plans, no profiler UI, no hosted service.** It counts queries and groups SQL.
+- **It will not fix your code.** No automatic `Include`, no rewritten LINQ.
+- **Three providers are integration-tested** in CI — SQLite, PostgreSQL, and SQL Server. Others work
+  through the same contract, but their fingerprint *quality* is unverified; see
+  [provider support](./docs/providers/README.md).
+- **.NET 8 and .NET 10.** .NET 9 is skipped on purpose ([ADR-0008](./docs/decisions/0008-target-frameworks.md)).
+- **Preview.** The API will change before `1.0.0`. The report JSON carries a `schemaVersion` so a
+  breaking change to it is a visible event.
 
-- **Repeated SQL is evidence, not proof.** Three lookups bounded by the shape of a report are fine.
-  QueryGuard cannot tell that from an N+1; you can, and an allowlist entry records the judgement with a
-  reason.
-- **EF Core only.** Commands issued through Dapper or raw ADO.NET are invisible to it, because it hooks
-  EF Core's official `DbCommandInterceptor`.
-- **No execution plans, no profiler UI, no hosted analytics.** It counts queries and groups SQL.
-- **It will not fix anything for you.** No automatic `Include`, no rewritten LINQ.
-- **Three providers are integration-tested** in CI: SQLite, PostgreSQL, and SQL Server. Others very
-  likely work — see
-  [provider support](./docs/providers/README.md) for what "likely" is worth.
-- **.NET 8 and .NET 10.** .NET 9 is deliberately skipped ([ADR-0008](./docs/decisions/0008-target-frameworks.md)).
+Profilers and APM answer *what is slow in production?* QueryGuard answers *did this change alter how
+many queries we run?* — before merge, as a build failure. They compose fine; keep your APM.
 
-## How it compares
+## Privacy
 
-**Profilers and APM answer "what is slow in production?"** QueryGuard answers "did this change alter how
-many queries we run?" — before merge, as a build failure. Different question, different place in the
-lifecycle, and they compose fine: keep your APM.
-
-**MiniProfiler and EF Core's own logging show you queries** while you are looking. QueryGuard asserts a
-budget when nobody is looking, which is when the regression actually lands.
-
-**Bullet, for Rails**, is where the product idea comes from: make hidden query behaviour visible during
-development and tests. The implementation here is independent, built on EF Core's public interception
-API.
-
-## Privacy by default
-
-QueryGuard reads SQL, so its defaults are part of the contract rather than a configuration detail. Out of
-the box it does **not** capture parameter values, does **not** capture connection strings, does **not**
-collect stack traces, does **not** write anything into HTTP responses, and bounds how many samples it
-keeps per fingerprint. Redaction runs centrally, before any reporter sees a string.
-
-Every one of those has a test. See [ADR-0004](./docs/decisions/0004-parameter-privacy.md).
-
-## Performance
-
-Registered with no open scope — every request outside a measured path — costs about **1.1 ns per command
-and allocates nothing**. That is one `AsyncLocal` read and a null check.
-
-The full numbers, the raw BenchmarkDotNet output, the hardware, and the reasons not to convert any of it
-into a production latency figure are in [docs/benchmarks.md](./docs/benchmarks.md).
+It reads SQL, so the defaults are the contract: no parameter values, no connection strings, no stack
+traces, nothing written into HTTP responses. Redaction runs centrally before any reporter sees a string,
+so no reporter — including one you write — can leak what was never captured. Each of those has a test
+([ADR-0004](./docs/decisions/0004-parameter-privacy.md)).
 
 ## Documentation
 
-- [Concepts](./docs/concepts/README.md) — sessions, fingerprints, budgets, findings, and how they fit together.
-- [Configuration](./docs/configuration/README.md) — every option, what it defaults to, and why.
-- [Troubleshooting](./docs/troubleshooting/README.md) — nothing recorded, unexpected warnings, fingerprints not grouping, middleware ordering.
-- [False positives](./docs/troubleshooting/false-positives.md) — when QueryGuard is wrong, and the allowlist workflow end to end.
-- [Provider support](./docs/providers/README.md) — what is tested, what is expected to work, and the difference.
-- [Benchmarks](./docs/benchmarks.md) · [Roadmap](./docs/roadmap.md) · [Decision records](./docs/decisions/README.md)
+| | |
+| --- | --- |
+| [How it works](./docs/concepts/README.md) | Sessions, fingerprints, redaction, analysis |
+| [Configuration](./docs/configuration/README.md) | Every budget and option, and why each default is what it is |
+| [Baselines](./docs/baselines/README.md) | Recording what a scope costs and reporting what changed |
+| [Troubleshooting](./docs/troubleshooting/README.md) | Nothing recorded, fingerprints not grouping, middleware ordering |
+| [When a finding is wrong](./docs/troubleshooting/false-positives.md) | The allowlist workflow, end to end |
+| [Benchmarks](./docs/benchmarks.md) | What it costs, with raw output |
+| [Decision records](./docs/decisions/README.md) | Why it behaves the way it does |
 
 ## Contributing
 
-Issues and focused pull requests are welcome. Start with [CONTRIBUTING.md](./CONTRIBUTING.md).
+Issues and focused pull requests welcome — three questions on the PR template, and small fixes need
+nothing more. Start with [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-The most valuable report right now is a **false positive**: a repeated query QueryGuard flagged that was
-correct. That is the failure mode that decides whether a tool like this is worth keeping.
+The most valuable report right now is a **false positive**: a repeated query QueryGuard flagged that
+was correct. That is the failure mode that decides whether a tool like this is worth keeping, and
+accepted reports become regression fixtures.
 
-- Bugs and compatibility: [issue forms](https://github.com/Benziza/queryguard-dotnet/issues/new/choose)
-- Design questions: [Discussions](https://github.com/Benziza/queryguard-dotnet/discussions). Three are open
-  right now — the primary guard, allowlist brittleness, and where this belongs in the lifecycle:
-  [#80](https://github.com/Benziza/queryguard-dotnet/discussions/80)
-- Security: [SECURITY.md](./SECURITY.md)
+Design questions are open in
+[Discussion #80](https://github.com/Benziza/queryguard-dotnet/discussions/80) — the primary guard,
+allowlist brittleness, and where this belongs in the lifecycle. Security issues go to
+[SECURITY.md](./SECURITY.md).
 
 ## License
 
-MIT. See [LICENSE](./LICENSE).
+MIT. Borrowed its product lesson from [Bullet](https://github.com/flyerhzm/bullet) for Rails: make
+hidden query behaviour visible during development and tests. The implementation is independent, built
+on EF Core's public interception API.

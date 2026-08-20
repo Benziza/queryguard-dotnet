@@ -51,6 +51,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Changed
 
+- README rewritten around the shortest path that works: problem, install, four-line usage, then the
+  baseline table. Cut by a third, with the ASP.NET Core registration block, the running-app walkthrough,
+  the reporter table, and the performance detail moved to the pages that already covered them.
 - The pull request template asks three questions (what changed, why, how it was tested) instead of
   presenting forty-five checkboxes. The rigorous version moved to `docs/review-checklist.md` for the
   changes that warrant it. Most issue-form fields are now optional; only what a maintainer cannot act
