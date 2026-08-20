@@ -114,6 +114,12 @@ jobs:
 
   integration-tests:
     name: integration-tests
+
+    # The QueryGuard step posts a sticky pull request comment. Everything else in this workflow is
+    # read-only, so the grant is scoped to this job rather than to the workflow.
+    permissions:
+      contents: read
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
@@ -157,6 +163,15 @@ jobs:
           -c Release --no-build
           --logger "trx;LogFileName=sample-demo-tests.trx"
           --results-directory artifacts/test-results
+
+      # Publishes the baseline table the sample tests just wrote. Dogfooding the action this
+      # repository ships: if it breaks, it breaks here first rather than in someone else's pipeline.
+      # Ubuntu only — one comment per pull request, not one per matrix leg.
+      - name: Publish the QueryGuard report
+        if: matrix.os == 'ubuntu-latest'
+        uses: ./action
+        with:
+          summary-path: artifacts/queryguard/summary.md
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()

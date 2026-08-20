@@ -1,0 +1,60 @@
+name: QueryGuard
+description: Post a QueryGuard query-count report as a sticky pull request comment and job summary.
+
+# A composite action with one bash step, deliberately.
+#
+# A JavaScript action would need a committed node_modules or a build step, and a Docker action would
+# add a minute of image pull to every run. Both would be a supply-chain surface on a tool whose whole
+# argument is that it does not change how your build behaves. `gh` and `jq` are preinstalled on every
+# GitHub-hosted runner, so this needs neither.
+
+inputs:
+  summary-path:
+    description: >-
+      Path to the Markdown file to publish, as written by QueryGuardBaselineMarkdownReporter. Supports
+      a glob; multiple matches are concatenated in sorted order.
+    required: false
+    default: artifacts/queryguard/summary.md
+
+  github-token:
+    description: >-
+      Token used to post the comment. The default GITHUB_TOKEN is enough, and the workflow needs
+      `pull-requests: write` for it to work.
+    required: false
+    default: ${{ github.token }}
+
+  comment:
+    description: >-
+      Whether to post a pull request comment. Set to false to publish only the job summary — useful on
+      a busy repository, or while trying the action out.
+    required: false
+    default: 'true'
+
+  title:
+    description: Heading used to identify the comment so it can be updated rather than duplicated.
+    required: false
+    default: QueryGuard
+
+  fail-on-missing:
+    description: >-
+      Whether a missing summary file fails the step. Off by default, because a test run that found
+      nothing to measure is not a CI failure — and a diagnostics tool should not be the reason a build
+      goes red.
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Publish QueryGuard report
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        QG_SUMMARY_PATH: ${{ inputs.summary-path }}
+        QG_COMMENT: ${{ inputs.comment }}
+        QG_TITLE: ${{ inputs.title }}
+        QG_FAIL_ON_MISSING: ${{ inputs.fail-on-missing }}
+        QG_REPO: ${{ github.repository }}
+        QG_EVENT: ${{ github.event_name }}
+        QG_PR: ${{ github.event.pull_request.number }}
+      run: ${{ github.action_path }}/publish.sh
