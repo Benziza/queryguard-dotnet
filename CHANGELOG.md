@@ -12,6 +12,25 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+## [0.1.0-preview.4] - 2026-08-20
+
+Findings reach the places people already look: a documentation site, GitHub code scanning, and a fourth
+integration-tested provider.
+
+> [!IMPORTANT]
+> **The fingerprint of a tagged query changes in this release.** The fix below normalizes a
+> `QueryGuard:` directive to the same form whichever way it was written, so any query carrying one gets
+> a new fingerprint id.
+>
+> **Baselines are not affected.** A baseline stores counts only — no SQL and no fingerprint ids
+> ([ADR-0013](https://benziza.github.io/queryguard-dotnet/decisions/0013-baseline-storage.html)) — and a
+> delimiter cannot change a count. Nothing to re-record.
+>
+> **What does need attention:** an allowlist entry keyed on the fingerprint id of a *tagged* query
+> (`AllowFingerprint("QG-FP-…")`) stops matching and needs the new id. Allowlisting by *tag* is
+> unaffected, and is the more durable choice for exactly this reason. Anything you have built on the
+> `sql` or fingerprint ids in the JSON report will see new values for tagged queries.
+
 ### Added
 
 - **A documentation site** at [benziza.github.io/queryguard-dotnet](https://benziza.github.io/queryguard-dotnet/),
@@ -57,10 +76,14 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
   comment however it was written, which the block-comment branch was already doing correctly.
 
   Two consequences. The same directive written `--` or `/* */` now produces one fingerprint rather than
-  two, which is right — the delimiter is not part of what the query does. And **fingerprints of tagged
-  queries have changed**, so a baseline recorded before this release needs re-recording, and an
-  allowlist entry keyed on a tagged query's fingerprint needs updating. Allowlisting by tag is
-  unaffected.
+  two, which is right — the delimiter is not part of what the query does. And **the fingerprint id of a
+  tagged query changes**, so an allowlist entry keyed on one needs the new value. Allowlisting by tag is
+  unaffected. Baselines are unaffected too: they store counts, not fingerprint ids.
+
+  One narrow exception to that. Because the two spellings now merge, a scope that ran the *same* query
+  tagged both ways loses a distinct fingerprint and its `distinctQueries` count drops by one, which does
+  show up as a baseline change. `TagWith` only ever emits a line comment, so reaching this needs raw SQL
+  carrying a block-comment directive alongside it.
 
   Found by running the new MySQL suite; it was never MySQL-specific.
 - `queryguard --version` reported the assembly version, `0.1.0.0`, which every preview shares — a bug
@@ -247,7 +270,8 @@ release.
   `Properties/launchSettings.json`, and corrected the query and warning counts quoted in
   `samples/README.md` to what the sample actually logs.
 
-[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.3...main
+[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.4...main
+[0.1.0-preview.4]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.4
 [0.1.0-preview.3]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.3
 [0.1.0-preview.2]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.2
 [0.1.0-preview.1]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.1

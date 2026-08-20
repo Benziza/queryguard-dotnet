@@ -120,7 +120,8 @@ substring assertion cannot see a delimiter bug.
 
 Two smaller consequences, both improvements: the same directive written `--` or `/* */` now produces one
 fingerprint instead of two, which is right because the delimiter is not part of what the query does; and
-fingerprints of tagged queries changed, so a baseline recorded before this needs re-recording.
+the fingerprint id of a tagged query changed, so an allowlist entry keyed on one needs the new value.
+Baselines are unaffected — they store counts, not fingerprint ids.
 
 ## Parameter syntaxes the normalizer handles
 
