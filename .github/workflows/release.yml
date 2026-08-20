@@ -1,0 +1,202 @@
+name: Release
+
+# Publishing happens only from a version tag, in a protected environment, with short-lived
+# credentials. See docs/decisions/0012-trusted-publishing.md.
+#
+# The work is split in two on purpose. `verify` builds, tests, packs and checks the packages, and
+# runs on a manual dispatch as well as on a tag — so a release can be rehearsed end to end without
+# publishing anything. `publish` is the only job that can push, it runs only for a `v*` tag, and it
+# consumes the artifact `verify` produced rather than building its own. What ships is exactly what
+# was verified, by construction rather than by convention.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+  # A manual run is always a dry run. There is no input that turns publishing on, because the
+  # publish job is gated on the ref being a tag — a rehearsal cannot become a release by accident,
+  # or by someone ticking the wrong box.
+  workflow_dispatch: {}
+
+# Read-only by default; each job asks for the minimum it needs.
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # SourceLink and the generated release notes both need history.
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      # A tag that disagrees with the packaged version would publish something nobody asked for,
+      # under a name that can never be corrected — a published NuGet version is immutable. On a
+      # manual run there is no tag to check, so this reports the version that would ship instead.
+      - name: Resolve and check the version
+        id: version
+        run: |
+          set -euo pipefail
+
+          prefix=$(grep -oPm1 '(?<=<VersionPrefix>)[^<]+' Directory.Build.props)
+          suffix=$(grep -oPm1 '(?<=<VersionSuffix Condition="[^"]*">)[^<]+' Directory.Build.props || true)
+
+          if [ -n "$suffix" ]; then
+            version="${prefix}-${suffix}"
+          else
+            version="$prefix"
+          fi
+
+          echo "Package version: $version"
+
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            tag="${GITHUB_REF_NAME#v}"
+            echo "Tag version: $tag"
+
+            if [ "$tag" != "$version" ]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match the package version $version."
+              exit 1
+            fi
+          else
+            echo "::notice::Dry run for version $version. Nothing will be published."
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Restore
+        run: dotnet restore QueryGuard.slnx
+
+      - name: Build
+        run: dotnet build QueryGuard.slnx -c Release --no-restore
+
+      # The whole suite, on the commit being released. A release is the one time it is not worth
+      # trusting that main was green an hour ago.
+      - name: Test
+        run: >-
+          dotnet test QueryGuard.slnx -c Release --no-build
+          --logger "trx;LogFileName=release-tests.trx"
+          --results-directory artifacts/test-results
+
+      # src/ rather than the solution: packing the solution also walks the samples, which are
+      # deliberately not packable and warn about it on every run.
+      - name: Pack
+        run: |
+          set -euo pipefail
+
+          for project in src/*/*.csproj; do
+            dotnet pack "$project" -c Release --no-build -o artifacts/packages
+          done
+
+      # The same checks the pull-request build runs, including installing the packed packages into a
+      # throwaway project and running code against them. A package that cannot be consumed must not
+      # reach nuget.org, where the version it occupies can never be reused.
+      - name: Verify packages
+        run: eng/verify-packages.sh artifacts/packages
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: release-${{ steps.version.outputs.version }}
+          path: |
+            artifacts/packages/*.nupkg
+            artifacts/packages/*.snupkg
+            artifacts/test-results
+          if-no-files-found: error
+
+  publish:
+    name: publish
+    needs: verify
+    runs-on: ubuntu-latest
+
+    # Only a tag can publish. A manual dispatch stops after `verify`.
+    if: github.ref_type == 'tag'
+
+    # Environment protection rules gate publication, not just branch permissions.
+    environment: release
+
+    permissions:
+      # Creating the GitHub release.
+      contents: write
+      # Exchanging a GitHub OIDC token for a short-lived nuget.org credential.
+      id-token: write
+
+    steps:
+      # No checkout of source and no second build: the packages published here are the bytes
+      # `verify` produced and checked. Rebuilding would publish something that was never verified,
+      # however unlikely the difference.
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: release-${{ needs.verify.outputs.version }}
+          path: artifacts
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: List what is about to be published
+        run: ls -l artifacts/packages
+
+      # Exchanges the workflow's OIDC token for a credential scoped to this repository and workflow.
+      # Nothing long-lived is stored, so there is no key to leak and none to remember to rotate.
+      - name: Log in to NuGet with trusted publishing
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Publish packages
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # --skip-duplicate so a partially completed publish can be re-run without failing on the
+          # packages that already made it. A published version is never overwritten.
+          for package in artifacts/packages/*.nupkg; do
+            echo "Publishing $(basename "$package")"
+            dotnet nuget push "$package" \
+              --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" \
+              --source "https://api.nuget.org/v3/index.json" \
+              --skip-duplicate
+          done
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.verify.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # --verify-tag so a release is never created for a tag that does not exist, and
+          # --prerelease for anything carrying a version suffix. A preview that installs as "latest"
+          # would put unfinished work in front of people who did not ask for it.
+          prerelease=""
+          case "$VERSION" in
+            *-*) prerelease="--prerelease" ;;
+          esac
+
+          gh release create "${GITHUB_REF_NAME}" \
+            artifacts/packages/*.nupkg \
+            artifacts/packages/*.snupkg \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "QueryGuard.NET ${GITHUB_REF_NAME}" \
+            --generate-notes \
+            --verify-tag \
+            $prerelease

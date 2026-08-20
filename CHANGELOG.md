@@ -14,6 +14,8 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Release workflow: a tag builds, tests, packs, and verifies before publishing with short-lived
+  credentials obtained through OIDC, and a manual run rehearses everything except the push.
 - Benchmark suite covering the no-active-scope, capture, capture-plus-analysis, fingerprinting, and
   stack-trace paths, with the measured numbers and raw BenchmarkDotNet output published in
   `docs/benchmarks.md`.

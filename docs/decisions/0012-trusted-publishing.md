@@ -32,8 +32,14 @@ short-lived credentials obtained at publish time.**
   for workflow tokens is read-only.
 - The tag is verified against the packaged version before anything is pushed. A mismatch stops
   the release.
-- Full build, test, and pack run on the tag commit. Packages are never published from an artifact
-  built elsewhere.
+- The release runs as two jobs. `verify` resolves and checks the version, builds, tests, packs, and
+  runs the package verification script — including the consumer smoke test that installs the packed
+  packages and runs code against them. `publish` runs only when the ref is a tag, downloads the
+  artifact `verify` produced, and pushes it. Publication therefore ships the exact bytes that were
+  verified rather than a second build that was not.
+- A manual dispatch runs `verify` alone, so a release can be rehearsed end to end without publishing.
+  There is no input that enables publishing; the gate is the ref itself, so a rehearsal cannot become
+  a release by mistake.
 - Third-party actions are pinned to full commit SHAs, with Dependabot proposing updates so pinning
   does not become stale pinning.
 - Symbol packages (`.snupkg`) and SourceLink ship alongside, so a consumer can verify what they run
@@ -59,10 +65,11 @@ deciding to release. Releases should be intentional, tagged, and checklisted.
 
 - The release workflow's contract depends on nuget.org's trusted publishing behavior, which must be
   verified before the first real publish rather than assumed from documentation.
-- A dry run is required before the first release: build, test, and pack on a tag, with the push step
-  proven not to publish accidentally.
+- A dry run is required before the first release, and the workflow supports one directly: a manual
+  dispatch runs everything except the push. The checklist in [docs/releasing.md](../releasing.md)
+  makes it step one.
 - Setting up the `release` environment and the nuget.org trusted publishing policy is a manual,
-  one-time step, recorded in the release checklist so it is not rediscovered later.
+  one-time step, recorded in [docs/releasing.md](../releasing.md) so it is not rediscovered later.
 - Every release is auditable: tag, commit, workflow run, artifacts.
 
 ## Revisit when
