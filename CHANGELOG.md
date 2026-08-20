@@ -22,6 +22,15 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 - Package metadata points at the site. `PackageProjectUrl` is now the documentation site rather than a
   second link to the repository, which nuget.org already shows separately as the source repository, so a
   consumer gets both instead of the same destination twice.
+- **A SARIF reporter**, so findings land in GitHub code scanning: the Security tab and an annotation on
+  the line that ran the query, in the viewer CodeQL already uses. `QueryGuardSarifReporter` takes the
+  repository root, because only a repository-relative path can be matched against a diff. A candidate is
+  a `warning` and never an `error` whatever the policy severity says, and an allowlisted finding becomes
+  a SARIF suppression carrying its reason rather than being dropped. This repository uploads its own
+  sample report on every pull request.
+- `QueryGuardOrigin`, which parses the file and line out of a captured stack trace. A trace is fine for
+  printing and useless when a consumer needs the two values separately; it declines rather than guesses
+  when a frame has no symbols, because a wrong line number in an annotation is worse than no annotation.
 - **MySQL is integration-tested.** A Testcontainers suite runs real commands against MySQL 8.4 in CI,
   covering backtick quoting, parameter placeholders, literal redaction, both write shapes, failures, and
   query tags. It moves MySQL from Community to Integration-tested in

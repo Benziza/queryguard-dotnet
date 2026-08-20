@@ -66,8 +66,8 @@ dotnet add package QueryGuard.Testing --prerelease
 ```
 
 One package for testing: it brings the EF Core interceptor with it. Add `QueryGuard.AspNetCore` if you
-also want per-request reports from a running app, and `QueryGuard.Reporting` for JSON, JUnit, or
-Markdown output.
+also want per-request reports from a running app, and `QueryGuard.Reporting` for JSON, JUnit, Markdown,
+or SARIF output.
 
 ## Use it
 

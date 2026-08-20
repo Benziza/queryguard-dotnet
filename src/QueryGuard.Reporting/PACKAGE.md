@@ -1,7 +1,7 @@
 # QueryGuard.Reporting
 
 Render a [QueryGuard.NET](https://github.com/Benziza/queryguard-dotnet) result as console text,
-versioned JSON, or JUnit XML.
+versioned JSON, JUnit XML, or SARIF.
 
 ```csharp
 var result = await scope.CompleteAsync();
@@ -14,7 +14,31 @@ await new QueryGuardJsonReporter().WriteAsync(result, "artifacts/queryguard.json
 
 // Rendered natively by almost every CI system.
 await new QueryGuardJUnitReporter().WriteAsync(result, "artifacts/queryguard.junit.xml");
+
+// For GitHub code scanning: an annotation on the line that ran the query.
+await new QueryGuardSarifReporter(repositoryRoot).WriteAsync(result, "artifacts/queryguard.sarif");
 ```
+
+## SARIF puts a finding on the diff
+
+Upload the file and a repeated query appears as an annotation on the line that caused it, in the viewer
+CodeQL already uses — no dashboard, nothing to install:
+
+```yaml
+- uses: github/codeql-action/upload-sarif@v4
+  with:
+    sarif_file: artifacts/queryguard.sarif
+    category: queryguard
+```
+
+The job needs `security-events: write`. Pass the repository root to the reporter: the paths a stack trace
+records are absolute, and only a repository-relative path can be matched against a diff. Without it the
+finding still appears, just without the annotation.
+
+A candidate is reported as a **warning**, never an error, whatever the policy severity says about failing
+the build. Failing a build on evidence is how a check gets switched off rather than tuned. An allowlisted
+finding becomes a SARIF *suppression* carrying its reason, rather than being dropped — the repetition is
+still there, and the report should not imply otherwise.
 
 ## Output is deterministic and versioned
 

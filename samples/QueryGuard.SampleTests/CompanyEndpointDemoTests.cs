@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -179,6 +180,65 @@ public sealed class CompanyEndpointDemoTests : IClassFixture<SampleApiFactory>
 
         Assert.Contains("\"schemaVersion\": \"1.0\"", json, StringComparison.Ordinal);
         Assert.Contains("<failure", junit, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task The_sarif_report_points_code_scanning_at_the_line_that_ran_the_query()
+    {
+        // This repository uploads the file this test writes, so the SARIF reporter is exercised against
+        // real findings on every pull request rather than only against fixtures. A document can be valid
+        // SARIF, upload without complaint, and still annotate nothing — the assertion that matters is
+        // that a location survived all the way to the emitted URI.
+        using var client = _factory.CreateClient();
+
+        await using var scope = QueryGuardScope.Start(
+            "GET /api/companies",
+            QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(5),
+            accessor: _factory.SessionAccessor);
+
+        _ = await client.GetAsync(new Uri("/api/companies", UriKind.Relative));
+
+        var result = await scope.CompleteAsync();
+        var root = RepositoryRoot();
+        var sarif = new QueryGuardSarifReporter(root).Render(result);
+
+        Assert.Contains("\"version\": \"2.1.0\"", sarif, StringComparison.Ordinal);
+        Assert.Contains(RuleNames.MaxOccurrencesPerFingerprint, sarif, StringComparison.Ordinal);
+
+        // Relative, so GitHub can match it against the diff, and pointing into the sample rather than
+        // into the test project.
+        Assert.Contains("samples/QueryGuard.SampleApi/Program.cs", sarif, StringComparison.Ordinal);
+        Assert.DoesNotContain(root.Replace('\\', '/'), sarif, StringComparison.Ordinal);
+
+        var path = Path.Join(root, "artifacts", "queryguard", "queryguard.sarif");
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        await File.WriteAllTextAsync(path, sarif);
+    }
+
+    /// <summary>
+    /// The repository root, found by walking up for the solution file.
+    /// </summary>
+    /// <remarks>
+    /// A test host runs with its output folder as the working directory, so a relative path would land
+    /// in <c>bin/Release/net10.0/artifacts</c> and CI would look in the workspace root and find nothing.
+    /// The report is then silently missing rather than wrong, which is the worst kind of missing.
+    /// </remarks>
+    private static string RepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (directory is not null)
+        {
+            if (File.Exists(Path.Join(directory.FullName, "QueryGuard.slnx")))
+            {
+                return directory.FullName;
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new InvalidOperationException(
+            "Could not find QueryGuard.slnx above " + AppContext.BaseDirectory + ".");
     }
 }
 
