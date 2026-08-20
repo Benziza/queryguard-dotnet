@@ -12,6 +12,13 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+### Fixed
+
+- The documentation site rendered the navbar logo at its natural 128px inside a 60px navbar, so it
+  spilled out over the header on every page. The asset declares its size intrinsically, which is what
+  makes the plain `<img>` in `README.md` size correctly on GitHub, and the DocFX template sets no
+  `max-height`. Constrained by a template overlay rather than by stripping the dimensions off the SVG.
+
 ## [0.1.0-preview.4] - 2026-08-20
 
 Findings reach the places people already look: a documentation site, GitHub code scanning, and a fourth

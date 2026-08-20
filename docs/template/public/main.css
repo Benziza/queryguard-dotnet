@@ -1,0 +1,23 @@
+/*
+ * Site overrides for the DocFX modern template.
+ *
+ * Loaded because "template" in docfx.json lists this folder after "default" and "modern"; DocFX applies
+ * them in order, so anything here wins.
+ */
+
+/*
+ * Constrain the navbar logo.
+ *
+ * The asset declares width="128" height="128" intrinsically, which is what makes the plain <img> in
+ * README.md size correctly on GitHub. The modern template sets no max-height on it, so the site rendered
+ * it at its natural 128px inside a 60px navbar and it spilled over the header.
+ *
+ * Sized here rather than by stripping the dimensions from the SVG: without them the README image and the
+ * social preview lose their intrinsic size too, and an unconstrained SVG in a flex container is a worse
+ * default than a fixed one.
+ */
+.navbar-brand > img {
+  height: 2rem;
+  width: auto;
+  max-height: 2rem;
+}
