@@ -6,6 +6,8 @@
   and analysis, in the order a command travels through them.
 - [Configuration](./configuration/README.md) — every budget and option, what it defaults to, and the
   reasoning behind each default.
+- [Baselines](./baselines/README.md) — record what a scope costs today and report what changed, so
+  nobody has to guess a budget number.
 - [Troubleshooting](./troubleshooting/README.md) — nothing recorded, fingerprints not grouping,
   `(unmatched)` scope names, dropped commands.
 - [When a finding is wrong](./troubleshooting/false-positives.md) — what repeated SQL does and does not

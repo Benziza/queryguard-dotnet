@@ -56,9 +56,18 @@ insufficient for a provider people actually use.
 **Reporting reach.** SARIF output so findings appear in GitHub code scanning. An OpenTelemetry
 exporter so budget results reach existing observability. Both are additive and schema-versioned.
 
-**Budget ergonomics.** Baseline comparison — "this endpoint used 12 queries last release and 31
-now" — is more useful than an absolute threshold someone has to guess. It needs a stored
-baseline, which is a real design question, not a quick feature.
+**Budget ergonomics.** ~~Baseline comparison — "this endpoint used 12 queries last release and 31
+now" — is more useful than an absolute threshold someone has to guess. It needs a stored baseline,
+which is a real design question, not a quick feature.~~
+
+**Shipped.** It was a real design question, and the answer is a committed JSON file compared against
+whatever the branch says — see [baselines](./baselines/README.md) and
+[ADR-0013](./decisions/0013-baseline-storage.md). It moved up the list because the guess it removes is
+the first thing a new user hits: `WithMaxQueries(10)` needs someone to know that ten is right, and on
+an unmeasured endpoint nobody does.
+
+Still open here: making a regression fail a build by choice rather than by reading `HasRegressions`
+yourself, and measuring the merge base directly instead of trusting a committed file.
 
 **Adoption friction.** Endpoint metadata attributes so a policy can live next to the endpoint it
 guards. A `dotnet` CLI tool for running a report outside a test host.
