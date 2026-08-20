@@ -14,6 +14,8 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Provider test suite covering SQLite and PostgreSQL, and a request-level isolation stress suite for
+  the ASP.NET Core middleware. Both run in CI.
 - Sample application and demonstration tests: a minimal API with one endpoint that returns `200 OK` while
   executing 51 queries, the same endpoint fixed with projection, and an intentional repetition documented
   with a `QueryGuard:Ignore` tag. The demonstration runs in CI.

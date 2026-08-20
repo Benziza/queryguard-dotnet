@@ -30,5 +30,6 @@
     <Project Path="tests/QueryGuard.AspNetCore.Tests/QueryGuard.AspNetCore.Tests.csproj" />
     <Project Path="tests/QueryGuard.Testing.Tests/QueryGuard.Testing.Tests.csproj" />
     <Project Path="tests/QueryGuard.Reporting.Tests/QueryGuard.Reporting.Tests.csproj" />
+    <Project Path="tests/QueryGuard.ProviderTests/QueryGuard.ProviderTests.csproj" />
   </Folder>
 </Solution>
