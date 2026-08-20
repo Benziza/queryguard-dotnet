@@ -14,6 +14,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Documentation set: a problem-first README with real verified output, plus concept, configuration,
+  provider-support, and troubleshooting guides, and a false-positive guide covering the allowlist
+  workflow end to end.
 - Release workflow: a tag builds, tests, packs, and verifies before publishing with short-lived
   credentials obtained through OIDC, and a manual run rehearses everything except the push.
 - Benchmark suite covering the no-active-scope, capture, capture-plus-analysis, fingerprinting, and
@@ -77,5 +80,12 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
   deterministic builds, central package version management, and package validation.
 - CI matrix building and testing `net8.0` and `net10.0` on Ubuntu and Windows, plus
   formatting verification, CodeQL analysis, and dependency review.
+
+### Fixed
+
+- The sample API produced no QueryGuard output under `dotnet run`, because it enables QueryGuard only in
+  the `Development` environment and had no launch profile to set one. Added
+  `Properties/launchSettings.json`, and corrected the query and warning counts quoted in
+  `samples/README.md` to what the sample actually logs.
 
 [Unreleased]: https://github.com/Benziza/queryguard-dotnet/commits/main

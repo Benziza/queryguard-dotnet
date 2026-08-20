@@ -25,13 +25,27 @@ The response is `200 OK` and the data is correct. The log says something else:
 
 ```text
 warn: QueryGuard.AspNetCore.QueryGuardMiddleware[1000]
-      QueryGuard GET /api/companies -> 200: 51 read queries in 2 groups, 1.5 ms database time, 1 failures, 1 warnings, 0 ignored.
+      QueryGuard GET /api/companies -> 200: 51 read queries in 2 groups, 0.9 ms database time, 1 failures, 2 warnings, 0 ignored.
 warn: QueryGuard.AspNetCore.QueryGuardMiddleware[1002]
       QueryGuard Failure max-occurrences-per-fingerprint: Fingerprint QG-FP-FDB5F469 executed 50 times; the budget is 5.
         Occurrences: 50 (budget: 5)
+        Total database time: 0.8 ms
         First seen at command #2, last at command #51
         SQL: SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?
 ```
+
+Two warnings follow it, trimmed here: the `max-queries` budget (51 against 20) and the
+`repeated-query` candidate, which carries the caveat that repeated SQL is evidence rather than proof.
+The console logger prefixes every line of a multi-line message, so the real output is noisier than the
+excerpt above — [`QueryGuardConsoleReporter`](../src/QueryGuard.Reporting/QueryGuardConsoleReporter.cs)
+exists to render the same result for reading, and the tests below print it.
+
+QueryGuard is enabled here only in the `Development` environment, which is the posture recommended for
+the first preview. `Properties/launchSettings.json` sets that, so `dotnet run` is enough — but a run
+that bypasses the launch profile (`--no-launch-profile`, or a container without
+`ASPNETCORE_ENVIRONMENT`) produces correct responses and no QueryGuard output at all. That is the
+configuration behaving as designed, not a bug, and it is the first thing to check if the log looks
+empty.
 
 Now the same data from the fixed endpoint:
 
@@ -41,7 +55,7 @@ curl http://localhost:5000/api/companies/projected
 
 ```text
 info: QueryGuard.AspNetCore.QueryGuardMiddleware[1000]
-      QueryGuard GET /api/companies/projected -> 200: 1 read queries in 1 groups, 0.9 ms database time, 0 failures, 0 warnings, 0 ignored.
+      QueryGuard GET /api/companies/projected -> 200: 1 read queries in 1 groups, 0.1 ms database time, 0 failures, 0 warnings, 0 ignored.
 ```
 
 Fifty-one queries became one. The response did not change — `Both_endpoints_return_identical_data`
