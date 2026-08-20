@@ -115,11 +115,13 @@ jobs:
   integration-tests:
     name: integration-tests
 
-    # The QueryGuard step posts a sticky pull request comment. Everything else in this workflow is
-    # read-only, so the grant is scoped to this job rather than to the workflow.
+    # The QueryGuard step posts a sticky pull request comment, and the SARIF upload writes a code
+    # scanning result. Everything else in this workflow is read-only, so the grants are scoped to this
+    # job rather than to the workflow.
     permissions:
       contents: read
       pull-requests: write
+      security-events: write
     strategy:
       fail-fast: false
       matrix:
@@ -172,6 +174,31 @@ jobs:
         uses: ./action
         with:
           summary-path: artifacts/queryguard/summary.md
+
+      # The other half of the dogfooding: the sample tests also write a SARIF file, and uploading it
+      # puts the sample's deliberate N+1 in this repository's own Security tab, annotated on the line
+      # of samples/QueryGuard.SampleApi/Program.cs that runs the query.
+      #
+      # This is the only check that a SARIF document is not merely valid. GitHub rejects a malformed
+      # upload, so it validates the schema, and the resulting alert shows whether the location
+      # actually resolved — a file can parse, upload, and annotate nothing.
+      #
+      # Ubuntu only, and never from a fork: an upload needs security-events: write, which a pull
+      # request from a fork does not get, and a step that fails for a permission it was never going
+      # to have is noise rather than a signal.
+      #
+      # The event_name guard is load-bearing. On a push there is no pull_request in the payload, so
+      # comparing head.repo against the repository compares an empty string and skips - which would
+      # mean main, the branch whose alerts persist, never uploaded anything.
+      - name: Upload the QueryGuard SARIF report
+        if: >-
+          matrix.os == 'ubuntu-latest'
+          && (github.event_name != 'pull_request'
+              || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: github/codeql-action/upload-sarif@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
+        with:
+          sarif_file: artifacts/queryguard/queryguard.sarif
+          category: queryguard
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
