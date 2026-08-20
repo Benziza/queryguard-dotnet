@@ -9,6 +9,9 @@ comment** — one comment that gets edited rather than a new one per push.
 
 That is the whole thing.
 
+`@main` tracks the latest action. Pin a release tag — `action@v0.1.0-preview.3` — when you would rather
+a change here never arrive unannounced in your build.
+
 ## What it looks like
 
 > ### QueryGuard
@@ -25,7 +28,7 @@ No threshold to read, and `3 → 51` needs no explanation.
 
 ## Full example
 
-Your tests measure and render; the action publishes.
+Your tests measure, the tool compares, the action publishes.
 
 ```yaml
 jobs:
@@ -42,12 +45,23 @@ jobs:
 
       - run: dotnet test
 
+      - run: dotnet tool install -g QueryGuard.Cli --prerelease
+      - run: queryguard verify --summary artifacts/queryguard/summary.md
+
       - uses: Benziza/queryguard-dotnet/action@main
         with:
           summary-path: artifacts/queryguard/summary.md
 ```
 
-And in the test that measures:
+The tests only need to write their JSON reports:
+
+```csharp
+await new QueryGuardJsonReporter().WriteAsync(result, "artifacts/queryguard/companies.json");
+```
+
+The [CLI](https://www.nuget.org/packages/QueryGuard.Cli) reads those, compares them against the
+committed baseline, and renders the table. Rendering it in the test process instead works too, and is
+the right call when the comparison needs anything the tool does not expose:
 
 ```csharp
 var comparison = QueryGuardBaselineComparison.Compare(baseline, results);

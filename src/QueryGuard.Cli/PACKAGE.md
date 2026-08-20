@@ -5,7 +5,7 @@ reports, and verifies later runs against it — so a query-count regression show
 baseline plumbing written by hand.
 
 ```bash
-dotnet tool install -g QueryGuard.Cli
+dotnet tool install -g QueryGuard.Cli --prerelease
 ```
 
 ## The workflow

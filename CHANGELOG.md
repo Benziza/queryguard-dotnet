@@ -12,6 +12,11 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+## [0.1.0-preview.3] - 2026-08-20
+
+The CI release. A pull request now gets the query-count table as a comment, a failure names the code that
+ran the query, and the baseline workflow no longer needs plumbing written by hand.
+
 ### Added
 
 - **`QueryGuard.Cli`, a `dotnet queryguard` tool.** `baseline record` reads the JSON reports a test run
@@ -34,6 +39,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 - The baseline Markdown table said "1 scope now run more queries" — the noun was pluralised and the verb
   was not. It is the first line of the pull request comment, which makes it the most read sentence the
   tool produces.
+- The documented tool install was `dotnet tool install -g QueryGuard.Cli`, which fails while every
+  published version is a prerelease — the first command a reader runs would have reported the package
+  did not exist. Every instance now passes `--prerelease`.
 
 ## [0.1.0-preview.2] - 2026-08-20
 
@@ -184,6 +192,7 @@ release.
   `Properties/launchSettings.json`, and corrected the query and warning counts quoted in
   `samples/README.md` to what the sample actually logs.
 
-[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.2...main
+[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.3...main
+[0.1.0-preview.3]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.3
 [0.1.0-preview.2]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.2
 [0.1.0-preview.1]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.1
