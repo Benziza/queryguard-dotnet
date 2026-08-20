@@ -24,6 +24,11 @@ builder.Services.AddDbContext<AppDbContext>((services, db) =>
 
 var app = builder.Build();
 
+app.UseRouting();
+
+// After UseRouting, so a scope is named by its matched route pattern rather than its URL. Earlier and
+// every request lands in one "(unmatched)" scope — QueryGuard still works, the reports just lose the
+// one label that makes them useful.
 app.UseQueryGuard();
 ```
 

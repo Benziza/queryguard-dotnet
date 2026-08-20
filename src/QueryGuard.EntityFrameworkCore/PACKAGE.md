@@ -36,6 +36,9 @@ retained samples are bounded. See
 | `net8.0` | 8.0.x |
 | `net10.0` | 10.0.x |
 
-Any **relational** EF Core provider works through the interception contract. SQLite and PostgreSQL
-are integration-tested; see the
-[provider matrix](https://github.com/Benziza/queryguard-dotnet/blob/main/docs/decisions/0009-provider-matrix.md).
+Any **relational** EF Core provider works through the interception contract, so commands will be
+captured and grouped. Whether your provider's SQL formatting produces equally good fingerprint
+*grouping* is a separate claim: SQLite and PostgreSQL are integration-tested in CI, SQL Server is
+verified against captured SQL fixtures, and everything else is unverified. The
+[provider matrix](https://github.com/Benziza/queryguard-dotnet/blob/main/docs/providers/README.md)
+keeps those tiers apart rather than blurring them.
