@@ -11,7 +11,7 @@ body:
     attributes:
       label: QueryGuard version
     validations:
-      required: true
+      required: false
 
   - type: input
     id: provider-package
@@ -40,21 +40,21 @@ body:
         - Failure handling
         - Other
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: behavior
     attributes:
       label: Observed behavior
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: expected
     attributes:
       label: Expected behavior
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: sql
@@ -67,7 +67,7 @@ body:
     attributes:
       label: Minimal synthetic reproduction
     validations:
-      required: true
+      required: false
 
   - type: checkboxes
     id: checks

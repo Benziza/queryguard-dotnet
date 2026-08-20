@@ -30,10 +30,10 @@
   behind them.
 - [Testing strategy](./testing-strategy.md) — the layers, the critical scenarios that must never
   regress, and the benchmark honesty rules.
+- [Review checklist](./review-checklist.md) — prompts for changes that touch capture, redaction,
+  the hot path, or the public API. Not required for a pull request.
 - [Releasing](./releasing.md) — the release runbook: one-time setup, the per-release checklist, and
   what to do when a publish goes wrong.
-- [Launch materials](./launch/README.md) — announcement drafts, and the rules limiting what they
-  may claim.
 
 ## Assets
 
