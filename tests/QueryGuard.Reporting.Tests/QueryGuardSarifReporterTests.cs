@@ -19,6 +19,8 @@ public class QueryGuardSarifReporterTests
 {
     private const string Root = "C:/repo";
 
+    private const string Fallback = "tests/Measured.cs";
+
     private static readonly string Trace = string.Join(
         '\n',
         "at Sample.Api.Endpoints.<List>b__0(AppDbContext db)",
@@ -27,7 +29,7 @@ public class QueryGuardSarifReporterTests
     [Fact]
     public void The_document_declares_sarif_2_1_0_with_one_run()
     {
-        using var document = JsonDocument.Parse(new QueryGuardSarifReporter().Render(ReportFixture.FailingResult()));
+        using var document = JsonDocument.Parse(new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult()));
         var root = document.RootElement;
 
         Assert.Equal("2.1.0", root.GetProperty("version").GetString());
@@ -48,7 +50,7 @@ public class QueryGuardSarifReporterTests
     {
         // Declaring all seven every time would leave the Security tab listing rules that never fired,
         // which reads as coverage rather than silence.
-        var rules = Rules(new QueryGuardSarifReporter().Render(ReportFixture.FailingResult()));
+        var rules = Rules(new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult()));
 
         Assert.Equal(
             [RuleNames.MaxOccurrencesPerFingerprint, RuleNames.RepeatedQuery],
@@ -58,7 +60,7 @@ public class QueryGuardSarifReporterTests
     [Fact]
     public void A_clean_result_produces_no_results_and_no_rules()
     {
-        var sarif = new QueryGuardSarifReporter().Render(ReportFixture.CleanResult());
+        var sarif = new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.CleanResult());
 
         Assert.Empty(Results(sarif));
         Assert.Empty(Rules(sarif));
@@ -69,7 +71,7 @@ public class QueryGuardSarifReporterTests
     {
         // The rule that keeps the check tunable rather than switched off. A candidate is evidence, and
         // a red X on evidence is how a tool gets removed from a pipeline.
-        var results = Results(new QueryGuardSarifReporter().Render(ReportFixture.FailingResult()));
+        var results = Results(new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult()));
 
         Assert.NotEmpty(results);
         Assert.All(results, result => Assert.Equal("warning", result.GetProperty("level").GetString()));
@@ -81,7 +83,7 @@ public class QueryGuardSarifReporterTests
         // The fixture's per-fingerprint finding carries Severity.Failure, which fails the build through
         // the assertion. That is the assertion's job; repeating it here as an error would put a severity
         // in the Security tab that a reader cannot tune.
-        var result = Results(new QueryGuardSarifReporter().Render(ReportFixture.FailingResult()))
+        var result = Results(new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult()))
             .Single(r => r.GetProperty("ruleId").GetString() == RuleNames.MaxOccurrencesPerFingerprint);
 
         Assert.Equal("warning", result.GetProperty("level").GetString());
@@ -92,7 +94,7 @@ public class QueryGuardSarifReporterTests
     {
         // An annotation is read on a diff with no report around it: without the scope, "executed 51
         // times" does not say during what.
-        var result = Results(new QueryGuardSarifReporter().Render(ReportFixture.FailingResult()))
+        var result = Results(new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult()))
             .Single(r => r.GetProperty("ruleId").GetString() == RuleNames.MaxOccurrencesPerFingerprint);
 
         var message = result.GetProperty("message").GetProperty("text").GetString();
@@ -106,7 +108,7 @@ public class QueryGuardSarifReporterTests
         // The repeated-query message already reads "Potential N+1 pattern in GET /api/companies: ...".
         // Appending the scope again produced "... (scope: GET /api/companies)" on the end, which reads
         // like a bug because it is one.
-        var result = Results(new QueryGuardSarifReporter().Render(ReportFixture.FailingResult()))
+        var result = Results(new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult()))
             .Single(r => r.GetProperty("ruleId").GetString() == RuleNames.RepeatedQuery);
 
         var message = result.GetProperty("message").GetProperty("text").GetString();
@@ -120,7 +122,7 @@ public class QueryGuardSarifReporterTests
     {
         // The project's rule is that an allowlisted finding stays visible with its reason. Omitting it
         // would make the report claim the repetition is not there.
-        var result = Assert.Single(Results(new QueryGuardSarifReporter().Render(ReportFixture.IgnoredResult())));
+        var result = Assert.Single(Results(new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.IgnoredResult())));
 
         var suppression = Assert.Single(result.GetProperty("suppressions").EnumerateArray());
         Assert.Equal("accepted", suppression.GetProperty("status").GetString());
@@ -133,7 +135,7 @@ public class QueryGuardSarifReporterTests
     [Fact]
     public void A_finding_that_was_not_ignored_carries_no_suppression()
     {
-        var result = Results(new QueryGuardSarifReporter().Render(ReportFixture.FailingResult())).First();
+        var result = Results(new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult())).First();
 
         Assert.False(result.TryGetProperty("suppressions", out _));
     }
@@ -164,13 +166,62 @@ public class QueryGuardSarifReporterTests
     }
 
     [Fact]
-    public void A_finding_with_no_origin_has_no_location_at_all()
+    public void Every_emitted_result_has_a_location_because_github_rejects_the_file_otherwise()
     {
-        // Rendered as a repository-level alert by GitHub, which is honest. Pointing at line 1 of
-        // something would not be.
-        var result = Results(Render(withTrace: false, root: Root)).First();
+        // Learned from a rejected upload, not from the schema. The schema permits a result with no
+        // locations; GitHub answers "locationFromSarifResult: expected at least one location" and
+        // rejects the WHOLE file, so one location-less result loses every other finding with it.
+        foreach (var sarif in new[]
+                 {
+                     new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult()),
+                     new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult()),
+                     Render(withTrace: false, root: Root, fallback: Fallback),
+                     Render(withTrace: true, root: Root),
+                 })
+        {
+            Assert.All(
+                Results(sarif),
+                result => Assert.NotEmpty(result.GetProperty("locations").EnumerateArray()));
+        }
+    }
 
-        Assert.False(result.TryGetProperty("locations", out _));
+    [Fact]
+    public void A_finding_with_no_origin_lands_on_the_fallback_path_without_a_line()
+    {
+        // No region, because there is no line to claim. A guessed line number annotates innocent code,
+        // which is the one outcome worse than no annotation.
+        var location = SingleLocation(Render(withTrace: false, root: Root, fallback: Fallback));
+
+        Assert.Equal(Fallback, location.GetProperty("artifactLocation").GetProperty("uri").GetString());
+        Assert.False(location.TryGetProperty("region", out _));
+    }
+
+    [Fact]
+    public void Without_a_fallback_a_finding_with_no_origin_is_omitted_and_the_count_is_stated()
+    {
+        // It cannot be emitted and it must not be silent. There is nowhere in a SARIF result to say so,
+        // so it goes on the run.
+        var sarif = Render(withTrace: false, root: Root);
+
+        Assert.Empty(Results(sarif));
+
+        using var document = JsonDocument.Parse(sarif);
+        var properties = document.RootElement.GetProperty("runs")[0].GetProperty("properties");
+
+        Assert.Equal(1, properties.GetProperty("findingsWithoutLocation").GetInt32());
+        Assert.Contains(
+            "fallbackPath",
+            properties.GetProperty("findingsWithoutLocationNote").GetString()!,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Nothing_is_omitted_when_every_finding_has_an_origin()
+    {
+        // The counter must not appear when it would read as "some findings were dropped".
+        using var document = JsonDocument.Parse(Render(withTrace: true, root: Root));
+
+        Assert.False(document.RootElement.GetProperty("runs")[0].TryGetProperty("properties", out _));
     }
 
     [Fact]
@@ -178,7 +229,7 @@ public class QueryGuardSarifReporterTests
     {
         // Without a partial fingerprint, GitHub derives identity partly from location: moving the
         // offending call down one line would close one alert and open another.
-        var result = Results(new QueryGuardSarifReporter().Render(ReportFixture.FailingResult())).First();
+        var result = Results(new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult())).First();
 
         var fingerprints = result.GetProperty("partialFingerprints");
         Assert.StartsWith(
@@ -203,7 +254,7 @@ public class QueryGuardSarifReporterTests
     {
         // Rules are emitted sorted, so a change to the order findings are produced in cannot churn the
         // document.
-        var rules = Rules(new QueryGuardSarifReporter().Render(ReportFixture.FailingResult())).ToList();
+        var rules = Rules(new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult())).ToList();
 
         Assert.Equal(rules.Order(StringComparer.Ordinal), rules);
     }
@@ -213,7 +264,7 @@ public class QueryGuardSarifReporterTests
     {
         // SARIF wants a semantic version. SourceLink appends "+<commit>", which is valid build metadata
         // and noise in a tool banner.
-        using var document = JsonDocument.Parse(new QueryGuardSarifReporter().Render(ReportFixture.FailingResult()));
+        using var document = JsonDocument.Parse(new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult()));
 
         var version = document.RootElement
             .GetProperty("runs")[0].GetProperty("tool").GetProperty("driver")
@@ -228,7 +279,7 @@ public class QueryGuardSarifReporterTests
     {
         // Redaction happened before this reporter ran. The guard is that the reporter renders the SQL it
         // was handed and reaches for nothing else, so a value that was never captured cannot appear.
-        var sarif = new QueryGuardSarifReporter(Root).Render(ReportFixture.FailingResult());
+        var sarif = new QueryGuardSarifReporter(Root, Fallback).Render(ReportFixture.FailingResult());
 
         Assert.DoesNotContain("Password", sarif, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Data Source", sarif, StringComparison.OrdinalIgnoreCase);
@@ -240,7 +291,7 @@ public class QueryGuardSarifReporterTests
         Assert.Throws<ArgumentNullException>(() => new QueryGuardSarifReporter().Render(null!));
     }
 
-    private static string Render(bool withTrace, string? root)
+    private static string Render(bool withTrace, string? root, string? fallback = null)
     {
         var fingerprint = new QueryFingerprint(QueryFingerprint.IdPrefix + "1A2B3C4D", "SELECT 1");
 
@@ -263,7 +314,7 @@ public class QueryGuardSarifReporterTests
                     stackTrace: withTrace ? Trace : null),
             ]);
 
-        return new QueryGuardSarifReporter(root).Render(result);
+        return new QueryGuardSarifReporter(root, fallback).Render(result);
     }
 
     private static JsonElement SingleLocation(string sarif)

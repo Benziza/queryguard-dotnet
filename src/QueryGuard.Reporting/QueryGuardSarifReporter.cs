@@ -54,6 +54,7 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
     private const string InformationUri = "https://benziza.github.io/queryguard-dotnet/";
 
     private readonly string? _repositoryRoot;
+    private readonly string? _fallbackPath;
     private readonly bool _indented;
 
     /// <summary>
@@ -65,13 +66,26 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
     /// <see langword="null"/>, or a path falls outside it, the absolute path is emitted unchanged: still
     /// valid SARIF, and the finding still appears, but without an inline annotation.
     /// </param>
+    /// <param name="fallbackPath">
+    /// Where to attach a finding whose origin is unknown — a repository-relative path such as the test
+    /// project file. Needed because <strong>GitHub rejects a SARIF file containing any result without a
+    /// location</strong>, with <c>locationFromSarifResult: expected at least one location</c>, and it
+    /// rejects the whole file rather than the offending result. The SARIF schema permits omitting
+    /// locations; GitHub does not. Without a fallback such a finding is left out of the document and
+    /// counted in <c>runs[0].properties.findingsWithoutLocation</c>, so it is stated rather than
+    /// silently dropped.
+    /// </param>
     /// <param name="indented">
     /// Whether to indent. Defaults to <see langword="true"/>: the file is usually read by a person
     /// working out why an upload did not do what they expected.
     /// </param>
-    public QueryGuardSarifReporter(string? repositoryRoot = null, bool indented = true)
+    public QueryGuardSarifReporter(
+        string? repositoryRoot = null,
+        string? fallbackPath = null,
+        bool indented = true)
     {
         _repositoryRoot = NormalizeRoot(repositoryRoot);
+        _fallbackPath = string.IsNullOrWhiteSpace(fallbackPath) ? null : fallbackPath.Replace('\\', '/');
         _indented = indented;
     }
 
@@ -94,6 +108,28 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
 
     private void WriteDocument(Utf8JsonWriter writer, QueryGuardResult result)
     {
+        // Resolved once, up front. The rule list and the results both come from it, so a rule can never
+        // be declared for a finding that was left out of the document.
+        var emitted = new List<(QueryFinding Finding, string Uri, int? Line)>();
+        var withoutLocation = 0;
+
+        foreach (var finding in result.Findings)
+        {
+            if (string.IsNullOrEmpty(finding.RuleName))
+            {
+                continue;
+            }
+
+            if (Location(finding) is { } location)
+            {
+                emitted.Add((finding, location.Uri, location.Line));
+            }
+            else
+            {
+                withoutLocation++;
+            }
+        }
+
         writer.WriteStartObject();
         writer.WriteString("$schema", SchemaUri);
         writer.WriteString("version", SarifVersion);
@@ -101,8 +137,8 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
         writer.WriteStartArray("runs");
         writer.WriteStartObject();
 
-        WriteTool(writer, result);
-        WriteResults(writer, result);
+        WriteTool(writer, emitted);
+        WriteResults(writer, result, emitted, withoutLocation);
 
         writer.WriteEndObject();
         writer.WriteEndArray();
@@ -111,7 +147,9 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
         writer.Flush();
     }
 
-    private static void WriteTool(Utf8JsonWriter writer, QueryGuardResult result)
+    private static void WriteTool(
+        Utf8JsonWriter writer,
+        List<(QueryFinding Finding, string Uri, int? Line)> emitted)
     {
         writer.WriteStartObject("tool");
         writer.WriteStartObject("driver");
@@ -123,7 +161,7 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
         // Security tab listing rules that never fired, which reads as coverage rather than silence.
         writer.WriteStartArray("rules");
 
-        foreach (var ruleName in DistinctRules(result))
+        foreach (var ruleName in DistinctRules(emitted))
         {
             WriteRule(writer, ruleName);
         }
@@ -133,10 +171,10 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
         writer.WriteEndObject();
     }
 
-    private static IEnumerable<string> DistinctRules(QueryGuardResult result)
-        => result.Findings
-            .Select(finding => finding.RuleName)
-            .Where(name => !string.IsNullOrEmpty(name))
+    private static IEnumerable<string> DistinctRules(
+        List<(QueryFinding Finding, string Uri, int? Line)> emitted)
+        => emitted
+            .Select(entry => entry.Finding.RuleName)
             .Distinct(StringComparer.Ordinal)
             .OrderBy(name => name, StringComparer.Ordinal);
 
@@ -168,17 +206,16 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
         writer.WriteEndObject();
     }
 
-    private void WriteResults(Utf8JsonWriter writer, QueryGuardResult result)
+    private static void WriteResults(
+        Utf8JsonWriter writer,
+        QueryGuardResult result,
+        List<(QueryFinding Finding, string Uri, int? Line)> emitted,
+        int withoutLocation)
     {
         writer.WriteStartArray("results");
 
-        foreach (var finding in result.Findings)
+        foreach (var (finding, uri, line) in emitted)
         {
-            if (string.IsNullOrEmpty(finding.RuleName))
-            {
-                continue;
-            }
-
             writer.WriteStartObject();
             writer.WriteString("ruleId", finding.RuleName);
             writer.WriteString("level", Level(finding));
@@ -187,7 +224,7 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
             writer.WriteString("text", Message(finding, result));
             writer.WriteEndObject();
 
-            WriteLocations(writer, finding);
+            WriteLocation(writer, uri, line);
             WriteSuppression(writer, finding);
             WriteFingerprint(writer, finding);
 
@@ -195,6 +232,19 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
         }
 
         writer.WriteEndArray();
+
+        // Stated rather than silent: a report that quietly shows three of five findings reads as
+        // "there were three". There is nowhere in a SARIF result to say it, so it goes on the run.
+        if (withoutLocation > 0)
+        {
+            writer.WriteStartObject("properties");
+            writer.WriteNumber("findingsWithoutLocation", withoutLocation);
+            writer.WriteString(
+                "findingsWithoutLocationNote",
+                "Omitted because GitHub rejects a SARIF file containing a result with no location. "
+                + "Capture origins in the scope, or pass a fallbackPath to the reporter.");
+            writer.WriteEndObject();
+        }
     }
 
     /// <summary>
@@ -230,27 +280,41 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
         return string.Create(CultureInfo.InvariantCulture, $"{finding.Message} (scope: {result.SessionName})");
     }
 
-    private void WriteLocations(Utf8JsonWriter writer, QueryFinding finding)
+    /// <summary>
+    /// Where to attach a finding, or <see langword="null"/> when nothing can be.
+    /// </summary>
+    /// <remarks>
+    /// A precise line when the origin was captured. Otherwise the configured fallback with no region,
+    /// which is honest — it says "this run found something" without claiming to know which line. A
+    /// guessed line number would annotate innocent code, which is the one outcome worse than no
+    /// annotation.
+    /// </remarks>
+    private (string Uri, int? Line)? Location(QueryFinding finding)
     {
-        if (!QueryGuardOrigin.TryParse(finding.StackTrace, out var origin) || origin is null)
+        if (QueryGuardOrigin.TryParse(finding.StackTrace, out var origin) && origin is not null)
         {
-            // No symbols, so no line to point at. Omitted rather than pointed at line 1 of something:
-            // GitHub renders a result with no location as a repository-level alert, which is honest,
-            // whereas a guessed location annotates innocent code.
-            return;
+            return (Uri(origin.FilePath), origin.Line);
         }
 
+        return _fallbackPath is null ? null : (_fallbackPath, null);
+    }
+
+    private static void WriteLocation(Utf8JsonWriter writer, string uri, int? startLine)
+    {
         writer.WriteStartArray("locations");
         writer.WriteStartObject();
         writer.WriteStartObject("physicalLocation");
 
         writer.WriteStartObject("artifactLocation");
-        writer.WriteString("uri", Uri(origin.FilePath));
+        writer.WriteString("uri", uri);
         writer.WriteEndObject();
 
-        writer.WriteStartObject("region");
-        writer.WriteNumber("startLine", origin.Line);
-        writer.WriteEndObject();
+        if (startLine is { } line)
+        {
+            writer.WriteStartObject("region");
+            writer.WriteNumber("startLine", line);
+            writer.WriteEndObject();
+        }
 
         writer.WriteEndObject();
         writer.WriteEndObject();

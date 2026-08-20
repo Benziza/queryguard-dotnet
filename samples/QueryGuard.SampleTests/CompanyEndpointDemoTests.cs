@@ -200,7 +200,13 @@ public sealed class CompanyEndpointDemoTests : IClassFixture<SampleApiFactory>
 
         var result = await scope.CompleteAsync();
         var root = RepositoryRoot();
-        var sarif = new QueryGuardSarifReporter(root).Render(result);
+        // The fallback is where a finding with no captured origin is attached. GitHub rejects a whole
+        // SARIF file if any result has no location, so the choice is a real one rather than cosmetic:
+        // the test that measured the endpoint is an honest place to point, and issue #109 is why the
+        // per-fingerprint budget finding needs it at all.
+        var sarif = new QueryGuardSarifReporter(
+            root,
+            fallbackPath: "samples/QueryGuard.SampleTests/CompanyEndpointDemoTests.cs").Render(result);
 
         Assert.Contains("\"version\": \"2.1.0\"", sarif, StringComparison.Ordinal);
         Assert.Contains(RuleNames.MaxOccurrencesPerFingerprint, sarif, StringComparison.Ordinal);

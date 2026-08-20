@@ -24,7 +24,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
   consumer gets both instead of the same destination twice.
 - **A SARIF reporter**, so findings land in GitHub code scanning: the Security tab and an annotation on
   the line that ran the query, in the viewer CodeQL already uses. `QueryGuardSarifReporter` takes the
-  repository root, because only a repository-relative path can be matched against a diff. A candidate is
+  repository root, because only a repository-relative path can be matched against a diff, and a
+  `fallbackPath` for a finding whose origin is unknown — GitHub rejects an entire SARIF file if any one
+  result has no location, which the schema itself permits. A candidate is
   a `warning` and never an `error` whatever the policy severity says, and an allowlisted finding becomes
   a SARIF suppression carrying its reason rather than being dropped. This repository uploads its own
   sample report on every pull request.
