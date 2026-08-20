@@ -98,22 +98,19 @@ public class QueryGuardScopeTests
         // Otherwise a test that throws before completing leaves the ambient session active, and the
         // next test on this flow records into a session nobody reads.
         var accessor = new AsyncLocalQueryGuardSessionAccessor();
-        var scope = QueryGuardScope.Start("test", accessor: accessor);
+        QueryGuardSession session;
 
-        // Disposed by hand because that is the behavior under test, so try/finally covers the case
-        // where an assertion fails first. Double disposal is a documented no-op.
-        try
+        using (var scope = QueryGuardScope.Start("test", accessor: accessor))
         {
+            session = scope.Session;
             Record(scope, "A", 1);
-            scope.Dispose();
 
-            Assert.True(scope.Session.IsCompleted);
-            Assert.Null(accessor.Current);
+            // Deliberately no call to Complete(). Leaving the block is the only thing that completes
+            // the session, which is the behavior under test.
         }
-        finally
-        {
-            scope.Dispose();
-        }
+
+        Assert.True(session.IsCompleted);
+        Assert.Null(accessor.Current);
     }
 
     [Fact]
@@ -135,20 +132,13 @@ public class QueryGuardScopeTests
     [Fact]
     public void Disposing_twice_is_safe()
     {
-        var scope = QueryGuardScope.Start("test");
+        // `using` adds a third disposal when the method returns, which must also be inert.
+        using var scope = QueryGuardScope.Start("test");
 
-        try
-        {
-            scope.Dispose();
-            scope.Dispose();
+        scope.Dispose();
+        scope.Dispose();
 
-            Assert.True(scope.Session.IsCompleted);
-        }
-        finally
-        {
-            // A third one, for good measure and to keep the analyzer's disposal path satisfied.
-            scope.Dispose();
-        }
+        Assert.True(scope.Session.IsCompleted);
     }
 
     [Fact]
