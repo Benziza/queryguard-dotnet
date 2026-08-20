@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QueryGuard.Reporting</RootNamespace>
+    <Description>Render QueryGuard.NET results as console text, versioned JSON, or JUnit XML, so a query budget failure shows up in CI the same way a failing test does.</Description>
+    <PackageTags>junit;json;reporting;ci;query-budget;diagnostics</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../QueryGuard.Core/QueryGuard.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -18,11 +18,13 @@
     <Project Path="src/QueryGuard.EntityFrameworkCore/QueryGuard.EntityFrameworkCore.csproj" />
     <Project Path="src/QueryGuard.AspNetCore/QueryGuard.AspNetCore.csproj" />
     <Project Path="src/QueryGuard.Testing/QueryGuard.Testing.csproj" />
+    <Project Path="src/QueryGuard.Reporting/QueryGuard.Reporting.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/QueryGuard.Core.Tests/QueryGuard.Core.Tests.csproj" />
     <Project Path="tests/QueryGuard.EntityFrameworkCore.Tests/QueryGuard.EntityFrameworkCore.Tests.csproj" />
     <Project Path="tests/QueryGuard.AspNetCore.Tests/QueryGuard.AspNetCore.Tests.csproj" />
     <Project Path="tests/QueryGuard.Testing.Tests/QueryGuard.Testing.Tests.csproj" />
+    <Project Path="tests/QueryGuard.Reporting.Tests/QueryGuard.Reporting.Tests.csproj" />
   </Folder>
 </Solution>

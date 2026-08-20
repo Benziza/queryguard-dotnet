@@ -14,6 +14,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- `QueryGuard.Reporting`: console, JSON, and JUnit XML reporters. Output is deterministic so a
+  snapshot test on it is meaningful, JSON carries an explicit `schemaVersion`, and ignored findings
+  are emitted with their reasons rather than dropped.
 - `QueryGuard.Testing`: `QueryGuardScope` for opening an explicit session in an integration test, and
   `QueryGuardAssert` for turning a query budget into an assertion. Takes no test framework dependency,
   so the same package works with xUnit, NUnit, MSTest, or TUnit.
