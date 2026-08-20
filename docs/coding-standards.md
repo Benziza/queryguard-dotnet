@@ -1,6 +1,6 @@
 # Coding standards
 
-The short version lives in [CONTRIBUTING.md](../CONTRIBUTING.md). This document explains *why*
+The short version lives in [CONTRIBUTING.md](https://github.com/Benziza/queryguard-dotnet/blob/main/CONTRIBUTING.md). This document explains *why*
 each rule exists, so that a reviewer can apply judgement instead of quoting a list.
 
 The theme running through all of it: QueryGuard is a **library** that runs on the **database

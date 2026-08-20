@@ -1,0 +1,35 @@
+- name: Home
+  href: index.md
+- name: Guide
+  items:
+    - name: How it works
+      href: concepts/README.md
+    - name: Configuration
+      href: configuration/README.md
+    - name: Baselines
+      href: baselines/README.md
+    - name: Provider support
+      href: providers/README.md
+    - name: Troubleshooting
+      href: troubleshooting/README.md
+    - name: When a finding is wrong
+      href: troubleshooting/false-positives.md
+    - name: Benchmarks
+      href: benchmarks.md
+- name: Decisions
+  href: decisions/
+- name: Contributing
+  items:
+    - name: Coding standards
+      href: coding-standards.md
+    - name: Testing strategy
+      href: testing-strategy.md
+    - name: Review checklist
+      href: review-checklist.md
+    - name: Releasing
+      href: releasing.md
+    - name: Roadmap
+      href: roadmap.md
+- name: API reference
+  href: api/
+  topicHref: api/index.md

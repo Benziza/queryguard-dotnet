@@ -1,0 +1,28 @@
+- name: Overview
+  href: README.md
+- name: 0001 — A public personal repository
+  href: 0001-public-personal-repo.md
+- name: 0002 — Session propagation
+  href: 0002-session-propagation.md
+- name: 0003 — Detector terminology
+  href: 0003-detector-terminology.md
+- name: 0004 — Parameter privacy
+  href: 0004-parameter-privacy.md
+- name: 0005 — SQL fingerprints
+  href: 0005-sql-fingerprints.md
+- name: 0006 — ASP.NET observe-only
+  href: 0006-aspnet-observe-only.md
+- name: 0007 — Stack trace policy
+  href: 0007-stack-trace-policy.md
+- name: 0008 — Target frameworks
+  href: 0008-target-frameworks.md
+- name: 0009 — Provider matrix
+  href: 0009-provider-matrix.md
+- name: 0010 — Testing API
+  href: 0010-testing-api.md
+- name: 0011 — Versioning
+  href: 0011-versioning.md
+- name: 0012 — Trusted publishing
+  href: 0012-trusted-publishing.md
+- name: 0013 — Baseline storage
+  href: 0013-baseline-storage.md

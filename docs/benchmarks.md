@@ -46,7 +46,7 @@ of magnitude, not a measurement. A number worth quoting publicly needs a default
 machine; this page exists to support design decisions, and for that the ratios are enough.
 
 **Raw output is published with the summary**:
-[`docs/benchmarks/2026-08-20-46ec17e/`](./benchmarks/2026-08-20-46ec17e/) holds the GitHub-format
+[`docs/benchmarks/2026-08-20-46ec17e/`](https://github.com/Benziza/queryguard-dotnet/tree/main/docs/benchmarks/2026-08-20-46ec17e) holds the GitHub-format
 tables and CSV exactly as BenchmarkDotNet wrote them, including the full environment header. A summary
 table without its raw output is a number nobody can check. CI also runs every benchmark once per pull
 request with `--job Dry` and uploads the artifacts — that proves the harness still runs, and nothing
