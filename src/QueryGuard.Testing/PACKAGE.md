@@ -4,6 +4,14 @@ Turn database behaviour into an assertion. Open a
 [QueryGuard.NET](https://github.com/Benziza/queryguard-dotnet) scope around the code under test and
 check that its query budget held.
 
+Two lines of setup. Attach QueryGuard where the context is configured:
+
+```csharp
+options.UseSqlite(connectionString).UseQueryGuard();
+```
+
+Then measure:
+
 ```csharp
 [Fact]
 public async Task Companies_endpoint_stays_within_its_query_budget()
@@ -21,19 +29,25 @@ public async Task Companies_endpoint_stays_within_its_query_budget()
 }
 ```
 
-## The scope and the interceptor must share an accessor
+No interceptor to construct and no accessor to match up: `UseQueryGuard()` and `QueryGuardScope.Start`
+default to the same ambient accessor, so they are wired to each other. Calling `UseQueryGuard()` twice
+is a no-op rather than a double count.
 
-The example above relies on both using `QueryGuardScope.DefaultAccessor`. If your interceptor came from
-a dependency injection container, pass that container's accessor to the scope instead:
+Outside a scope, nothing is captured — so leaving the call in place costs about a nanosecond per
+command and no allocation.
+
+## When you do need to pass an accessor
+
+Only when the interceptor came from a dependency injection container, in which case hand the scope that
+container's accessor:
 
 ```csharp
 accessor: services.GetRequiredService<IQueryGuardSessionAccessor>()
 ```
 
-Get this wrong and the scope completes with zero commands, so every count assertion fails for a reason
-unrelated to the code under test. With `WebApplicationFactory` there is a second trap —
-`TestServer` does not flow `ExecutionContext` into requests unless asked, and QueryGuard finds the
-active session through `AsyncLocal`. Both are covered in
+With `WebApplicationFactory` there is one more thing to know: `TestServer` does not flow
+`ExecutionContext` into requests unless asked, and QueryGuard finds the active session through
+`AsyncLocal`. See
 [troubleshooting](https://github.com/Benziza/queryguard-dotnet/blob/main/docs/troubleshooting/README.md).
 
 ## No test framework dependency

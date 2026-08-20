@@ -12,6 +12,21 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+### Added
+
+- `UseQueryGuard()` on `DbContextOptionsBuilder`, so attaching QueryGuard outside a dependency
+  injection container is one call instead of constructing an interceptor and matching its session
+  accessor by hand. Calling it twice is a no-op rather than a double count.
+- `AsyncLocalQueryGuardSessionAccessor.Shared`, the ambient accessor both `UseQueryGuard()` and
+  `QueryGuardScope.Start` default to.
+
+### Fixed
+
+- `QueryGuard.Testing` depended only on `QueryGuard.Core`, so installing it alone gave you the scope
+  and the assertions and nothing that could capture a command: a first run recorded zero queries and
+  every assertion failed for a reason unrelated to the code under test. It now depends on
+  `QueryGuard.EntityFrameworkCore`, and one package is enough.
+
 ### Removed
 
 - `docs/launch/` — the article draft, demo script, and community post drafts. They documented how the

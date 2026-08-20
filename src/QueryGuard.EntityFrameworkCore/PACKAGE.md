@@ -19,9 +19,16 @@ builder.Services.AddDbContext<AppDbContext>((services, db) =>
 });
 ```
 
-Nothing is captured unless a QueryGuard scope is open — through
-`QueryGuard.AspNetCore` middleware for a request, or `QueryGuard.Testing` for a test. With no
-active scope the interceptor does no work at all.
+In a test, or anywhere without a dependency injection container, one line does the same thing and
+cannot be wired to the wrong accessor:
+
+```csharp
+options.UseSqlite(connectionString).UseQueryGuard();
+```
+
+Nothing is captured unless a QueryGuard scope is open — through `QueryGuard.AspNetCore` middleware for
+a request, or `QueryGuard.Testing` for a test. With no active scope the interceptor does no work at
+all.
 
 ## Privacy defaults
 

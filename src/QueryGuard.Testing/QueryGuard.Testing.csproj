@@ -6,8 +6,15 @@
     <PackageTags>integration-testing;query-budget;ci;n-plus-one;ef-core;testing</PackageTags>
   </PropertyGroup>
 
+  <!--
+    Depends on the EF Core integration, not only on Core. A testing package that installs without
+    anything to capture commands is not usable on its own: `dotnet add package QueryGuard.Testing`
+    used to give you the scope and the assertions and no interceptor, so a first run recorded zero
+    queries and every assertion failed for an unrelated reason.
+  -->
   <ItemGroup>
     <ProjectReference Include="../QueryGuard.Core/QueryGuard.Core.csproj" />
+    <ProjectReference Include="../QueryGuard.EntityFrameworkCore/QueryGuard.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>

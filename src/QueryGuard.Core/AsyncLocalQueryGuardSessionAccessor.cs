@@ -31,6 +31,31 @@ public sealed class AsyncLocalQueryGuardSessionAccessor : IQueryGuardSessionAcce
 
     private int _outOfOrderDisposalCount;
 
+    /// <summary>
+    /// The process-wide accessor used when no other one is supplied.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A scope and the interceptor that feeds it have to read the <em>same</em> accessor, and getting
+    /// that wrong fails in the least helpful way available: the scope completes with zero commands, so
+    /// every count assertion fails for a reason that has nothing to do with the code under test. This
+    /// default exists so the common case cannot be wired wrong — <c>UseQueryGuard()</c> and
+    /// <c>QueryGuardScope.Start</c> both land here unless told otherwise.
+    /// </para>
+    /// <para>
+    /// It is static, which sounds alarming for something on a concurrent path and is not: the
+    /// accessor holds no session itself. Every session reference lives in an
+    /// <see cref="AsyncLocal{T}"/> slot belonging to one logical flow, so two parallel tests sharing
+    /// this instance still cannot see each other's commands. The session-isolation stress suites run
+    /// against exactly this arrangement.
+    /// </para>
+    /// <para>
+    /// An application that resolves QueryGuard from a container gets that container's accessor
+    /// instead, and should not mix the two.
+    /// </para>
+    /// </remarks>
+    public static AsyncLocalQueryGuardSessionAccessor Shared { get; } = new();
+
     /// <inheritdoc />
     public QueryGuardSession? Current => _current.Value?.Session;
 
