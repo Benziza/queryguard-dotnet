@@ -144,7 +144,7 @@ workflow run page. See [baselines](./docs/baselines/README.md).
 ## In CI, without writing plumbing
 
 ```bash
-dotnet tool install -g QueryGuard.Cli
+dotnet tool install -g QueryGuard.Cli --prerelease
 
 queryguard baseline record          # once, then commit the file
 queryguard verify --summary artifacts/queryguard/summary.md
