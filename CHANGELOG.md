@@ -14,6 +14,11 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Benchmark suite covering the no-active-scope, capture, capture-plus-analysis, fingerprinting, and
+  stack-trace paths, with the measured numbers and raw BenchmarkDotNet output published in
+  `docs/benchmarks.md`.
+- Package verification that asserts metadata, symbols, and framework coverage, then installs the packed
+  packages into a throwaway project and runs code against them.
 - Provider test suite covering SQLite and PostgreSQL, and a request-level isolation stress suite for
   the ASP.NET Core middleware. Both run in CI.
 - Sample application and demonstration tests: a minimal API with one endpoint that returns `200 OK` while
