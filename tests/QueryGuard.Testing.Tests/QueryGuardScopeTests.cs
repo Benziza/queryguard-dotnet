@@ -100,11 +100,20 @@ public class QueryGuardScopeTests
         var accessor = new AsyncLocalQueryGuardSessionAccessor();
         var scope = QueryGuardScope.Start("test", accessor: accessor);
 
-        Record(scope, "A", 1);
-        scope.Dispose();
+        // Disposed by hand because that is the behavior under test, so try/finally covers the case
+        // where an assertion fails first. Double disposal is a documented no-op.
+        try
+        {
+            Record(scope, "A", 1);
+            scope.Dispose();
 
-        Assert.True(scope.Session.IsCompleted);
-        Assert.Null(accessor.Current);
+            Assert.True(scope.Session.IsCompleted);
+            Assert.Null(accessor.Current);
+        }
+        finally
+        {
+            scope.Dispose();
+        }
     }
 
     [Fact]
@@ -128,10 +137,18 @@ public class QueryGuardScopeTests
     {
         var scope = QueryGuardScope.Start("test");
 
-        scope.Dispose();
-        scope.Dispose();
+        try
+        {
+            scope.Dispose();
+            scope.Dispose();
 
-        Assert.True(scope.Session.IsCompleted);
+            Assert.True(scope.Session.IsCompleted);
+        }
+        finally
+        {
+            // A third one, for good measure and to keep the analyzer's disposal path satisfied.
+            scope.Dispose();
+        }
     }
 
     [Fact]
