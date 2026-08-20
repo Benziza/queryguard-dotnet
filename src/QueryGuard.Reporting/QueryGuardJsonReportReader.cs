@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Text.Json;
 
 namespace QueryGuard.Reporting;
@@ -124,20 +125,26 @@ public static class QueryGuardJsonReportReader
             return 0;
         }
 
-        var top = 0;
-
-        foreach (var group in groups.EnumerateArray())
-        {
-            if (group.ValueKind == JsonValueKind.Object
-                && group.TryGetProperty("occurrences", out var occurrences)
-                && occurrences.ValueKind == JsonValueKind.Number)
-            {
-                top = Math.Max(top, occurrences.GetInt32());
-            }
-        }
-
-        return top;
+        return groups.EnumerateArray()
+            .Select(ReadOccurrences)
+            .DefaultIfEmpty(0)
+            .Max();
     }
+
+    /// <summary>
+    /// A group's occurrence count, or zero when the group does not carry a usable one.
+    /// </summary>
+    /// <remarks>
+    /// Zero rather than an exception, because the maximum is what is wanted and a malformed group cannot
+    /// be the maximum. A report missing this everywhere yields zero, which
+    /// <see cref="QueryGuardBaselineEntry"/> accepts — a scope that ran no queries is a real state.
+    /// </remarks>
+    private static int ReadOccurrences(JsonElement group)
+        => group.ValueKind == JsonValueKind.Object
+            && group.TryGetProperty("occurrences", out var occurrences)
+            && occurrences.ValueKind == JsonValueKind.Number
+                ? occurrences.GetInt32()
+                : 0;
 
     private static void RequireReadableVersion(JsonElement root)
     {

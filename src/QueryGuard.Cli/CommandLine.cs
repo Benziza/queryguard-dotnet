@@ -123,23 +123,7 @@ internal sealed class CommandLine
     /// exactly the kind of quiet wrong answer this tool exists to avoid producing.
     /// </remarks>
     internal string? FindUnknown(params string[] known)
-    {
-        foreach (var name in Options.Keys)
-        {
-            if (Array.IndexOf(known, name) < 0)
-            {
-                return name;
-            }
-        }
-
-        foreach (var name in Flags)
-        {
-            if (Array.IndexOf(known, name) < 0)
-            {
-                return name;
-            }
-        }
-
-        return null;
-    }
+        => Options.Keys
+            .Concat(Flags)
+            .FirstOrDefault(name => Array.IndexOf(known, name) < 0);
 }
