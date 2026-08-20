@@ -47,4 +47,42 @@ internal static class TestData
         string name = "GET /api/companies",
         QueryGuardPolicy? policy = null)
         => new(name, policy ?? QueryGuardPolicy.Create("test"), clock: () => FixedInstant);
+
+    /// <summary>
+    /// An analyzed result with the shape a test asks for.
+    /// </summary>
+    /// <param name="scope">The scope name.</param>
+    /// <param name="reads">Total counted read commands.</param>
+    /// <param name="groups">How many distinct fingerprints to spread them across.</param>
+    /// <param name="topOccurrences">How many of the reads belong to the most repeated fingerprint.</param>
+    /// <remarks>
+    /// The remaining fingerprints get one command each, so <paramref name="reads"/> has to equal
+    /// <paramref name="topOccurrences"/> plus <paramref name="groups"/> minus one. Asserted rather than
+    /// silently adjusted: a test that asks for an impossible shape has a bug in the test, and quietly
+    /// producing a different shape would make it pass for the wrong reason.
+    /// </remarks>
+    public static QueryGuardResult ResultWith(string scope, int reads, int groups, int topOccurrences)
+    {
+        if (groups < 1 || topOccurrences < 1 || reads != topOccurrences + groups - 1)
+        {
+            throw new ArgumentException(
+                $"Cannot build a result with {reads} reads across {groups} groups where the top one ran "
+                + $"{topOccurrences} times.",
+                nameof(reads));
+        }
+
+        var session = Session(scope);
+
+        for (var i = 0; i < topOccurrences; i++)
+        {
+            session.Record(QueryCommandKind.Reader, FingerprintFor(0), TimeSpan.FromMilliseconds(1));
+        }
+
+        for (var group = 1; group < groups; group++)
+        {
+            session.Record(QueryCommandKind.Reader, FingerprintFor(group), TimeSpan.FromMilliseconds(1));
+        }
+
+        return new QueryGuardAnalyzer().Analyze(session.Complete());
+    }
 }

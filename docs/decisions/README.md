@@ -21,6 +21,7 @@ trigger is a belief, not an engineering choice.
 | [0010](./0010-testing-api.md) | Testing framework dependency | Accepted |
 | [0011](./0011-versioning.md) | Versioning and report schema | Accepted |
 | [0012](./0012-trusted-publishing.md) | Publishing credentials | Accepted |
+| [0013](./0013-baseline-storage.md) | Baseline storage and comparison | Accepted |
 
 ## Statuses
 

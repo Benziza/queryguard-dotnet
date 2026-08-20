@@ -126,6 +126,63 @@ internal static class ReportFixture
         return Result(groups, findings, readCommands: count * 4);
     }
 
+    /// <summary>
+    /// A result with a chosen scope name and query shape, for baseline comparisons.
+    /// </summary>
+    /// <remarks>
+    /// The most repeated fingerprint goes first, because <c>TopRepeatedGroup</c> is defined as the head
+    /// of the ordered group list. The remaining groups get one command each, so
+    /// <paramref name="reads"/> has to equal <paramref name="topOccurrences"/> plus
+    /// <paramref name="groups"/> minus one — asserted rather than adjusted, so a test asking for an
+    /// impossible shape fails instead of passing against a different one.
+    /// </remarks>
+    internal static QueryGuardResult ResultWith(string scope, int reads, int groups, int topOccurrences)
+    {
+        if (groups < 1 || topOccurrences < 1 || reads != topOccurrences + groups - 1)
+        {
+            throw new ArgumentException(
+                $"Cannot build a result with {reads} reads across {groups} groups where the top one ran "
+                + $"{topOccurrences} times.",
+                nameof(reads));
+        }
+
+        var groupList = new List<QueryFingerprintGroup>(groups)
+        {
+            Group(Fingerprint("AAAAAAAA", "SELECT 1"), topOccurrences, 1.0, 1, topOccurrences),
+        };
+
+        for (var i = 1; i < groups; i++)
+        {
+            groupList.Add(Group(
+                Fingerprint($"BBBBBB{i:D2}", $"SELECT {i + 1}"),
+                occurrences: 1,
+                totalMs: 1.0,
+                firstSequence: topOccurrences + i,
+                lastSequence: topOccurrences + i));
+        }
+
+        var records = new List<QueryRecord>(reads);
+        for (var i = 0; i < reads; i++)
+        {
+            records.Add(new QueryRecord(
+                sequence: i + 1,
+                kind: QueryCommandKind.Reader,
+                fingerprint: groupList[i < topOccurrences ? 0 : i - topOccurrences + 1].Fingerprint,
+                duration: TimeSpan.FromMilliseconds(1),
+                startedAt: FixedInstant));
+        }
+
+        return new QueryGuardResult(
+            sessionName: scope,
+            sessionId: FixedSessionId,
+            policyName: "baseline",
+            startedAt: FixedInstant,
+            elapsed: TimeSpan.FromMilliseconds(10),
+            records: records,
+            groups: groupList,
+            findings: []);
+    }
+
     private static QueryGuardResult Result(
         List<QueryFingerprintGroup> groups,
         List<QueryFinding> findings,
