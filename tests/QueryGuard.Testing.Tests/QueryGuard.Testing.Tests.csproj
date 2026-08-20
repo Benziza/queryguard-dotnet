@@ -8,4 +8,10 @@
     <ProjectReference Include="../../src/QueryGuard.Testing/QueryGuard.Testing.csproj" />
   </ItemGroup>
 
+  <!-- The origin tests drive a real EF Core context, because the thing under test is whether a stack
+       captured inside the interceptor survives filtering with the caller's own frame intact. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+  </ItemGroup>
+
 </Project>

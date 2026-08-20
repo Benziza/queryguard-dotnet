@@ -98,7 +98,16 @@ QueryGuard FAILED: GET /api/companies (policy 'companies')
 
   [FAIL] max-occurrences-per-fingerprint: QG-FP-FDB5F469 executed 50 times; the budget is 5.
           SQL: SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?
+          origin: samples/QueryGuard.SampleApi/Program.cs:line 89
 ```
+
+The last line is the one that saves time: it points at the code that ran the query, not just the SQL.
+A named method is shown by name; a lambda — like a minimal-API endpoint — is shown by file and line,
+because its compiler-generated name carries no information.
+
+Captured once per distinct query, and only in a test scope. See
+[ADR-0007](./docs/decisions/0007-stack-trace-policy.md) for why it stays off on a request path: it costs
+20–30× the rest of the capture path, which is free in a test and not free in production.
 
 Try it in three minutes — `git clone`, then:
 

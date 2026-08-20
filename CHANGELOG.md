@@ -12,6 +12,13 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+### Added
+
+- **A failure now says where the query came from.** A test scope records the call site of each distinct
+  query by default and the assertion message prints it as `origin:`, so a failure names the code rather
+  than only the SQL. On by default in a scope and still off on a request path, where it costs 20–30× the
+  rest of the capture path. `captureOrigin: false` opts out.
+
 ## [0.1.0-preview.2] - 2026-08-20
 
 The activation release. One package and one line are now enough to capture a query, SQL Server is
