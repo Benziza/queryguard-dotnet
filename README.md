@@ -9,6 +9,9 @@
 </p>
 
 <p align="center">
+  <a href="https://www.nuget.org/packages/QueryGuard.AspNetCore">
+    <img alt="NuGet" src="https://img.shields.io/nuget/vpre/QueryGuard.AspNetCore?color=004880&label=nuget">
+  </a>
   <a href="https://github.com/Benziza/queryguard-dotnet/actions/workflows/ci.yml">
     <img alt="CI" src="https://github.com/Benziza/queryguard-dotnet/actions/workflows/ci.yml/badge.svg">
   </a>
@@ -116,8 +119,8 @@ dotnet add package QueryGuard.Reporting --version 0.1.0-preview.1
 `QueryGuard.Core` and `QueryGuard.EntityFrameworkCore` come in as dependencies; reference them directly
 only if you are using QueryGuard without ASP.NET Core.
 
-*`0.1.0-preview.1` is the first preview. Until it finishes publishing to nuget.org, the clone-and-run
-path above works from source.*
+*`0.1.0-preview.1` is the first preview: the API will change before `1.0.0`, and the report JSON carries
+an explicit `schemaVersion` so a breaking change to it is a visible event rather than a surprise.*
 
 ## Use it in ASP.NET Core
 

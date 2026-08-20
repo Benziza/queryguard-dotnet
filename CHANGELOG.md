@@ -12,6 +12,12 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+## [0.1.0-preview.1] - 2026-08-20
+
+First public preview. Published to nuget.org with trusted publishing; packages, symbols, and the
+generated release notes are attached to the [`v0.1.0-preview.1`](https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.1)
+release.
+
 ### Added
 
 - Launch drafts under `docs/launch/`: the technical article, a demo script, and community posts, each
@@ -85,9 +91,21 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Fixed
 
+- The release workflow resolved the package version by parsing `Directory.Build.props` with a regex
+  containing a variable-length lookbehind, which PCRE rejects. `grep` failed, a `|| true` swallowed the
+  failure, and the version silently lost its suffix — resolving `0.1.0` for a tag reading
+  `0.1.0-preview.1`. The tag comparison refused to publish. The version now comes from
+  `dotnet msbuild -getProperty:PackageVersion`, the same property `dotnet pack` stamps on the package,
+  and a dry run validates the version it resolved instead of ignoring it.
+- The `QueryGuard.AspNetCore` package README showed `app.UseQueryGuard()` with no `app.UseRouting()`
+  before it, which names every scope `(unmatched)` and does so silently. Also documented the shared
+  accessor requirement in the `QueryGuard.Testing` README, and separated "capture works on any
+  relational provider" from "fingerprint grouping is verified on two of them" in the
+  `QueryGuard.EntityFrameworkCore` README.
 - The sample API produced no QueryGuard output under `dotnet run`, because it enables QueryGuard only in
   the `Development` environment and had no launch profile to set one. Added
   `Properties/launchSettings.json`, and corrected the query and warning counts quoted in
   `samples/README.md` to what the sample actually logs.
 
-[Unreleased]: https://github.com/Benziza/queryguard-dotnet/commits/main
+[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.1...main
+[0.1.0-preview.1]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.1
