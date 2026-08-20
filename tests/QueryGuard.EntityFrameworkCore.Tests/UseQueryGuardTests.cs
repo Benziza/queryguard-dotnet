@@ -168,8 +168,15 @@ public class UseQueryGuardTests : IDisposable
 
     [Fact]
     public void A_builder_is_required()
-        => Assert.Throws<ArgumentNullException>(
-            () => ((DbContextOptionsBuilder)null!).UseQueryGuard());
+    {
+        // Typed locals rather than casts on null: the cast is what selects the overload, and reading
+        // it back as a cast makes it look decorative.
+        DbContextOptionsBuilder builder = null!;
+        DbContextOptionsBuilder<WidgetContext> generic = null!;
+
+        Assert.Throws<ArgumentNullException>(() => builder.UseQueryGuard());
+        Assert.Throws<ArgumentNullException>(() => generic.UseQueryGuard());
+    }
 
     public void Dispose()
     {
