@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to QueryGuard.NET are documented here.
 
