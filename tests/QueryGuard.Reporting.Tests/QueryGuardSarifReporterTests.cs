@@ -185,6 +185,36 @@ public class QueryGuardSarifReporterTests
         }
     }
 
+    [Theory]
+    [InlineData("/_/samples/Api/Program.cs", "samples/Api/Program.cs")]
+    [InlineData("/_1/samples/Api/Program.cs", "samples/Api/Program.cs")]
+    [InlineData("/_12/src/Thing.cs", "src/Thing.cs")]
+    public void A_deterministic_build_path_is_mapped_to_a_repository_relative_uri(string recorded, string expected)
+    {
+        // Found by uploading and reading the alert, not by reading the schema. Setting
+        // ContinuousIntegrationBuild - which this repository does, and which every SourceLink-using
+        // library does in CI - makes the compiler embed "/_/" in place of the source root. The path is
+        // already repository-relative but matches no repository root, so it used to pass through and
+        // GitHub filed the alert under a path it could not map to the diff. The upload succeeded and
+        // every test passed; the annotation simply never appeared.
+        var location = SingleLocation(RenderWithPath(recorded));
+
+        Assert.Equal(expected, location.GetProperty("artifactLocation").GetProperty("uri").GetString());
+    }
+
+    [Theory]
+    [InlineData("/_x/src/Thing.cs")]
+    [InlineData("/_/")]
+    [InlineData("/_")]
+    public void Something_that_only_looks_like_a_deterministic_root_is_left_alone(string recorded)
+    {
+        // The prefix is "/_" plus optional digits plus a slash plus something. Trimming anything else
+        // would corrupt a real path that happened to start similarly.
+        var location = SingleLocation(RenderWithPath(recorded));
+
+        Assert.Equal(recorded, location.GetProperty("artifactLocation").GetProperty("uri").GetString());
+    }
+
     [Fact]
     public void A_finding_with_no_origin_lands_on_the_fallback_path_without_a_line()
     {
@@ -315,6 +345,32 @@ public class QueryGuardSarifReporterTests
             ]);
 
         return new QueryGuardSarifReporter(root, fallback).Render(result);
+    }
+
+    private static string RenderWithPath(string recordedPath)
+    {
+        var fingerprint = new QueryFingerprint(QueryFingerprint.IdPrefix + "1A2B3C4D", "SELECT 1");
+
+        var result = new QueryGuardResult(
+            sessionName: "GET /api/companies",
+            sessionId: ReportFixture.FixedSessionId,
+            policyName: "companies",
+            startedAt: ReportFixture.FixedInstant,
+            elapsed: TimeSpan.FromMilliseconds(120),
+            records: [],
+            groups: [],
+            findings:
+            [
+                new QueryFinding(
+                    QueryFindingKind.RepeatedQueryCandidate,
+                    QueryGuardSeverity.Warning,
+                    "Fingerprint executed 51 times.",
+                    RuleNames.RepeatedQuery,
+                    fingerprint,
+                    stackTrace: "at T.M() in " + recordedPath + ":line 89"),
+            ]);
+
+        return new QueryGuardSarifReporter(Root).Render(result);
     }
 
     private static JsonElement SingleLocation(string sarif)

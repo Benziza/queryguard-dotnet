@@ -375,6 +375,11 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
     {
         var path = filePath.Replace('\\', '/');
 
+        if (TryStripDeterministicRoot(path, out var mapped))
+        {
+            return mapped;
+        }
+
         if (_repositoryRoot is null)
         {
             return path;
@@ -386,6 +391,50 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
         }
 
         return path[_repositoryRoot.Length..].TrimStart('/');
+    }
+
+    /// <summary>
+    /// Strips the synthetic root a deterministic build embeds in place of the real source directory.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Found by uploading and looking at the alert. Setting <c>ContinuousIntegrationBuild</c> — which
+    /// every SourceLink-using library does in CI, and which this repository does — makes the compiler
+    /// replace the source root with <c>/_/</c>, so a stack trace on a CI build reports
+    /// <c>/_/samples/Api/Program.cs</c> rather than the checkout path.
+    /// </para>
+    /// <para>
+    /// That path is already repository-relative, which is the good news, but it matches no repository
+    /// root, so it passed through unchanged and GitHub filed the alert under a path it could not map to
+    /// the diff: the annotation silently did not appear. The upload succeeded and the tests passed.
+    /// </para>
+    /// <para>
+    /// Numbered variants — <c>/_1/</c>, <c>/_2/</c> — appear when a build maps more than one source
+    /// root, so the whole family is handled rather than the first one.
+    /// </para>
+    /// </remarks>
+    private static bool TryStripDeterministicRoot(string path, out string mapped)
+    {
+        mapped = string.Empty;
+
+        if (path.Length < 4 || path[0] != '/' || path[1] != '_')
+        {
+            return false;
+        }
+
+        var index = 2;
+        while (index < path.Length && char.IsAsciiDigit(path[index]))
+        {
+            index++;
+        }
+
+        if (index >= path.Length || path[index] != '/')
+        {
+            return false;
+        }
+
+        mapped = path[(index + 1)..];
+        return mapped.Length > 0;
     }
 
     private static string? NormalizeRoot(string? repositoryRoot)
