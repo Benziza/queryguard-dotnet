@@ -84,11 +84,18 @@ jobs:
       - name: Build
         run: dotnet build QueryGuard.slnx -c Release --no-restore
 
-      - name: Run unit tests
+      - name: Run core unit tests
         run: >-
           dotnet test tests/QueryGuard.Core.Tests/QueryGuard.Core.Tests.csproj
           -c Release --no-build
-          --logger "trx;LogFileName=unit-tests.trx"
+          --logger "trx;LogFileName=core-unit-tests.trx"
+          --results-directory artifacts/test-results
+
+      - name: Run testing-API unit tests
+        run: >-
+          dotnet test tests/QueryGuard.Testing.Tests/QueryGuard.Testing.Tests.csproj
+          -c Release --no-build
+          --logger "trx;LogFileName=testing-unit-tests.trx"
           --results-directory artifacts/test-results
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
