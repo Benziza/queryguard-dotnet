@@ -150,6 +150,14 @@ jobs:
           --logger "trx;LogFileName=aspnetcore-integration-tests.trx"
           --results-directory artifacts/test-results
 
+      # The README quotes this demo. If it stops demonstrating, the README is wrong.
+      - name: Run the sample demonstration
+        run: >-
+          dotnet test samples/QueryGuard.SampleTests/QueryGuard.SampleTests.csproj
+          -c Release --no-build
+          --logger "trx;LogFileName=sample-demo-tests.trx"
+          --results-directory artifacts/test-results
+
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:

@@ -20,6 +20,10 @@
     <Project Path="src/QueryGuard.Testing/QueryGuard.Testing.csproj" />
     <Project Path="src/QueryGuard.Reporting/QueryGuard.Reporting.csproj" />
   </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/QueryGuard.SampleApi/QueryGuard.SampleApi.csproj" />
+    <Project Path="samples/QueryGuard.SampleTests/QueryGuard.SampleTests.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/QueryGuard.Core.Tests/QueryGuard.Core.Tests.csproj" />
     <Project Path="tests/QueryGuard.EntityFrameworkCore.Tests/QueryGuard.EntityFrameworkCore.Tests.csproj" />

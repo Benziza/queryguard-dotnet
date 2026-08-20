@@ -14,6 +14,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- Sample application and demonstration tests: a minimal API with one endpoint that returns `200 OK` while
+  executing 51 queries, the same endpoint fixed with projection, and an intentional repetition documented
+  with a `QueryGuard:Ignore` tag. The demonstration runs in CI.
 - `QueryGuard.Reporting`: console, JSON, and JUnit XML reporters. Output is deterministic so a
   snapshot test on it is meaningful, JSON carries an explicit `schemaVersion`, and ignored findings
   are emitted with their reasons rather than dropped.

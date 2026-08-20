@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>QueryGuard.SampleApi</RootNamespace>
+    <UserSecretsId>queryguard-sample-api</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/QueryGuard.AspNetCore/QueryGuard.AspNetCore.csproj" />
+    <ProjectReference Include="../../src/QueryGuard.Reporting/QueryGuard.Reporting.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+  </ItemGroup>
+
+</Project>
