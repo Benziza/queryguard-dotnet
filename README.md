@@ -48,9 +48,6 @@ One package for testing: it brings the EF Core interceptor with it. Add `QueryGu
 also want per-request reports from a running app, and `QueryGuard.Reporting` for JSON, JUnit, or
 Markdown output.
 
-*The one-line setup below needs `0.1.0-preview.2` or later. On `0.1.0-preview.1` you construct the
-interceptor by hand — see [configuration](./docs/configuration/README.md).*
-
 ## Use it
 
 Two lines of setup. Attach QueryGuard where the context is configured:
