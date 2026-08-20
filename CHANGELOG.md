@@ -12,6 +12,14 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+### Added
+
+- **A documentation site** at [benziza.github.io/queryguard-dotnet](https://benziza.github.io/queryguard-dotnet/),
+  built with DocFX from the same Markdown the repository already had, plus an API reference generated
+  from the XML documentation — roughly 330 pages that were previously only readable as source comments.
+  Built on every pull request that touches it with warnings promoted to errors, so a dead link fails the
+  pull request that introduced it rather than the deployment after it merged.
+
 ### Fixed
 
 - `queryguard --version` reported the assembly version, `0.1.0.0`, which every preview shares — a bug

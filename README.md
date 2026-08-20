@@ -15,6 +15,9 @@
   <a href="https://github.com/Benziza/queryguard-dotnet/actions/workflows/ci.yml">
     <img alt="CI" src="https://github.com/Benziza/queryguard-dotnet/actions/workflows/ci.yml/badge.svg">
   </a>
+  <a href="https://benziza.github.io/queryguard-dotnet/">
+    <img alt="Documentation" src="https://img.shields.io/badge/docs-benziza.github.io-2088FF.svg">
+  </a>
   <a href="./LICENSE">
     <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg">
   </a>
@@ -192,6 +195,9 @@ so no reporter — including one you write — can leak what was never captured.
 
 ## Documentation
 
+Full documentation, including a searchable API reference generated from the source:
+**[benziza.github.io/queryguard-dotnet](https://benziza.github.io/queryguard-dotnet/)**
+
 | | |
 | --- | --- |
 | [How it works](./docs/concepts/README.md) | Sessions, fingerprints, redaction, analysis |
@@ -201,6 +207,7 @@ so no reporter — including one you write — can leak what was never captured.
 | [When a finding is wrong](./docs/troubleshooting/false-positives.md) | The allowlist workflow, end to end |
 | [Benchmarks](./docs/benchmarks.md) | What it costs, with raw output |
 | [Decision records](./docs/decisions/README.md) | Why it behaves the way it does |
+| [API reference](https://benziza.github.io/queryguard-dotnet/api/) | Every public type, generated from its XML documentation |
 
 ## Contributing
 

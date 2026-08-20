@@ -143,4 +143,4 @@ so they are counted and reported rather than silently added to a scope that had 
 - Ask in [Discussions](https://github.com/Benziza/queryguard-dotnet/discussions).
 - File a [bug report](https://github.com/Benziza/queryguard-dotnet/issues/new?template=bug_report.yml)
   with a minimal synthetic reproduction.
-- For a vulnerability, follow [SECURITY.md](../../SECURITY.md) rather than opening an issue.
+- For a vulnerability, follow [SECURITY.md](https://github.com/Benziza/queryguard-dotnet/blob/main/SECURITY.md) rather than opening an issue.

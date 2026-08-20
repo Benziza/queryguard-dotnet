@@ -1,0 +1,71 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "../src",
+          "files": [
+            "QueryGuard.Core/QueryGuard.Core.csproj",
+            "QueryGuard.EntityFrameworkCore/QueryGuard.EntityFrameworkCore.csproj",
+            "QueryGuard.Testing/QueryGuard.Testing.csproj",
+            "QueryGuard.Reporting/QueryGuard.Reporting.csproj",
+            "QueryGuard.AspNetCore/QueryGuard.AspNetCore.csproj"
+          ]
+        }
+      ],
+      "dest": "api",
+      "properties": {
+        "TargetFramework": "net10.0",
+        "Configuration": "Release"
+      },
+      "memberLayout": "separatePages",
+      "namespaceLayout": "flattened",
+      "enumSortOrder": "declaringOrder"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "**/*.{md,yml}"
+        ],
+        "exclude": [
+          "_site/**",
+          "README.md"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "assets/**"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appName": "QueryGuard.NET",
+      "_appTitle": "QueryGuard.NET",
+      "_appLogoPath": "assets/queryguard-logo.svg",
+      "_appFaviconPath": "assets/queryguard-icon.png",
+      "_appFooter": "<span>QueryGuard.NET — MIT licensed. Preview: the API will change before 1.0.0.</span>",
+      "_enableSearch": true,
+      "_gitContribute": {
+        "repo": "https://github.com/Benziza/queryguard-dotnet",
+        "branch": "main"
+      }
+    },
+    "sitemap": {
+      "baseUrl": "https://benziza.github.io/queryguard-dotnet/",
+      "changefreq": "weekly"
+    },
+    "postProcessors": [
+      "ExtractSearchIndex"
+    ]
+  }
+}

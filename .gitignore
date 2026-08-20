@@ -51,3 +51,8 @@ desktop.ini
 ## Local developer overrides
 *.local.json
 appsettings.Local.json
+
+# Documentation site
+docs/_site/
+docs/api/*.yml
+docs/api/.manifest

@@ -87,6 +87,25 @@ The PostgreSQL provider suite starts a container through Testcontainers. It skip
 automatically when Docker is unavailable, so a missing Docker daemon will not fail your
 local run — but it *will* run in CI.
 
+### The documentation site
+
+The site at [benziza.github.io/queryguard-dotnet](https://benziza.github.io/queryguard-dotnet/) is built
+from the Markdown in `docs/` plus an API reference generated from the XML documentation:
+
+```bash
+dotnet tool restore
+dotnet docfx docs/docfx.json --serve
+```
+
+Then open <http://localhost:8080>. CI runs the same build with `--warningsAsErrors`, so a link to a file
+that does not exist fails the pull request. Two things to know if that happens to you:
+
+- A link out of `docs/` — to `CONTRIBUTING.md` or a workflow file — cannot resolve on the site, because
+  those files are not part of it. Use the full `https://github.com/...` URL; it still works on GitHub.
+- Links into the generated API reference point at the `.yml` file, not the `.html`. DocFX rewrites the
+  extension, and linking the `.html` directly is the version that fails.
+
+
 ## Coding standards
 
 The full rationale lives in [`docs/coding-standards.md`](./docs/coding-standards.md).

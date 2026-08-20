@@ -5,7 +5,7 @@ A published NuGet version is immutable. It can be unlisted, so it stops appearin
 shapes everything below: every check that can happen before a push happens before a push, and the
 publish step itself does as little thinking as possible.
 
-The workflow is [`.github/workflows/release.yml`](../.github/workflows/release.yml). The reasoning
+The workflow is [`.github/workflows/release.yml`](https://github.com/Benziza/queryguard-dotnet/blob/main/.github/workflows/release.yml). The reasoning
 behind it is [ADR-0012](./decisions/0012-trusted-publishing.md).
 
 ## How the workflow is shaped
@@ -14,7 +14,7 @@ Two jobs, and the split is the safety mechanism.
 
 **`verify`** runs on a `v*` tag *and* on a manual dispatch. It resolves the version, checks the tag
 against it, restores, builds, runs the whole test suite, packs the `src/` projects, and runs
-[`eng/verify-packages.sh`](../eng/verify-packages.sh) — which asserts the package metadata and then
+[`eng/verify-packages.sh`](https://github.com/Benziza/queryguard-dotnet/blob/main/eng/verify-packages.sh) — which asserts the package metadata and then
 installs the packed packages into a throwaway project and runs code against them. It uploads
 everything it produced.
 
