@@ -14,6 +14,11 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- **A GitHub Action** (`Benziza/queryguard-dotnet/action@main`) that publishes the baseline table to the
+  job summary and, on a pull request, to a sticky comment it edits rather than duplicating. A composite
+  action running one bash script — no JavaScript bundle, no Docker image. It never fails a build for its
+  own reasons, and this repository runs it on its own pull requests.
+
 - **A failure now says where the query came from.** A test scope records the call site of each distinct
   query by default and the assertion message prints it as `origin:`, so a failure names the code rather
   than only the SQL. On by default in a scope and still off on a request path, where it costs 20–30× the

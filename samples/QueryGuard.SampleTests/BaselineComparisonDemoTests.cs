@@ -19,7 +19,7 @@ namespace QueryGuard.SampleTests;
 /// A budget asks for a number nobody has. A baseline asks for nothing: it records what the endpoints
 /// cost today and reports what changed. This measures all three sample endpoints, compares them against
 /// the committed <c>queryguard-baseline.json</c>, and writes the Markdown table to
-/// <c>$GITHUB_STEP_SUMMARY</c> so it lands on the workflow run page.
+/// <c>artifacts/queryguard/summary.md</c> for the QueryGuard action to publish.
 /// </para>
 /// <para>
 /// It is also the regression test for the sample itself. The numbers in the README and in
@@ -51,7 +51,7 @@ public sealed class BaselineComparisonDemoTests : IClassFixture<SampleApiFactory
         var markdown = new QueryGuardBaselineMarkdownReporter().Render(comparison);
         _output.WriteLine(markdown);
 
-        await PublishToStepSummaryAsync(markdown);
+        await WriteSummaryAsync(markdown);
 
         // Every sample endpoint is deterministic, so anything here is a real change in the sample and
         // the committed numbers in both READMEs are now wrong.
@@ -148,22 +148,49 @@ public sealed class BaselineComparisonDemoTests : IClassFixture<SampleApiFactory
     }
 
     /// <summary>
-    /// Appends the table to the workflow run page when running in GitHub Actions.
+    /// Writes the table where the QueryGuard action will find it.
     /// </summary>
     /// <remarks>
-    /// A no-op locally, which is the point: the same test produces developer output through
-    /// <c>ITestOutputHelper</c> and a rendered summary in CI, with no separate tooling.
+    /// A file rather than  directly. The test's job is to measure and render;
+    /// deciding where a report goes — job summary, pull request comment, both — belongs to whatever
+    /// publishes it, and writing a file works identically on a laptop and in CI.
     /// </remarks>
-    private static async Task PublishToStepSummaryAsync(string markdown)
+    private static async Task WriteSummaryAsync(string markdown)
     {
-        var summaryPath = Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY");
+        // Anchored at the repository root, not at the working directory.
+        //
+        // A test host runs with its output folder as the working directory, so a relative path lands
+        // in bin/Release/net10.0/artifacts and CI looks for it in the workspace root and finds
+        // nothing. The report is then silently missing rather than wrong, which is the worst kind of
+        // missing. Any real project hits this, which is why the action's README says to use a
+        // root-anchored path.
+        var root = RepositoryRoot();
+        var path = Path.Join(root, "artifacts", "queryguard", "summary.md");
 
-        if (string.IsNullOrWhiteSpace(summaryPath))
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        await File.WriteAllTextAsync(path, markdown);
+    }
+
+    /// <summary>
+    /// The repository root, found by walking up for the solution file.
+    /// </summary>
+    private static string RepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (directory is not null)
         {
-            return;
+            if (File.Exists(Path.Join(directory.FullName, "QueryGuard.slnx")))
+            {
+                return directory.FullName;
+            }
+
+            directory = directory.Parent;
         }
 
-        await File.AppendAllTextAsync(summaryPath, markdown);
+        // Falling back to the working directory keeps the test passing outside a checkout; the report
+        // just lands somewhere less convenient.
+        return Directory.GetCurrentDirectory();
     }
 
     /// <summary>
