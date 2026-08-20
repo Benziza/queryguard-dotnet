@@ -169,8 +169,10 @@ public class QueryGuardJsonReporterTests
     {
         // The usual destination is an artifacts folder a CI job has not created yet, and failing on
         // that would be a pointless obstacle in the middle of a test run.
-        var directory = Path.Combine(Path.GetTempPath(), "queryguard-tests", Guid.NewGuid().ToString("N"));
-        var path = Path.Combine(directory, "nested", "report" + _reporter.FileExtension);
+        // Path.Join rather than Path.Combine: Combine silently discards everything before a rooted
+        // segment, which is a real hazard when any part of a path is not a literal.
+        var directory = Path.Join(Path.GetTempPath(), "queryguard-tests", Guid.NewGuid().ToString("N"));
+        var path = Path.Join(directory, "nested", "report" + _reporter.FileExtension);
 
         try
         {
