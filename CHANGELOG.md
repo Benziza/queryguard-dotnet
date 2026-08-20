@@ -12,8 +12,18 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+### Removed
+
+- `docs/launch/` — the article draft, demo script, and community post drafts. They documented how the
+  project would be marketed, which is of no use to anyone evaluating whether to install it, and made
+  the repository read as a campaign rather than a tool. Kept as local notes instead.
+
 ### Changed
 
+- The pull request template asks three questions (what changed, why, how it was tested) instead of
+  presenting forty-five checkboxes. The rigorous version moved to `docs/review-checklist.md` for the
+  changes that warrant it. Most issue-form fields are now optional; only what a maintainer cannot act
+  without stays required, plus the privacy acknowledgements.
 - Test tooling: `Microsoft.NET.Test.Sdk` 18.9.0, `xunit.runner.visualstudio` 4.0.0, and
   `coverlet.collector` 10.0.1. Test-only; no shipped dependency changed.
 

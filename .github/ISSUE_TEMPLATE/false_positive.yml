@@ -19,7 +19,7 @@ body:
       label: QueryGuard version
       placeholder: "0.1.0-preview.1"
     validations:
-      required: true
+      required: false
 
   - type: input
     id: provider
@@ -27,7 +27,7 @@ body:
       label: EF Core provider and version
       placeholder: "Npgsql.EntityFrameworkCore.PostgreSQL 10.0.3"
     validations:
-      required: true
+      required: false
 
   - type: input
     id: scope
@@ -35,7 +35,7 @@ body:
       label: Route, endpoint, or test scope
       placeholder: "GET /api/reports/{id}"
     validations:
-      required: true
+      required: false
 
   - type: input
     id: fingerprint
@@ -51,7 +51,7 @@ body:
       label: Number of occurrences
       placeholder: "12"
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: reason
@@ -80,7 +80,7 @@ body:
     attributes:
       label: Minimal synthetic reproduction
     validations:
-      required: true
+      required: false
 
   - type: checkboxes
     id: checks
