@@ -218,7 +218,8 @@ Stated up front, because a tool that hides its limits gets distrusted the first 
   EF Core's official `DbCommandInterceptor`.
 - **No execution plans, no profiler UI, no hosted analytics.** It counts queries and groups SQL.
 - **It will not fix anything for you.** No automatic `Include`, no rewritten LINQ.
-- **Two providers are tested**, SQLite and PostgreSQL. Others very likely work — see
+- **Three providers are integration-tested** in CI: SQLite, PostgreSQL, and SQL Server. Others very
+  likely work — see
   [provider support](./docs/providers/README.md) for what "likely" is worth.
 - **.NET 8 and .NET 10.** .NET 9 is deliberately skipped ([ADR-0008](./docs/decisions/0008-target-frameworks.md)).
 

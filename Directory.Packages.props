@@ -39,6 +39,8 @@
   <ItemGroup Label="Provider integration dependencies (net10.0 only)">
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.14.0" />
+    <PackageVersion Include="Testcontainers.MsSql" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EntityFrameworkCoreVersion)" />
   </ItemGroup>
 
   <ItemGroup Label="Benchmark dependencies">

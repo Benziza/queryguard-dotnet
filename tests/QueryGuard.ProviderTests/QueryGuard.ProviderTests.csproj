@@ -4,6 +4,14 @@
     <RootNamespace>QueryGuard.ProviderTests</RootNamespace>
 
     <!--
+      Microsoft.Data.SqlClient throws NotSupportedException on startup under invariant globalization,
+      which this repository turns on solution-wide. The setting is there so tests cannot accidentally
+      depend on the host culture; SQL Server support is worth the exception, and every assertion in
+      this project already passes an explicit StringComparison or CultureInfo.
+    -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+
+    <!--
       PostgreSQL through Testcontainers needs a Docker daemon and the Npgsql provider, neither of which
       is worth multi-targeting for. The provider behaviour under test is EF Core's SQL generation, and
       that does not differ per consumer framework.
@@ -19,7 +27,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Testcontainers.MsSql" />
   </ItemGroup>
 
 </Project>

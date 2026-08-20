@@ -165,8 +165,11 @@ jobs:
           path: artifacts/test-results
           if-no-files-found: warn
 
-  # A second dialect, so an assumption baked into SQLite's SQL cannot pass as a general rule.
-  # Ubuntu only: this needs a Docker daemon, and the Windows runners do not offer a Linux one.
+  # PostgreSQL and SQL Server, so an assumption baked into SQLite's SQL cannot pass as a general
+  # rule. Adding SQL Server here found a shipped bug on its first run: EF Core prefixes its insert
+  # batch with SET statements, so classification read the leading keyword, saw SET, and counted every
+  # write against read budgets. Ubuntu only - this needs a Docker daemon, and the Windows runners do
+  # not offer a Linux one.
   provider-tests:
     name: provider-tests
     runs-on: ubuntu-latest

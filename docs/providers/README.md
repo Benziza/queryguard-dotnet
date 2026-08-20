@@ -14,7 +14,7 @@ is how a support matrix becomes a lie.
 | --- | --- | --- |
 | SQLite | **Integration-tested** | Real commands run in CI, on Ubuntu and Windows, on `net8.0` and `net10.0` |
 | PostgreSQL (Npgsql) | **Integration-tested** | Focused Testcontainers suite in CI |
-| SQL Server | **Fixture-verified** | Captured generated SQL pins the normalizer; no live database in CI |
+| SQL Server | **Integration-tested** | Real commands run in CI through Testcontainers |
 | MySQL / MariaDB | Community | No tests, no promises. Fingerprint quality unverified |
 | Other relational providers | Best effort | Works through the official interception contract |
 | Non-relational EF providers | **Unsupported** | `DbCommand` interception is relational only |
@@ -23,7 +23,10 @@ is how a support matrix becomes a lie.
 checked against captured SQL from that provider, but nothing live runs. See
 [ADR-0009](../decisions/0009-provider-matrix.md).
 
-## Why these two, specifically
+SQL Server was fixture-verified until a live suite was added, and the first run found a real bug — see
+[below](#what-the-live-sql-server-suite-found).
+
+## Why these three, specifically
 
 **SQLite is the workhorse.** Real relational execution, no container, fast enough to run the whole
 surface — interception, fingerprinting, budgets, middleware, failure paths — on every pull request.
@@ -34,8 +37,34 @@ normalizer indefinitely; the second data point is what makes the generic approac
 caught the case that had to be handled explicitly: PostgreSQL's `::` cast operator looks like the start of
 a named parameter, and treating it as one silently merged queries that differ by type.
 
-**SQL Server gets fixtures rather than a container** because its declaration blocks are the most
-distinctive thing about its SQL, and a fixture pins that at a fraction of the CI cost.
+**SQL Server is the provider most .NET developers check first**, so "probably works" was not a good
+enough answer for it. It also has the most distinctive generated SQL of the three — a parameter
+declaration prologue in front of the actual statement — which turned out to matter more than expected.
+
+## What the live SQL Server suite found
+
+A bug that had shipped, and that fixtures could not have caught.
+
+EF Core's insert batch on SQL Server does not begin with the interesting statement:
+
+```text
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [Departments] ([Id], [CompanyId], [Name]) VALUES (@p0, @p1, @p2);
+```
+
+QueryGuard decides whether a command is a read or a write from its leading keyword, because the
+execution method alone is provider-dependent — on SQLite an `INSERT … RETURNING` runs through the
+reader path. It saw `SET`, concluded "not a modification", and left the command classified as a read.
+So **every `SaveChanges` on SQL Server consumed a read budget**, and a budget of ten reads meant
+something different there than on SQLite, quietly.
+
+Classification now walks every statement in the batch rather than only the first. The shapes are pinned
+by unit tests that run without Docker, so the regression is caught on every pull request; the live suite
+is what noticed it existed.
+
+The general lesson, which is why the tier distinction is kept: a fixture proves the normalizer still
+does what it did when the fixture was written. It cannot notice SQL the fixture never contained.
 
 ## Parameter syntaxes the normalizer handles
 
@@ -68,12 +97,12 @@ than one provider.
 # SQLite only — no Docker needed
 dotnet test tests/QueryGuard.ProviderTests
 
-# With Docker running, the PostgreSQL tests execute too
+# With Docker running, the PostgreSQL and SQL Server tests execute too (about a minute)
 docker info && dotnet test tests/QueryGuard.ProviderTests
 ```
 
-The PostgreSQL tests skip themselves when no Docker daemon is reachable, with a skip reason that says so.
-A contributor without Docker gets a green run; CI runs them for real.
+The container-backed tests skip themselves when no Docker daemon is reachable, with a skip reason that
+says so. A contributor without Docker gets a green run; CI runs them for real.
 
 That skip is for an unavailable environment, not for a flaky test. A container that starts and then
 produces inconsistent results is a bug to diagnose, not to retry away.

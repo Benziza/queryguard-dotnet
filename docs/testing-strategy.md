@@ -16,7 +16,7 @@ performance**.
 | Testing API | `QueryGuard.Testing.Tests` | Scope semantics and assertion message quality | Yes |
 | Reporter / schema | `QueryGuard.Reporting.Tests` | JSON schema, JUnit validity, log event IDs, redaction | Yes |
 | Concurrency stress | `QueryGuard.Core.Tests`, `QueryGuard.AspNetCore.Tests` | Zero cross-session leakage under parallel load | Yes |
-| Provider integration | `QueryGuard.ProviderTests` | Provider-specific SQL and capture behavior | Yes, both providers |
+| Provider integration | `QueryGuard.ProviderTests` | Provider-specific SQL and capture behavior | Yes: SQLite, PostgreSQL, SQL Server |
 | Performance | `QueryGuard.Benchmarks` | Measured hot-path cost | Smoke only |
 | Package consumer smoke | `package-validate` job | The built package really works as a package | Yes |
 
