@@ -13,6 +13,10 @@
   reasoning behind them.
 - [Testing strategy](./testing-strategy.md) — the layers, the critical scenarios that must
   never regress, and the benchmark honesty rules.
+- [Benchmarks](./benchmarks.md) — what QueryGuard costs on the command path, with the raw
+  output and the caveats that limit it.
+- [Releasing](./releasing.md) — the release runbook: one-time setup, the per-release checklist,
+  and what to do when a publish goes wrong.
 - [CONTRIBUTING.md](../CONTRIBUTING.md) — workflow, branch and commit conventions, and how to
   get a change merged.
 
