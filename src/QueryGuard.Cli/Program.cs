@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using QueryGuard.Reporting;
 
 namespace QueryGuard.Cli;
@@ -43,7 +44,7 @@ internal static class Program
 
         if (args[0] is "--version")
         {
-            Console.WriteLine(typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown");
+            Console.WriteLine(Version());
             return Ok;
         }
 
@@ -309,6 +310,20 @@ internal static class Program
 
         return Directory.EnumerateFiles(directory, pattern, SearchOption.AllDirectories);
     }
+
+    /// <summary>
+    /// The version to report, identifying the exact build.
+    /// </summary>
+    /// <remarks>
+    /// The informational version rather than the assembly version, because the assembly version of every
+    /// preview is <c>0.1.0.0</c> — a bug report quoting it cannot say which preview it came from. This one
+    /// carries the suffix and the commit SourceLink stamped in, which is what makes a report actionable.
+    /// </remarks>
+    internal static string Version()
+        => typeof(Program).Assembly
+               .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+           ?? typeof(Program).Assembly.GetName().Version?.ToString()
+           ?? "unknown";
 
     private static int Unknown(string name)
     {

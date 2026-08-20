@@ -12,6 +12,12 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+### Fixed
+
+- `queryguard --version` reported the assembly version, `0.1.0.0`, which every preview shares — a bug
+  report quoting it could not say which build it came from. It now reports the informational version,
+  `0.1.0-preview.3+62d58ff…`, carrying the prerelease suffix and the commit SourceLink stamped in.
+
 ## [0.1.0-preview.3] - 2026-08-20
 
 The CI release. A pull request now gets the query-count table as a comment, a failure names the code that
