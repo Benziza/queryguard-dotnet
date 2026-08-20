@@ -155,23 +155,57 @@ public sealed class QueryGuardBaselineComparison
         QueryGuardBaseline baseline,
         IEnumerable<QueryGuardResult> results)
     {
-        ArgumentNullException.ThrowIfNull(baseline);
         ArgumentNullException.ThrowIfNull(results);
+
+        return CompareEntries(
+            baseline,
+            results.Where(result => result is not null).Select(QueryGuardBaselineEntry.FromResult));
+    }
+
+    /// <summary>
+    /// Compares recorded measurements against a baseline.
+    /// </summary>
+    /// <param name="baseline">The recorded baseline. <see cref="QueryGuardBaseline.Empty"/> is valid.</param>
+    /// <param name="measured">What each scope cost in this run.</param>
+    /// <returns>The comparison.</returns>
+    /// <exception cref="ArgumentNullException">A required argument is <see langword="null"/>.</exception>
+    /// <remarks>
+    /// <para>
+    /// For measurements that did not come from a live run — read back from JSON reports, for instance,
+    /// which is how the command-line tool works. An entry is what a comparison actually needs; a result
+    /// is just a convenient thing to derive one from.
+    /// </para>
+    /// <para>
+    /// A separate name rather than an overload, because two overloads differing only in element type
+    /// make <c>Compare(baseline, [])</c> ambiguous — a collection expression has nothing to infer from.
+    /// The compiler caught that on the existing tests, which is a better place to find it than a user's
+    /// build.
+    /// </para>
+    /// <para>
+    /// Scopes present in the baseline but absent from <paramref name="measured"/> are ignored rather than
+    /// reported as removed. A test run filtered to one project would otherwise claim every other
+    /// endpoint had been deleted, and being wrong that loudly is worse than saying nothing.
+    /// </para>
+    /// </remarks>
+    public static QueryGuardBaselineComparison CompareEntries(
+        QueryGuardBaseline baseline,
+        IEnumerable<QueryGuardBaselineEntry> measured)
+    {
+        ArgumentNullException.ThrowIfNull(baseline);
+        ArgumentNullException.ThrowIfNull(measured);
 
         var scopes = new List<QueryGuardScopeComparison>();
 
-        foreach (var result in results)
+        foreach (var current in measured)
         {
-            if (result is null)
+            if (current is null)
             {
                 continue;
             }
 
-            var current = QueryGuardBaselineEntry.FromResult(result);
-
             scopes.Add(new QueryGuardScopeComparison(
-                result.SessionName,
-                baseline.Find(result.SessionName),
+                current.Scope,
+                baseline.Find(current.Scope),
                 current));
         }
 

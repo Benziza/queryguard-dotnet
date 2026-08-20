@@ -14,15 +14,26 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Added
 
+- **`QueryGuard.Cli`, a `dotnet queryguard` tool.** `baseline record` reads the JSON reports a test run
+  wrote and records what each scope costs; `verify` compares a later run against it, writes the Markdown
+  table, and exits 2 with `--fail-on-regression`. Removes the file handling every project would otherwise
+  write into a test by hand.
+- `QueryGuardJsonReportReader`, which reads a JSON report back into a baseline entry, and
+  `QueryGuardBaselineComparison.CompareEntries`, for measurements that did not come from a live run.
 - **A GitHub Action** (`Benziza/queryguard-dotnet/action@main`) that publishes the baseline table to the
   job summary and, on a pull request, to a sticky comment it edits rather than duplicating. A composite
   action running one bash script — no JavaScript bundle, no Docker image. It never fails a build for its
   own reasons, and this repository runs it on its own pull requests.
-
 - **A failure now says where the query came from.** A test scope records the call site of each distinct
   query by default and the assertion message prints it as `origin:`, so a failure names the code rather
   than only the SQL. On by default in a scope and still off on a request path, where it costs 20–30× the
   rest of the capture path. `captureOrigin: false` opts out.
+
+### Fixed
+
+- The baseline Markdown table said "1 scope now run more queries" — the noun was pluralised and the verb
+  was not. It is the first line of the pull request comment, which makes it the most read sentence the
+  tool produces.
 
 ## [0.1.0-preview.2] - 2026-08-20
 

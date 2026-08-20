@@ -138,6 +138,59 @@ for name in "${EXPECTED_PACKAGES[@]}"; do
   echo
 done
 
+# ---------------------------------------------------------------------------
+# The command-line tool
+# ---------------------------------------------------------------------------
+#
+# A different shape from the libraries: tools ship under tools/<tfm>/any with a settings file and no
+# lib/ folder, so the loop above would have failed it for the wrong reasons. Checked separately rather
+# than skipped, because an unverified shipping package is how QueryGuard.Testing came to ship without
+# the dependency that made it usable.
+
+TOOL_NAME=QueryGuard.Cli
+echo "$TOOL_NAME"
+
+tool_nupkg=$(find "$PACKAGE_DIR" -maxdepth 1 -name "$TOOL_NAME.[0-9]*.nupkg" -not -name "*.symbols.nupkg" | head -n 1)
+
+if [ -z "$tool_nupkg" ]; then
+  fail "no .nupkg was produced"
+else
+  tool_version="${tool_nupkg##*/$TOOL_NAME.}"
+  tool_version="${tool_version%.nupkg}"
+  pass "packed as $TOOL_NAME $tool_version"
+
+  if [ "$tool_version" != "$package_version" ]; then
+    fail "version $tool_version does not match $package_version from the libraries"
+  fi
+
+  for framework in "${EXPECTED_FRAMEWORKS[@]}"; do
+    require_entry "$tool_nupkg" "^tools/$framework/any/queryguard\.dll$" "tool assembly for $framework"
+
+    # Without this the package installs and the command does not exist, which is a confusing way to
+    # fail — `dotnet tool install` reports success.
+    require_entry "$tool_nupkg" "^tools/$framework/any/DotnetToolSettings\.xml$" "tool manifest for $framework"
+  done
+
+  require_entry "$tool_nupkg" "^PACKAGE\.md$" "README shown on nuget.org"
+  require_entry "$tool_nupkg" "^LICENSE$" "licence file"
+
+  tool_nuspec=$(unzip -p "$tool_nupkg" "$TOOL_NAME.nuspec")
+
+  if grep -q '<packageTypes>' <<<"$tool_nuspec" && grep -q 'DotnetTool' <<<"$tool_nuspec"; then
+    pass "declared as a DotnetTool package type"
+  else
+    fail "nuspec does not declare the DotnetTool package type; it would install as a library"
+  fi
+
+  if grep -qE '<repository[^>]+commit="[0-9a-f]{40}"' <<<"$tool_nuspec"; then
+    pass "repository commit recorded for SourceLink"
+  else
+    fail "nuspec has no git repository commit"
+  fi
+fi
+
+echo
+
 if [ "$failures" -gt 0 ]; then
   echo "$failures package check(s) failed."
   exit 1
@@ -282,6 +335,86 @@ internal sealed class Widget
 CSHARP
 
 dotnet run --configuration Release
+
+cd "$REPO_ROOT"
+
+# ---------------------------------------------------------------------------
+# Tool smoke test
+# ---------------------------------------------------------------------------
+#
+# Installs the packed tool and runs the workflow a user follows: record a baseline from reports, then
+# verify against it. Everything above inspects a zip; this proves the command exists and works.
+
+echo
+echo "Tool smoke test against $package_version"
+
+tool_dir="$workspace/tool"
+work_dir="$workspace/tool-work/reports"
+mkdir -p "$tool_dir" "$work_dir"
+
+if ! dotnet tool install QueryGuard.Cli \
+      --version "$package_version" \
+      --tool-path "$(to_native_path "$tool_dir")" \
+      --add-source "$feed" >/dev/null 2>&1; then
+  echo "  FAIL: could not install the tool from the local feed"
+  exit 1
+fi
+
+echo "  ok: installed"
+
+# One report, in the shape QueryGuardJsonReporter writes.
+cat >"$work_dir/companies.json" <<'JSON'
+{
+  "schemaVersion": "1.0",
+  "scope": "GET /api/companies",
+  "policy": "companies",
+  "summary": { "totalCommands": 3, "readCommands": 3, "distinctQueries": 2 },
+  "queryGroups": [
+    { "fingerprint": "QG-FP-AAAAAAAA", "occurrences": 2 },
+    { "fingerprint": "QG-FP-BBBBBBBB", "occurrences": 1 }
+  ],
+  "findings": []
+}
+JSON
+
+queryguard="$tool_dir/queryguard"
+cd "$workspace/tool-work"
+
+if ! "$queryguard" baseline record --reports reports --baseline baseline.json >/dev/null 2>&1; then
+  echo "  FAIL: 'baseline record' did not succeed"
+  exit 1
+fi
+
+if ! grep -q '"scope": "GET /api/companies"' baseline.json; then
+  echo "  FAIL: the recorded baseline does not contain the scope"
+  exit 1
+fi
+
+echo "  ok: baseline record wrote the scope"
+
+if ! "$queryguard" verify --reports reports --baseline baseline.json >/dev/null 2>&1; then
+  echo "  FAIL: 'verify' reported a change against a baseline it just recorded"
+  exit 1
+fi
+
+echo "  ok: verify is clean against its own baseline"
+
+# Now make it worse and check the exit code, since that is what a build depends on.
+sed -i 's/"readCommands": 3/"readCommands": 51/; s/"occurrences": 2/"occurrences": 50/' reports/companies.json
+
+if "$queryguard" verify --reports reports --baseline baseline.json --fail-on-regression >/dev/null 2>&1; then
+  echo "  FAIL: a regression did not produce a non-zero exit with --fail-on-regression"
+  exit 1
+fi
+
+echo "  ok: a regression exits non-zero when asked to"
+
+if ! "$queryguard" verify --reports reports --baseline baseline.json >/dev/null 2>&1; then
+  echo "  FAIL: a regression exited non-zero without --fail-on-regression"
+  exit 1
+fi
+
+echo "  ok: a regression alone does not fail the build"
 
 cd "$REPO_ROOT"
 

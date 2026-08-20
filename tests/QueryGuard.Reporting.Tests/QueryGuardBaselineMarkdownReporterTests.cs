@@ -28,7 +28,9 @@ public class QueryGuardBaselineMarkdownReporterTests
 
         Assert.Contains("GET /api/companies", rendered, StringComparison.Ordinal);
         Assert.Contains("went from 3 to 51", rendered, StringComparison.Ordinal);
-        Assert.Contains("1 scope now run", rendered, StringComparison.Ordinal);
+        // Verb agreement: one scope "runs", several "run". This is the first line of the pull request
+        // comment, so a grammar slip there is the most visible one the tool can make.
+        Assert.Contains("1 scope now runs more queries", rendered, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -58,7 +60,7 @@ public class QueryGuardBaselineMarkdownReporterTests
     {
         var rendered = _reporter.Render(Comparison(("GET /a", 51, 1)));
 
-        Assert.Contains("run fewer queries", rendered, StringComparison.Ordinal);
+        Assert.Contains("1 scope runs fewer queries", rendered, StringComparison.Ordinal);
         Assert.Contains("-50", rendered, StringComparison.Ordinal);
         Assert.Contains("improved", rendered, StringComparison.Ordinal);
     }
@@ -154,6 +156,14 @@ public class QueryGuardBaselineMarkdownReporterTests
 
         Assert.Equal(rendered, _reporter.Render(comparison));
         Assert.DoesNotContain('\r', rendered);
+    }
+
+    [Fact]
+    public void The_verb_agrees_when_several_scopes_regress()
+    {
+        var rendered = _reporter.Render(Comparison(("GET /a", 1, 5), ("GET /b", 1, 5)));
+
+        Assert.Contains("2 scopes now run more queries", rendered, StringComparison.Ordinal);
     }
 
     private static QueryGuardBaselineComparison Comparison(params (string Scope, int Before, int Now)[] scopes)

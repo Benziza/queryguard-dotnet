@@ -19,6 +19,7 @@
     <Project Path="src/QueryGuard.AspNetCore/QueryGuard.AspNetCore.csproj" />
     <Project Path="src/QueryGuard.Testing/QueryGuard.Testing.csproj" />
     <Project Path="src/QueryGuard.Reporting/QueryGuard.Reporting.csproj" />
+    <Project Path="src/QueryGuard.Cli/QueryGuard.Cli.csproj" />
   </Folder>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/QueryGuard.Benchmarks/QueryGuard.Benchmarks.csproj" />
@@ -34,5 +35,6 @@
     <Project Path="tests/QueryGuard.Testing.Tests/QueryGuard.Testing.Tests.csproj" />
     <Project Path="tests/QueryGuard.Reporting.Tests/QueryGuard.Reporting.Tests.csproj" />
     <Project Path="tests/QueryGuard.ProviderTests/QueryGuard.ProviderTests.csproj" />
+    <Project Path="tests/QueryGuard.Cli.Tests/QueryGuard.Cli.Tests.csproj" />
   </Folder>
 </Solution>

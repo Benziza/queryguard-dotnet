@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QueryGuard.Cli.Tests</RootNamespace>
+
+    <!--
+      Single-target, matching how the tool is consumed: it is installed for a machine, not referenced by
+      a project, so there is no per-framework behaviour to prove. The tool itself multi-targets so it can
+      be installed on either SDK.
+    -->
+    <TargetFrameworks></TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
+
+    <!-- The tool disables it, and these tests exercise the tool's own code paths. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/QueryGuard.Cli/QueryGuard.Cli.csproj" />
+  </ItemGroup>
+
+</Project>

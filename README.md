@@ -141,6 +141,23 @@ The baseline is a small JSON file you commit, so accepting a regression means re
 letting the diff record the decision. Wire the table into `$GITHUB_STEP_SUMMARY` and it lands on the
 workflow run page. See [baselines](./docs/baselines/README.md).
 
+## In CI, without writing plumbing
+
+```bash
+dotnet tool install -g QueryGuard.Cli
+
+queryguard baseline record          # once, then commit the file
+queryguard verify --summary artifacts/queryguard/summary.md
+```
+
+```yaml
+- uses: Benziza/queryguard-dotnet/action@main
+```
+
+The action posts that table as a sticky pull request comment — one comment it edits, not one per push.
+Add `--fail-on-regression` to `verify` when you want a regression to fail the build; without it the tool
+reports and exits 0. See [the action](./action/README.md).
+
 ## Why not just count total queries?
 
 Because twenty legitimate queries can hide one query pattern repeating fifteen times. A total-count
