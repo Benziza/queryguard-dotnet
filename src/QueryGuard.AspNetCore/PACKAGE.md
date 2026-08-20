@@ -39,7 +39,7 @@ your application produces and the exception it raises are exactly what a client 
 enabled or disabled. Findings go to `ILogger` with stable event IDs.
 
 That is a deliberate constraint, not a missing feature — see
-[ADR-0006](https://github.com/Benziza/queryguard-dotnet/blob/main/docs/decisions/0006-aspnet-observe-only.md).
+[ADR-0006](https://benziza.github.io/queryguard-dotnet/decisions/0006-aspnet-observe-only.html).
 
 ## Policies are per route pattern
 

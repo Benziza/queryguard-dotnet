@@ -19,6 +19,9 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
   from the XML documentation — roughly 330 pages that were previously only readable as source comments.
   Built on every pull request that touches it with warnings promoted to errors, so a dead link fails the
   pull request that introduced it rather than the deployment after it merged.
+- Package metadata points at the site. `PackageProjectUrl` is now the documentation site rather than a
+  second link to the repository, which nuget.org already shows separately as the source repository, so a
+  consumer gets both instead of the same destination twice.
 
 ### Fixed
 

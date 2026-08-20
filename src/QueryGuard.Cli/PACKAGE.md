@@ -87,7 +87,7 @@ a sticky pull request comment:
 ```
 
 Full documentation:
-[docs/baselines](https://github.com/Benziza/queryguard-dotnet/blob/main/docs/baselines/README.md).
+[docs/baselines](https://benziza.github.io/queryguard-dotnet/baselines/README.html).
 
 ## Preview
 
