@@ -1,35 +1,43 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to QueryGuard.NET are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 While the version is below `1.0.0`, breaking changes may appear in a minor or preview
-release — every one of them is listed here with migration notes.
+release â€” every one of them is listed here with migration notes.
 
 Generated GitHub release notes list the merged pull requests. This file is the curated
 record: breaking changes, privacy-relevant behavior, and report-schema compatibility.
 
 ## [Unreleased]
 
+### Fixed
+
+- **A write was counted as a read on SQL Server.** EF Core prefixes its insert batch with
+  `SET IMPLICIT_TRANSACTIONS OFF; SET NOCOUNT ON;`, and command classification tested only the leading
+  keyword â€” so it saw `SET`, concluded the command was not a modification, and left it counted as a
+  read. Every `SaveChanges` on SQL Server consumed a read budget, which made a budget of ten reads
+  mean something different there than on SQLite. Classification now walks every statement in the
+  batch. Present in `0.1.0-preview.1`.
+- `QueryGuard.Testing` depended only on `QueryGuard.Core`, so installing it alone gave you the scope
+  and the assertions and nothing that could capture a command: a first run recorded zero queries and
+  every assertion failed for a reason unrelated to the code under test. It now depends on
+  `QueryGuard.EntityFrameworkCore`, and one package is enough.
+
 ### Added
 
+- Live SQL Server integration suite through Testcontainers, moving SQL Server from *fixture-verified*
+  to *integration-tested*. It found the classification bug above on its first run.
 - `UseQueryGuard()` on `DbContextOptionsBuilder`, so attaching QueryGuard outside a dependency
   injection container is one call instead of constructing an interceptor and matching its session
   accessor by hand. Calling it twice is a no-op rather than a double count.
 - `AsyncLocalQueryGuardSessionAccessor.Shared`, the ambient accessor both `UseQueryGuard()` and
   `QueryGuardScope.Start` default to.
 
-### Fixed
-
-- `QueryGuard.Testing` depended only on `QueryGuard.Core`, so installing it alone gave you the scope
-  and the assertions and nothing that could capture a command: a first run recorded zero queries and
-  every assertion failed for a reason unrelated to the code under test. It now depends on
-  `QueryGuard.EntityFrameworkCore`, and one package is enough.
-
 ### Removed
 
-- `docs/launch/` — the article draft, demo script, and community post drafts. They documented how the
+- `docs/launch/` â€” the article draft, demo script, and community post drafts. They documented how the
   project would be marketed, which is of no use to anyone evaluating whether to install it, and made
   the repository read as a campaign rather than a tool. Kept as local notes instead.
 
@@ -75,7 +83,7 @@ release.
   so the same package works with xUnit, NUnit, MSTest, or TUnit.
 - `QueryGuard.AspNetCore`: `AddQueryGuard` registration, `UseQueryGuard` middleware that opens a
   session per request, per-route-pattern policy resolution, and a structured summary with stable
-  event IDs. The middleware observes only — the response, its headers, and the original exception are
+  event IDs. The middleware observes only â€” the response, its headers, and the original exception are
   never modified.
 - Optional first-occurrence stack trace: off by default, bounded to one filtered trace per
   fingerprint, and framework frames removed so what remains is application code. False-positive
@@ -98,7 +106,7 @@ release.
   fixtures pin the behavior for SQLite, PostgreSQL, SQL Server, and MySQL.
 - `QueryGuard.EntityFrameworkCore`: captures relational command execution through the official
   `DbCommandInterceptor` API on EF Core 8 and 10, covering the synchronous and asynchronous reader,
-  scalar, and non-query paths plus command failures. Observes only — the generated SQL, the result,
+  scalar, and non-query paths plus command failures. Observes only â€” the generated SQL, the result,
   and the original exception are never modified.
 - `IQueryFingerprintFactory` with a stable SHA-256-derived identifier, and `QueryGuardQueryTag` for
   recognizing `QueryGuard:` directives attached with EF Core `TagWith`.
@@ -123,7 +131,7 @@ release.
 
 - The release workflow resolved the package version by parsing `Directory.Build.props` with a regex
   containing a variable-length lookbehind, which PCRE rejects. `grep` failed, a `|| true` swallowed the
-  failure, and the version silently lost its suffix — resolving `0.1.0` for a tag reading
+  failure, and the version silently lost its suffix â€” resolving `0.1.0` for a tag reading
   `0.1.0-preview.1`. The tag comparison refused to publish. The version now comes from
   `dotnet msbuild -getProperty:PackageVersion`, the same property `dotnet pack` stamps on the package,
   and a dry run validates the version it resolved instead of ignoring it.

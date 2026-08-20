@@ -245,16 +245,64 @@ public sealed class QueryGuardCommandInterceptor : DbCommandInterceptor
         };
     }
 
+    /// <summary>
+    /// Reports whether any statement in the batch modifies data.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Every statement, not just the first one, because a provider is free to put something else in
+    /// front of the interesting part. EF Core's SQL Server insert batch does exactly that:
+    /// </para>
+    /// <code>
+    /// SET IMPLICIT_TRANSACTIONS OFF;
+    /// SET NOCOUNT ON;
+    /// INSERT INTO [Departments] ([Id], [CompanyId], [Name]) VALUES (@p0, @p1, @p2);
+    /// </code>
+    /// <para>
+    /// Checking only the leading keyword saw <c>SET</c>, left the command classified as a read, and
+    /// so counted every <c>SaveChanges</c> on SQL Server against read budgets. A live suite caught
+    /// that; the captured fixtures could not, because they only ever contained the SQL someone
+    /// thought to capture.
+    /// </para>
+    /// <para>
+    /// This walks statements separated by <c>;</c> and tests each leading keyword. It is deliberately
+    /// not SQL parsing: no quote tracking, no nesting, no comment handling. A read batch that
+    /// genuinely contains a modification statement is a write as far as a read budget is concerned,
+    /// which is the answer this needs to give anyway.
+    /// </para>
+    /// </remarks>
     private static bool IsModificationStatement(string commandText)
     {
-        var span = commandText.AsSpan().TrimStart();
+        var remaining = commandText.AsSpan();
 
-        return span.StartsWith("INSERT", StringComparison.OrdinalIgnoreCase)
-            || span.StartsWith("UPDATE", StringComparison.OrdinalIgnoreCase)
-            || span.StartsWith("DELETE", StringComparison.OrdinalIgnoreCase)
-            || span.StartsWith("MERGE", StringComparison.OrdinalIgnoreCase)
-            || span.StartsWith("CREATE", StringComparison.OrdinalIgnoreCase)
-            || span.StartsWith("ALTER", StringComparison.OrdinalIgnoreCase)
-            || span.StartsWith("DROP", StringComparison.OrdinalIgnoreCase);
+        while (!remaining.IsEmpty)
+        {
+            var end = remaining.IndexOf(';');
+            var statement = (end < 0 ? remaining : remaining[..end]).TrimStart();
+
+            if (StartsWithModificationKeyword(statement))
+            {
+                return true;
+            }
+
+            if (end < 0)
+            {
+                return false;
+            }
+
+            remaining = remaining[(end + 1)..];
+        }
+
+        return false;
     }
+
+    private static bool StartsWithModificationKeyword(ReadOnlySpan<char> statement)
+        => statement.StartsWith("INSERT", StringComparison.OrdinalIgnoreCase)
+            || statement.StartsWith("UPDATE", StringComparison.OrdinalIgnoreCase)
+            || statement.StartsWith("DELETE", StringComparison.OrdinalIgnoreCase)
+            || statement.StartsWith("MERGE", StringComparison.OrdinalIgnoreCase)
+            || statement.StartsWith("CREATE", StringComparison.OrdinalIgnoreCase)
+            || statement.StartsWith("ALTER", StringComparison.OrdinalIgnoreCase)
+            || statement.StartsWith("DROP", StringComparison.OrdinalIgnoreCase)
+            || statement.StartsWith("TRUNCATE", StringComparison.OrdinalIgnoreCase);
 }
