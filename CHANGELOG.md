@@ -12,6 +12,11 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+## [0.1.0-preview.6] - 2026-08-21
+
+The main ASP.NET Core testing path is simpler, and packages no longer require the newest framework
+patch installed in this repository.
+
 ### Changed
 
 - Package dependencies now start at the first secure EF Core and ASP.NET Core 8 patch, or at 10.0.0,
@@ -308,7 +313,8 @@ release.
   `Properties/launchSettings.json`, and corrected the query and warning counts quoted in
   `samples/README.md` to what the sample actually logs.
 
-[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.5...main
+[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.6...main
+[0.1.0-preview.6]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.5...v0.1.0-preview.6
 [0.1.0-preview.5]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.5
 [0.1.0-preview.4]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.4
 [0.1.0-preview.3]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.3
