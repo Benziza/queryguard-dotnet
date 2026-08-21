@@ -47,8 +47,7 @@ public static class WebApplicationFactoryQueryGuardExtensions
                 services.Configure<QueryGuardOptions>(options => options.Enabled = false);
                 services.TryAddSingleton<IQueryGuardSessionAccessor>(AsyncLocalQueryGuardSessionAccessor.Shared);
 
-                services.AddDbContext<TContext>((provider, options) =>
-                    options.UseQueryGuard(provider.GetRequiredService<IQueryGuardSessionAccessor>()));
+                AttachQueryGuard<TContext>(services);
             });
         });
 
@@ -65,5 +64,59 @@ public static class WebApplicationFactoryQueryGuardExtensions
             configuredFactory.Dispose();
             throw;
         }
+    }
+
+    private static void AttachQueryGuard<
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicConstructors
+            | DynamicallyAccessedMemberTypes.NonPublicConstructors
+            | DynamicallyAccessedMemberTypes.PublicProperties)] TContext>(
+        IServiceCollection services)
+        where TContext : DbContext
+    {
+        ServiceDescriptor? optionsDescriptor = null;
+
+        for (var i = services.Count - 1; i >= 0; i--)
+        {
+            if (services[i].ServiceType == typeof(DbContextOptions<TContext>))
+            {
+                optionsDescriptor = services[i];
+                break;
+            }
+        }
+
+        if (optionsDescriptor is null)
+        {
+            services.AddDbContext<TContext>((provider, options) =>
+                options.UseQueryGuard(provider.GetRequiredService<IQueryGuardSessionAccessor>()));
+            return;
+        }
+
+        services.Remove(optionsDescriptor);
+        services.Add(new ServiceDescriptor(
+            typeof(DbContextOptions<TContext>),
+            provider => DecorateOptions<TContext>(provider, optionsDescriptor),
+            optionsDescriptor.Lifetime));
+    }
+
+    private static DbContextOptions<TContext> DecorateOptions<TContext>(
+        IServiceProvider provider,
+        ServiceDescriptor descriptor)
+        where TContext : DbContext
+    {
+        var original = descriptor.ImplementationInstance
+            ?? descriptor.ImplementationFactory?.Invoke(provider)
+            ?? throw new InvalidOperationException(
+                $"The {typeof(TContext).Name} options registration must use an instance or factory.");
+
+        if (original is not DbContextOptions<TContext> options)
+        {
+            throw new InvalidOperationException(
+                $"The {typeof(TContext).Name} options registration returned {original.GetType().Name}.");
+        }
+
+        var builder = new DbContextOptionsBuilder<TContext>(options);
+        builder.UseQueryGuard(provider.GetRequiredService<IQueryGuardSessionAccessor>());
+        return builder.Options;
     }
 }
