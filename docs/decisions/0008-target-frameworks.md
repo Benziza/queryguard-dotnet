@@ -37,6 +37,10 @@ EF Core versions are pinned per target framework, so a consumer never gets a mis
 This is implemented with conditional versions in `Directory.Packages.props`, so it is one
 place to change rather than one per project.
 
+Shipping projects compile against the earliest secure patch supported in each line. Tests and samples
+use the current patch. This keeps the NuGet dependency floor low without testing against vulnerable
+packages.
+
 Corollaries:
 
 - CI builds **and tests** both target frameworks, on Ubuntu and Windows. A compile-only pass
@@ -71,6 +75,8 @@ different, worse product wearing the same name.
   runtime installed. `CONTRIBUTING.md` documents running `-f net10.0` locally and letting CI
   cover both.
 - Package validation verifies the shipped framework list is coherent.
+- Package validation installs the net10.0 package beside an older EF Core patch, and checks the
+  dependency floors recorded for both target frameworks.
 
 ## Revisit when
 

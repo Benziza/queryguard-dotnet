@@ -53,6 +53,16 @@ require_entry() {
   fi
 }
 
+require_dependency_version() {
+  local nuspec="$1" dependency="$2" version="$3" description="$4"
+
+  if grep -Fq "<dependency id=\"$dependency\" version=\"$version\"" <<<"$nuspec"; then
+    pass "$description"
+  else
+    fail "$description ($dependency $version not found)"
+  fi
+}
+
 echo "Verifying packages in $PACKAGE_DIR"
 echo
 
@@ -130,6 +140,20 @@ for name in "${EXPECTED_PACKAGES[@]}"; do
     pass "MIT licence expression"
   else
     fail "licence expression missing or not MIT"
+  fi
+
+  if [ "$name" = "QueryGuard.EntityFrameworkCore" ]; then
+    require_dependency_version "$nuspec" "Microsoft.EntityFrameworkCore.Relational" "8.0.1" \
+      "net8.0 EF Core dependency starts at the supported floor"
+    require_dependency_version "$nuspec" "Microsoft.EntityFrameworkCore.Relational" "10.0.0" \
+      "net10.0 EF Core dependency starts at the supported floor"
+  fi
+
+  if [ "$name" = "QueryGuard.AspNetCore.Testing" ]; then
+    require_dependency_version "$nuspec" "Microsoft.AspNetCore.Mvc.Testing" "8.0.1" \
+      "net8.0 ASP.NET Core testing dependency starts at the supported floor"
+    require_dependency_version "$nuspec" "Microsoft.AspNetCore.Mvc.Testing" "10.0.0" \
+      "net10.0 ASP.NET Core testing dependency starts at the supported floor"
   fi
 
   if grep -qE '<description>.{80,}</description>' <<<"$nuspec"; then
@@ -259,7 +283,10 @@ cat >Consumer.csproj <<XML
     <PackageReference Include="QueryGuard.AspNetCore.Testing" Version="$package_version" />
     <PackageReference Include="QueryGuard.Testing" Version="$package_version" />
     <PackageReference Include="QueryGuard.Reporting" Version="$package_version" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
+    <!-- Keep this below the repository's current EF Core patch. This catches a package that
+         accidentally requires the latest patch instead of the supported 10.0 line. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10" />
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
   </ItemGroup>
 </Project>
 XML

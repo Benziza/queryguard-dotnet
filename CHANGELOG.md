@@ -14,6 +14,8 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Changed
 
+- Package dependencies now start at the first secure EF Core and ASP.NET Core 8 patch, or at 10.0.0,
+  instead of requiring the latest patch installed in this repository.
 - The main quick start now uses `QueryGuard.AspNetCore.Testing`, and the sample request tests exercise
   the same `TrackQueries` path that new users are asked to copy.
 - A testing guide separates `WebApplicationFactory` requests from explicit service and background-job

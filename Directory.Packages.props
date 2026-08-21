@@ -3,21 +3,36 @@
   <!--
     Central package version management.
 
-    Entity Framework Core and the Microsoft.Extensions.* abstractions are pinned per
-    target framework so that a net8.0 consumer resolves the EF Core 8 line and a
-    net10.0 consumer resolves the EF Core 10 line. See docs/decisions/0008-target-frameworks.md.
+    Product dependencies use the first patch in each supported major line. This keeps
+    the package compatible with applications that update patches on their own schedule.
+    Tests and samples use current patch versions.
+    See docs/decisions/0008-target-frameworks.md.
   -->
 
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <EntityFrameworkCoreVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.30</EntityFrameworkCoreVersion>
+    <EntityFrameworkCoreVersion Condition="'$(IsPackable)' == 'true' and '$(TargetFramework)' == 'net8.0'">8.0.1</EntityFrameworkCoreVersion>
+    <EntityFrameworkCoreVersion Condition="'$(IsPackable)' == 'true' and '$(EntityFrameworkCoreVersion)' == ''">10.0.0</EntityFrameworkCoreVersion>
+    <EntityFrameworkCoreVersion Condition="'$(TargetFramework)' == 'net8.0' and '$(EntityFrameworkCoreVersion)' == ''">8.0.30</EntityFrameworkCoreVersion>
     <EntityFrameworkCoreVersion Condition="'$(EntityFrameworkCoreVersion)' == ''">10.0.11</EntityFrameworkCoreVersion>
-    <MicrosoftExtensionsVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.2</MicrosoftExtensionsVersion>
+
+    <MicrosoftExtensionsVersion Condition="'$(IsPackable)' == 'true' and '$(TargetFramework)' == 'net8.0'">8.0.2</MicrosoftExtensionsVersion>
+    <MicrosoftExtensionsVersion Condition="'$(IsPackable)' == 'true' and '$(MicrosoftExtensionsVersion)' == ''">10.0.0</MicrosoftExtensionsVersion>
+    <MicrosoftExtensionsVersion Condition="'$(TargetFramework)' == 'net8.0' and '$(MicrosoftExtensionsVersion)' == ''">8.0.2</MicrosoftExtensionsVersion>
     <MicrosoftExtensionsVersion Condition="'$(MicrosoftExtensionsVersion)' == ''">10.0.11</MicrosoftExtensionsVersion>
-    <MicrosoftExtensionsLoggingVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.3</MicrosoftExtensionsLoggingVersion>
+
+    <MicrosoftExtensionsLoggingVersion Condition="'$(IsPackable)' == 'true' and '$(TargetFramework)' == 'net8.0'">8.0.2</MicrosoftExtensionsLoggingVersion>
+    <MicrosoftExtensionsLoggingVersion Condition="'$(IsPackable)' == 'true' and '$(MicrosoftExtensionsLoggingVersion)' == ''">10.0.0</MicrosoftExtensionsLoggingVersion>
+    <MicrosoftExtensionsLoggingVersion Condition="'$(TargetFramework)' == 'net8.0' and '$(MicrosoftExtensionsLoggingVersion)' == ''">8.0.3</MicrosoftExtensionsLoggingVersion>
     <MicrosoftExtensionsLoggingVersion Condition="'$(MicrosoftExtensionsLoggingVersion)' == ''">10.0.11</MicrosoftExtensionsLoggingVersion>
-    <AspNetCoreTestingVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.30</AspNetCoreTestingVersion>
+
+    <AspNetCoreTestingVersion Condition="'$(IsPackable)' == 'true' and '$(TargetFramework)' == 'net8.0'">8.0.1</AspNetCoreTestingVersion>
+    <AspNetCoreTestingVersion Condition="'$(IsPackable)' == 'true' and '$(AspNetCoreTestingVersion)' == ''">10.0.0</AspNetCoreTestingVersion>
+    <AspNetCoreTestingVersion Condition="'$(TargetFramework)' == 'net8.0' and '$(AspNetCoreTestingVersion)' == ''">8.0.30</AspNetCoreTestingVersion>
     <AspNetCoreTestingVersion Condition="'$(AspNetCoreTestingVersion)' == ''">10.0.11</AspNetCoreTestingVersion>
+
+    <CachingMemoryVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.1</CachingMemoryVersion>
+    <CachingMemoryVersion Condition="'$(CachingMemoryVersion)' == ''">$(MicrosoftExtensionsVersion)</CachingMemoryVersion>
   </PropertyGroup>
 
   <ItemGroup Label="Product dependencies">
@@ -25,6 +40,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="$(CachingMemoryVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(AspNetCoreTestingVersion)" />
   </ItemGroup>
 
@@ -34,6 +50,7 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
     <PackageVersion Include="coverlet.collector" Version="10.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EntityFrameworkCoreVersion)" />
+    <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
   </ItemGroup>
 
   <ItemGroup Label="Provider integration dependencies (net10.0 only)">
