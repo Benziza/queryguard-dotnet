@@ -44,7 +44,7 @@ public static class QueryGuardJsonReportReader
         catch (JsonException exception)
         {
             // Reusing the baseline exception type on purpose: to a caller, "this report cannot be read"
-            // and "this baseline cannot be read" are the same class of problem — a file to go and fix.
+            // and "this baseline cannot be read" are the same class of problem: a file to go and fix.
             throw new QueryGuardBaselineFormatException("The report is not valid JSON.", exception);
         }
 
@@ -137,7 +137,7 @@ public static class QueryGuardJsonReportReader
     /// <remarks>
     /// Zero rather than an exception, because the maximum is what is wanted and a malformed group cannot
     /// be the maximum. A report missing this everywhere yields zero, which
-    /// <see cref="QueryGuardBaselineEntry"/> accepts — a scope that ran no queries is a real state.
+    /// <see cref="QueryGuardBaselineEntry"/> accepts: a scope that ran no queries is a real state.
     /// </remarks>
     private static int ReadOccurrences(JsonElement group)
         => group.ValueKind == JsonValueKind.Object

@@ -85,7 +85,7 @@ public class QueryGuardJUnitReporterTests
     public void A_clean_result_still_produces_one_passing_case()
     {
         // An empty suite renders as "no tests" in most CI viewers, which reads as "QueryGuard did not
-        // run" — the opposite of the truth.
+        // run": the opposite of the truth.
         var cases = Cases(ReportFixture.CleanResult());
 
         var single = Assert.Single(cases);
@@ -126,7 +126,7 @@ public class QueryGuardJUnitReporterTests
     [Fact]
     public void Sql_and_messages_survive_a_round_trip_through_xml()
     {
-        // SQL is full of characters XML cares about — quotes in identifiers, and `<` or `&` in a
+        // SQL is full of characters XML cares about: quotes in identifiers, and `<` or `&` in a
         // predicate. Asserting on a specific escape sequence would be asserting on XmlWriter's
         // choices; what matters is that the text comes back out exactly as it went in.
         const string AwkwardSql = "SELECT * FROM \"T\" WHERE \"a\" < ? AND \"b\" & ? > ? AND \"c\" = 'x'";

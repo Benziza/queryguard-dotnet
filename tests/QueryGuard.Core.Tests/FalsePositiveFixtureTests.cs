@@ -17,7 +17,7 @@ namespace QueryGuard.Tests;
 /// </para>
 /// <para>
 /// These are regression fixtures, not documentation. A change to the detector that makes any of these
-/// louder — or that makes the mechanism for silencing them stop working — fails here rather than
+/// louder, or that makes the mechanism for silencing them stop working, fails here rather than
 /// arriving in someone's build. Every accepted false-positive report should become one of these.
 /// </para>
 /// </remarks>
@@ -29,7 +29,7 @@ public class FalsePositiveFixtureTests
     /// <remarks>
     /// Three occurrences hits the default threshold exactly, and the repetition is capped by the
     /// number of sections rather than by row count. Nothing here scales with data, so nothing here is
-    /// an N+1 — but the tool is right to mention it, because from the SQL alone it looks identical to
+    /// an N+1, but the tool is right to mention it, because from the SQL alone it looks identical to
     /// one.
     /// </remarks>
     [Fact]
@@ -136,7 +136,7 @@ public class FalsePositiveFixtureTests
     /// A write batch: <c>SaveChanges</c> issuing one statement per entity.
     /// </summary>
     /// <remarks>
-    /// This one is not merely tolerated, it is invisible — writes are never grouped for
+    /// This one is not merely tolerated, it is invisible: writes are never grouped for
     /// repeated-query analysis. Reporting it would put a warning on every save in the application,
     /// which is the fastest possible way to train users to ignore QueryGuard.
     /// </remarks>

@@ -117,7 +117,7 @@ public sealed class QueryGuardResult
 
     /// <summary>
     /// Gets how long the session was open. This is wall-clock time for the request or test, not
-    /// database time — compare it against <see cref="TotalDatabaseDuration"/>.
+    /// database time: compare it against <see cref="TotalDatabaseDuration"/>.
     /// </summary>
     public TimeSpan Elapsed { get; }
 

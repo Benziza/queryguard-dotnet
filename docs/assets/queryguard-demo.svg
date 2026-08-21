@@ -31,7 +31,7 @@
   <text x="34.7" y="329" fill="#e3b341">[WARN] repeated-query: Potential N+1 pattern in GET /api/companies: fingerprint QG-FP-FDB5F469 executed 50 times.</text>
   <text x="93.5" y="348" fill="#adbac7">Occurrences: 50 (warning threshold: 3)</text>
   <text x="93.5" y="367" fill="#768390" font-style="italic">Repeated SQL is strong evidence, not proof of an application-level N+1 defect.</text>
-  <text x="93.5" y="386" fill="#768390" font-style="italic">Review eager loading, projection, or batching — or record an allowlist entry with a reason.</text>
+  <text x="93.5" y="386" fill="#768390" font-style="italic">Review eager loading, projection, or batching, or record an allowlist entry with a reason.</text>
   <text x="20.0" y="424" fill="#7ee787" font-weight="600">Passed!  - Failed: 0, Passed: 5, Skipped: 0, Total: 5</text>
   <text x="20.0" y="462" fill="#636e7b" font-style="italic"># 200 OK, correct data, 51 queries. A passing test about a failing budget.</text>
   </g>

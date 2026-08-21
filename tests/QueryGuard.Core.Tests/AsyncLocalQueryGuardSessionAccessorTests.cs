@@ -106,7 +106,7 @@ public class AsyncLocalQueryGuardSessionAccessorTests
 
         // Disposal order is what this test is about, so the activations are held individually
         // rather than in `using` blocks. The finally clause makes a failing assertion mid-way
-        // leave nothing activated — double disposal is a documented no-op.
+        // leave nothing activated: double disposal is a documented no-op.
         var activations = new IQueryGuardSessionActivation[sessions.Length];
         try
         {

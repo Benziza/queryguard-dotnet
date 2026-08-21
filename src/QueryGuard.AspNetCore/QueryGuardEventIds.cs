@@ -51,7 +51,7 @@ public static class QueryGuardEventIds
     /// QueryGuard's own reporting failed.
     /// </summary>
     /// <remarks>
-    /// The only event logged at error level, and it never replaces an application failure — a reporter
+    /// The only event logged at error level, and it never replaces an application failure: a reporter
     /// that throws while an application exception is in flight must not become the exception the user
     /// sees.
     /// </remarks>

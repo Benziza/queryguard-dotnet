@@ -14,7 +14,7 @@ namespace QueryGuard.Reporting;
 /// <remarks>
 /// <para>
 /// The point is not another file format. A finding now knows the file and line it came from, and SARIF is
-/// built around exactly that triple — rule, message, physical location — so a repeated query can show up
+/// built around exactly that triple, rule, message, physical location, so a repeated query can show up
 /// as an annotation on the line that caused it, in the viewer CodeQL already uses. No dashboard to build
 /// and nothing to install.
 /// </para>
@@ -67,7 +67,7 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
     /// valid SARIF, and the finding still appears, but without an inline annotation.
     /// </param>
     /// <param name="fallbackPath">
-    /// Where to attach a finding whose origin is unknown — a repository-relative path such as the test
+    /// Where to attach a finding whose origin is unknown: a repository-relative path such as the test
     /// project file. Needed because <strong>GitHub rejects a SARIF file containing any result without a
     /// location</strong>, with <c>locationFromSarifResult: expected at least one location</c>, and it
     /// rejects the whole file rather than the offending result. The SARIF schema permits omitting
@@ -266,7 +266,7 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
     /// <remarks>
     /// The scope is appended because an annotation is read on a diff with no surrounding report:
     /// without it, "executed 50 times" does not say during what. Not appended when the message already
-    /// names the scope, which the repeated-query message does — "… in GET /api/companies: … (scope: GET
+    /// names the scope, which the repeated-query message does: "… in GET /api/companies: … (scope: GET
     /// /api/companies)" reads like a bug, because it is one.
     /// </remarks>
     private static string Message(QueryFinding finding, QueryGuardResult result)
@@ -285,7 +285,7 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
     /// </summary>
     /// <remarks>
     /// A precise line when the origin was captured. Otherwise the configured fallback with no region,
-    /// which is honest — it says "this run found something" without claiming to know which line. A
+    /// which is honest: it says "this run found something" without claiming to know which line. A
     /// guessed line number would annotate innocent code, which is the one outcome worse than no
     /// annotation.
     /// </remarks>
@@ -369,7 +369,7 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
     /// <remarks>
     /// Relative to the repository root when possible, with forward slashes, because that is the only form
     /// GitHub can match against a diff. A path outside the root is emitted unchanged rather than
-    /// mangled — a wrong relative path silently annotates the wrong file.
+    /// mangled: a wrong relative path silently annotates the wrong file.
     /// </remarks>
     private string Uri(string filePath)
     {
@@ -398,8 +398,8 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Found by uploading and looking at the alert. Setting <c>ContinuousIntegrationBuild</c> — which
-    /// every SourceLink-using library does in CI, and which this repository does — makes the compiler
+    /// Found by uploading and looking at the alert. Setting <c>ContinuousIntegrationBuild</c>, which
+    /// every SourceLink-using library does in CI and this repository also does, makes the compiler
     /// replace the source root with <c>/_/</c>, so a stack trace on a CI build reports
     /// <c>/_/samples/Api/Program.cs</c> rather than the checkout path.
     /// </para>
@@ -409,7 +409,7 @@ public sealed class QueryGuardSarifReporter : QueryGuardReporter
     /// the diff: the annotation silently did not appear. The upload succeeded and the tests passed.
     /// </para>
     /// <para>
-    /// Numbered variants — <c>/_1/</c>, <c>/_2/</c> — appear when a build maps more than one source
+    /// Numbered variants, <c>/_1/</c>, <c>/_2/</c>, appear when a build maps more than one source
     /// root, so the whole family is handled rather than the first one.
     /// </para>
     /// </remarks>

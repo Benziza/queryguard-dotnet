@@ -117,7 +117,7 @@ public sealed class QueryGuardBaselineMarkdownReporter
             var scope = comparison.Scopes[i];
 
             var before = scope.IsNew
-                ? "—"
+                ? "-"
                 : scope.Baseline!.ReadCommands.ToString(CultureInfo.InvariantCulture);
 
             builder
@@ -196,7 +196,7 @@ public sealed class QueryGuardBaselineMarkdownReporter
         // The same caveat every other QueryGuard output carries. A count going up is a fact; whether it
         // is a defect is a judgement, and the tool does not get to make it.
         builder.Append(
-            "More queries is not automatically a defect — a new feature legitimately costs queries. "
+            "More queries is not automatically a defect: a new feature legitimately costs queries. "
             + "If this change is intended, regenerate the baseline and commit it, so the diff records "
             + "the decision.\n");
     }

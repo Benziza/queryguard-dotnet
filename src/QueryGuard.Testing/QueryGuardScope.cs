@@ -14,7 +14,7 @@ namespace QueryGuard.Testing;
 /// </para>
 /// <para>
 /// The scope is disposable both ways. <see cref="DisposeAsync"/> completes the session if the caller
-/// did not, so a test that throws mid-way still releases the ambient session — otherwise the next test
+/// did not, so a test that throws mid-way still releases the ambient session: otherwise the next test
 /// on the same execution flow would record into a session nobody is reading.
 /// </para>
 /// </remarks>
@@ -65,7 +65,7 @@ public sealed class QueryGuardScope : IDisposable, IAsyncDisposable
     /// Opens a scope.
     /// </summary>
     /// <param name="name">
-    /// What this scope measures — a route pattern, or the name of the behavior under test. It appears in
+    /// What this scope measures: a route pattern, or the name of the behavior under test. It appears in
     /// every finding and in the assertion message.
     /// </param>
     /// <param name="policy">The policy to evaluate. Defaults to a policy with no budgets.</param>
@@ -140,7 +140,7 @@ public sealed class QueryGuardScope : IDisposable, IAsyncDisposable
     /// <param name="cancellationToken">Ignored; present so the API reads naturally in async tests.</param>
     /// <returns>A task producing the result.</returns>
     /// <remarks>
-    /// Analysis is synchronous and in-memory — there is nothing to await. The asynchronous overload
+    /// Analysis is synchronous and in-memory: there is nothing to await. The asynchronous overload
     /// exists so that <c>await scope.CompleteAsync()</c> reads consistently with the surrounding async
     /// test code, and so the signature can become genuinely asynchronous later without a breaking
     /// change.

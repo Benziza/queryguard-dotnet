@@ -31,7 +31,7 @@ namespace QueryGuard.SampleTests;
 /// </para>
 /// <para>
 /// <see cref="The_problem_endpoint_returns_200_OK_and_still_breaks_its_query_budget"/> is the
-/// interesting one — it asserts that a QueryGuard budget failure <em>does</em> happen. That is a
+/// interesting one: it asserts that a QueryGuard budget failure <em>does</em> happen. That is a
 /// passing test about a failing budget, not a broken build.
 /// </para>
 /// </remarks>
@@ -76,7 +76,7 @@ public sealed class CompanyEndpointDemoTests : IClassFixture<SampleApiFactory>
         Assert.Equal(SeededCompanies, repeated.Occurrences);
         Assert.Contains("Departments", repeated.Fingerprint.NormalizedSql, StringComparison.Ordinal);
 
-        // The assertion a real test would make. Here it is expected to fail, so it is inverted — and
+        // The assertion a real test would make. Here it is expected to fail, so it is inverted, and
         // the message is printed, because that message is what a developer would actually see.
         var failure = Assert.Throws<QueryGuardBudgetExceededException>(() => QueryGuardAssert.Passes(result));
         _output.WriteLine(failure.Message);
@@ -187,7 +187,7 @@ public sealed class CompanyEndpointDemoTests : IClassFixture<SampleApiFactory>
     {
         // This repository uploads the file this test writes, so the SARIF reporter is exercised against
         // real findings on every pull request rather than only against fixtures. A document can be valid
-        // SARIF, upload without complaint, and still annotate nothing — the assertion that matters is
+        // SARIF, upload without complaint, and still annotate nothing: the assertion that matters is
         // that a location survived all the way to the emitted URI.
         using var client = _factory.CreateClient();
 
@@ -284,7 +284,7 @@ public sealed class SampleApiFactory : WebApplicationFactory<Program>
 
         // Redirect the sample's own connection string rather than re-registering its DbContext.
         // Re-registering would apply the sample's configuration action *and* the replacement, attaching
-        // the interceptor twice and doubling every recorded command — which looks exactly like a
+        // the interceptor twice and doubling every recorded command, which looks exactly like a
         // QueryGuard bug until you count the registrations.
         builder.UseSetting("ConnectionStrings:Catalog", _connectionString);
 
@@ -299,7 +299,7 @@ public sealed class SampleApiFactory : WebApplicationFactory<Program>
             // reason that has nothing to do with the query count.
             //
             // It has to be configured here rather than by setting Server.PreserveExecutionContext after
-            // CreateClient() — the flag is captured when the client's handler is built, so setting it
+            // CreateClient(): the flag is captured when the client's handler is built, so setting it
             // afterwards affects only the *next* client. That is a genuinely confusing failure: some
             // tests capture and some do not, depending on execution order.
             //
@@ -311,7 +311,7 @@ public sealed class SampleApiFactory : WebApplicationFactory<Program>
             // The middleware and an explicit scope both open sessions, and the innermost one wins. With
             // the middleware active it would open a session per request that shadows the test's scope,
             // so the scope would capture nothing. Turning it off makes the test's scope the only
-            // session — which is how a real integration test using QueryGuard.Testing is set up.
+            // session, which is how a real integration test using QueryGuard.Testing is set up.
             services.Configure<QueryGuardOptions>(options => options.Enabled = false);
 
             // A shared in-memory database disappears when the last connection to it closes, so one is

@@ -11,7 +11,7 @@ namespace QueryGuard;
 /// <para>
 /// Split from <see cref="QueryGuardAnalyzer"/> because these are two different jobs. Grouping asks
 /// "what happened?" and has one right answer. Budgets ask "is that acceptable?" and the answer is
-/// whatever the user configured — so the rules live where they can be read as a list, and each one
+/// whatever the user configured, so the rules live where they can be read as a list, and each one
 /// produces a finding carrying the numbers that justify it.
 /// </para>
 /// <para>

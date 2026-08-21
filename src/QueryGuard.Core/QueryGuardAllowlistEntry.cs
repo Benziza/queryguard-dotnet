@@ -13,7 +13,7 @@ namespace QueryGuard;
 /// where they can.
 /// </para>
 /// <para>
-/// A matched entry marks a finding as ignored. It never removes it — see
+/// A matched entry marks a finding as ignored. It never removes it: see
 /// <c>docs/decisions/0003-detector-terminology.md</c>. If we tell users some findings will be wrong,
 /// we owe them a way to say so that does not also make the tool blind.
 /// </para>
@@ -77,7 +77,7 @@ public sealed class QueryGuardAllowlistEntry
     /// <exception cref="ArgumentException">The tag or the reason is empty or whitespace.</exception>
     /// <remarks>
     /// Matching by tag survives a query changing, which makes it the right choice for a pattern that
-    /// is intentional by design rather than by accident — and it keeps the declaration next to the
+    /// is intentional by design rather than by accident, and it keeps the declaration next to the
     /// LINQ that needs it.
     /// </remarks>
     public static QueryGuardAllowlistEntry ForQueryTag(string queryTag, string reason)

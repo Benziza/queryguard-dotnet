@@ -8,7 +8,7 @@ namespace QueryGuard.Tests;
 /// Stack-trace capture: off by default, bounded to one per fingerprint, filtered when on.
 /// </summary>
 /// <remarks>
-/// See <c>docs/decisions/0007-stack-trace-policy.md</c>. The default matters most — QueryGuard's core
+/// See <c>docs/decisions/0007-stack-trace-policy.md</c>. The default matters most: QueryGuard's core
 /// promise is that installing it does not change how the application behaves, and a default that adds
 /// hot-path allocation undermines that for a feature not everyone needs.
 /// </remarks>
@@ -17,7 +17,7 @@ public class StackTraceCaptureTests
     [Fact]
     public void With_capture_off_the_provider_is_never_invoked()
     {
-        // Not "the trace is discarded" — the callback is not called at all, so nothing is walked,
+        // Not "the trace is discarded": the callback is not called at all, so nothing is walked,
         // formatted, or allocated.
         var invocations = 0;
         var session = new QueryGuardSession("test", QueryGuardPolicy.Create("p"));

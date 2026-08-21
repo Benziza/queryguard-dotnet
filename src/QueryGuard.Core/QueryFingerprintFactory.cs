@@ -21,7 +21,7 @@ namespace QueryGuard;
 /// </para>
 /// <para>
 /// Text is redacted <em>before</em> hashing, never after, so two commands differing only by an
-/// inlined value share an identifier — and no un-redacted text is ever retained.
+/// inlined value share an identifier, and no un-redacted text is ever retained.
 /// </para>
 /// </remarks>
 public sealed class QueryFingerprintFactory : IQueryFingerprintFactory

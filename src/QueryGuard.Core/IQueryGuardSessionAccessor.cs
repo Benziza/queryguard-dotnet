@@ -14,7 +14,7 @@ namespace QueryGuard;
 /// The default implementation is <see cref="AsyncLocalQueryGuardSessionAccessor"/>. Replacing it is
 /// supported for a host with a better propagation mechanism, but any replacement must guarantee
 /// the same thing: two concurrent flows never observe each other's session. Getting that wrong
-/// corrupts every number QueryGuard reports, and it fails intermittently — the worst possible
+/// corrupts every number QueryGuard reports, and it fails intermittently: the worst possible
 /// failure mode for a tool whose whole purpose is to make test results trustworthy.
 /// </para>
 /// <para>
@@ -43,7 +43,7 @@ public interface IQueryGuardSessionAccessor
     /// </returns>
     /// <remarks>
     /// Nesting is supported. Disposal restores the parent session rather than clearing the
-    /// accessor, and it must do so on the exception path too — a scope that only unwinds cleanly
+    /// accessor, and it must do so on the exception path too: a scope that only unwinds cleanly
     /// on success corrupts every measurement taken after the first failing test.
     /// </remarks>
     IQueryGuardSessionActivation Activate(QueryGuardSession session);

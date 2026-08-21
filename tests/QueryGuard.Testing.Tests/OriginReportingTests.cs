@@ -18,7 +18,7 @@ namespace SampleApplication.Diagnostics;
 /// <para>
 /// "This endpoint has a repeated query" leaves the developer to go find it. "Line 87 has a repeated
 /// query" does not. That difference is most of the value of a diagnostics tool, and it is why a scope
-/// captures the origin by default even though the interceptor on a request path does not — see
+/// captures the origin by default even though the interceptor on a request path does not: see
 /// <c>docs/decisions/0007-stack-trace-policy.md</c>.
 /// </para>
 /// <para>
@@ -118,7 +118,7 @@ public sealed class OriginReportingTests : IDisposable
     }
 
     /// <summary>
-    /// Runs the same query once per row — the shape QueryGuard exists to find.
+    /// Runs the same query once per row: the shape QueryGuard exists to find.
     /// </summary>
     /// <remarks>
     /// A named method rather than an inline loop, so the assertions above can look for it by name and

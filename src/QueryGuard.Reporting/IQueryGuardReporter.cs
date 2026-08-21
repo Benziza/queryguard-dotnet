@@ -11,7 +11,7 @@ namespace QueryGuard.Reporting;
 /// <para>
 /// A reporter receives a result that has <em>already</em> been redacted, so it cannot emit a parameter
 /// value or a connection string even if it tries. That is the point of centralizing redaction: adding
-/// a reporter — including one a consumer writes — cannot introduce a leak. See
+/// a reporter, including one a consumer writes, cannot introduce a leak. See
 /// <c>docs/decisions/0004-parameter-privacy.md</c>.
 /// </para>
 /// <para>

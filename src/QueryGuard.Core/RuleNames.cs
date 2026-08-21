@@ -6,7 +6,7 @@ namespace QueryGuard;
 /// <remarks>
 /// These names reach users: they appear in every finding, in JSON reports, and as JUnit test-case
 /// names, so a CI dashboard or a saved query can be built on them. That makes them part of the public
-/// contract — renaming one is a breaking change to the report schema, not a refactor. See
+/// contract: renaming one is a breaking change to the report schema, not a refactor. See
 /// <c>docs/decisions/0011-versioning.md</c>.
 /// </remarks>
 public static class RuleNames

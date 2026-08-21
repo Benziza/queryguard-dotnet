@@ -10,7 +10,7 @@ namespace QueryGuard.SampleApi;
 /// </summary>
 /// <remarks>
 /// Two entities in a one-to-many relationship is the smallest schema that can produce a genuine
-/// repeated-query pattern — one child query per parent row. Everything here is invented. No schema,
+/// repeated-query pattern: one child query per parent row. Everything here is invented. No schema,
 /// name, or SQL in this repository comes from a real application.
 /// </remarks>
 public sealed class CatalogDbContext : DbContext

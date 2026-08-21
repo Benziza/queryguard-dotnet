@@ -139,7 +139,7 @@ internal static class ReportFixture
     /// The most repeated fingerprint goes first, because <c>TopRepeatedGroup</c> is defined as the head
     /// of the ordered group list. The remaining groups get one command each, so
     /// <paramref name="reads"/> has to equal <paramref name="topOccurrences"/> plus
-    /// <paramref name="groups"/> minus one — asserted rather than adjusted, so a test asking for an
+    /// <paramref name="groups"/> minus one: asserted rather than adjusted, so a test asking for an
     /// impossible shape fails instead of passing against a different one.
     /// </remarks>
     internal static QueryGuardResult ResultWith(string scope, int reads, int groups, int topOccurrences)

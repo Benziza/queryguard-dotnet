@@ -10,7 +10,7 @@ namespace QueryGuard;
 /// <para>
 /// What this type does <em>not</em> carry is as deliberate as what it does. There is no field
 /// for a parameter value and no field for a connection string anywhere in the model, so no
-/// reporter — present or future — can leak data that was never captured. Parameter
+/// reporter, present or future, can leak data that was never captured. Parameter
 /// <em>names</em> are counted rather than stored, because the count is occasionally useful
 /// evidence while the names are not worth the risk. See
 /// <c>docs/decisions/0004-parameter-privacy.md</c>.
@@ -133,7 +133,7 @@ public sealed class QueryRecord
     /// </summary>
     /// <remarks>
     /// A failed command is recorded as evidence. The original exception is never captured,
-    /// wrapped, or replaced — it propagates to the application untouched.
+    /// wrapped, or replaced: it propagates to the application untouched.
     /// </remarks>
     public bool IsFailed { get; }
 

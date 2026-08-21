@@ -27,7 +27,7 @@ public sealed class QueryGuardAnalyzer
     /// Initializes a new instance of the <see cref="QueryGuardAnalyzer"/> class.
     /// </summary>
     /// <param name="redactor">
-    /// Supplies the retention limits — how many samples a group keeps. Defaults to a redactor with
+    /// Supplies the retention limits: how many samples a group keeps. Defaults to a redactor with
     /// default capture options.
     /// </param>
     /// <param name="budgetEvaluator">
@@ -202,7 +202,7 @@ public sealed class QueryGuardAnalyzer
             // The limitation travels with the finding rather than living only in the documentation.
             // A reader who sees this message in a CI log usually has nothing else in front of them.
             "Repeated SQL is strong evidence, not proof of an application-level N+1 defect.",
-            "Review eager loading, projection, or batching — or record an allowlist entry with a reason if the repetition is intentional.",
+            "Review eager loading, projection, or batching, or record an allowlist entry with a reason if the repetition is intentional.",
         ];
 
     /// <summary>

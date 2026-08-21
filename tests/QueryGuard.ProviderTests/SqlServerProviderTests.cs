@@ -15,7 +15,7 @@ namespace QueryGuard.ProviderTests;
 /// <remarks>
 /// <para>
 /// SQL Server was the one provider most .NET developers would check first and the one this project
-/// could only claim as "fixture-verified" — the normalizer was pinned against captured SQL with
+/// could only claim as "fixture-verified": the normalizer was pinned against captured SQL with
 /// nothing live behind it. A fixture proves the normalizer still does what it did when the fixture was
 /// written; it cannot notice that the provider now emits something the fixture never contained.
 /// </para>
@@ -28,7 +28,7 @@ namespace QueryGuard.ProviderTests;
 /// </code>
 /// <para>
 /// That prologue changes with the parameter's value and type, so a normalizer that failed to strip it
-/// would produce a different fingerprint per execution — and a per-parent query in a loop would look
+/// would produce a different fingerprint per execution, and a per-parent query in a loop would look
 /// like N distinct queries, which is precisely the case QueryGuard exists to catch. This suite runs
 /// that loop against a real server rather than trusting the fixture.
 /// </para>

@@ -53,7 +53,7 @@ public static class QueryGuardRouteName
     /// A narrowed version of the HTTP token grammar. Every standard method and every custom method
     /// anyone actually uses fits, and nothing that could break a log line does. Searched through
     /// <see cref="SearchValues"/> so the check is a vectorized span scan rather than a per-character
-    /// loop — this runs once per request.
+    /// loop: this runs once per request.
     /// </remarks>
     private static readonly SearchValues<char> MethodTokenCharacters = SearchValues.Create(
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.");
@@ -78,7 +78,7 @@ public static class QueryGuardRouteName
         }
 
         // The route pattern comes from the application's own route table and is trusted. The method
-        // comes from the request, and this name is written to logs — so a method containing a newline
+        // comes from the request, and this name is written to logs, so a method containing a newline
         // could forge a log entry. Kestrel rejects such methods, but QueryGuard does not get to assume
         // which server it is hosted in.
         var method = SanitizeMethod(context.Request.Method);
@@ -96,7 +96,7 @@ public static class QueryGuardRouteName
             }
         }
 
-        // A non-routed endpoint — a health check or a middleware-terminated branch — still has a
+        // A non-routed endpoint, a health check or a middleware-terminated branch, still has a
         // display name, which is better than falling back to the URL.
         return string.IsNullOrEmpty(endpoint.DisplayName)
             ? Unmatched

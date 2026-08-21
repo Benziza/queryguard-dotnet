@@ -13,9 +13,9 @@ namespace QueryGuard;
 /// without the application passing anything around.
 /// </para>
 /// <para>
-/// The known limitation is the same one: work that deliberately suppresses context flow — through
+/// The known limitation is the same one: work that deliberately suppresses context flow: through
 /// <c>ExecutionContext.SuppressFlow</c>, a custom scheduler that does not capture context, or
-/// fire-and-forget work started before the scope opened — will not be captured. That is documented
+/// fire-and-forget work started before the scope opened: will not be captured. That is documented
 /// behavior rather than a defect, and it is the reason
 /// <see cref="QueryGuardSession.DroppedRecordCount"/> exists.
 /// </para>
@@ -39,7 +39,7 @@ public sealed class AsyncLocalQueryGuardSessionAccessor : IQueryGuardSessionAcce
     /// A scope and the interceptor that feeds it have to read the <em>same</em> accessor, and getting
     /// that wrong fails in the least helpful way available: the scope completes with zero commands, so
     /// every count assertion fails for a reason that has nothing to do with the code under test. This
-    /// default exists so the common case cannot be wired wrong — <c>UseQueryGuard()</c> and
+    /// default exists so the common case cannot be wired wrong: <c>UseQueryGuard()</c> and
     /// <c>QueryGuardScope.Start</c> both land here unless told otherwise.
     /// </para>
     /// <para>
@@ -107,7 +107,7 @@ public sealed class AsyncLocalQueryGuardSessionAccessor : IQueryGuardSessionAcce
         }
 
         // Not in the chain at all. Either this activation was already released, or disposal is
-        // happening on a flow that never saw it — a fire-and-forget continuation, for instance.
+        // happening on a flow that never saw it: a fire-and-forget continuation, for instance.
         // Clearing the accessor here would silently stop capture for an unrelated scope, so the
         // safest action is none.
     }

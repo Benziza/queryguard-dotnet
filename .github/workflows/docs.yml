@@ -3,7 +3,7 @@ name: Docs
 # Third-party actions are pinned to a full commit SHA and updated by Dependabot.
 #
 # The site is built on every pull request that touches it and deployed only from main. A broken link
-# should fail the pull request that introduced it, not the deployment after it merged — docfx exits
+# should fail the pull request that introduced it, not the deployment after it merged: docfx exits
 # with a warning rather than an error for a dead link, so the build below promotes warnings to errors.
 
 on:
@@ -15,7 +15,7 @@ on:
       - '.config/dotnet-tools.json'
       - '.github/workflows/docs.yml'
   # Deliberately unfiltered, unlike the push trigger. This is a required check, and a required check
-  # that is skipped by a path filter never reports — it leaves every pull request touching nothing else
+  # that is skipped by a path filter never reports: it leaves every pull request touching nothing else
   # waiting for a status that will not arrive. A minute of build time is the cheaper problem.
   pull_request:
   workflow_dispatch:

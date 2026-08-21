@@ -12,7 +12,7 @@ namespace QueryGuard;
 /// <remarks>
 /// <para>
 /// A budget asks the user for a number they usually do not have. <c>WithMaxQueries(10)</c> requires
-/// knowing that ten is right — and the honest answer, on an endpoint nobody has measured, is that
+/// knowing that ten is right, and the honest answer, on an endpoint nobody has measured, is that
 /// nobody knows. So the number gets guessed, set too high to be useful, or set too low and then raised
 /// until the build goes green.
 /// </para>
@@ -25,7 +25,7 @@ namespace QueryGuard;
 /// </code>
 /// <para>
 /// That needs no threshold and no judgement to read. It is also the shape of the actual event a user
-/// cares about — not "this endpoint is over budget" but "this pull request changed this endpoint".
+/// cares about, not "this endpoint is over budget" but "this pull request changed this endpoint".
 /// </para>
 /// <para>
 /// Committed to the repository as a file, so the comparison happens against the merge base rather than
@@ -40,7 +40,7 @@ public sealed class QueryGuardBaseline
     /// <remarks>
     /// A baseline is committed, so a file written by one version will be read by another. Additive
     /// fields bump the minor version; removing or repurposing one is breaking. Same contract as the
-    /// JSON report — see <c>docs/decisions/0011-versioning.md</c>.
+    /// JSON report; see <c>docs/decisions/0011-versioning.md</c>.
     /// </remarks>
     public const string SchemaVersion = "1.0";
 

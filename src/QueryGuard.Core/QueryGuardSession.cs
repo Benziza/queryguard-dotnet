@@ -10,8 +10,8 @@ namespace QueryGuard;
 /// <remarks>
 /// <para>
 /// A session has two states. While open it accepts records; once completed it is frozen and
-/// exposes an immutable, deterministically ordered view of what it saw. That boundary matters —
-/// a session that quietly accepted a late record would produce results that depend on timing,
+/// exposes an immutable, deterministically ordered view of what it saw. That boundary matters. A
+/// session that quietly accepted a late record would produce results that depend on timing,
 /// which is the one thing a testing tool cannot afford.
 /// </para>
 /// <para>
@@ -54,7 +54,7 @@ public sealed class QueryGuardSession
     /// </param>
     /// <param name="policy">The policy this session will be evaluated against.</param>
     /// <param name="redactor">
-    /// Supplies the capture settings this session honours — whether a first-occurrence stack trace is
+    /// Supplies the capture settings this session honours: whether a first-occurrence stack trace is
     /// wanted, and how such a trace is filtered. Defaults to a redactor with default options, which
     /// captures no stack traces at all.
     /// </param>
@@ -139,7 +139,7 @@ public sealed class QueryGuardSession
     /// Gets how many records arrived after this session was completed.
     /// </summary>
     /// <remarks>
-    /// Non-zero means work outlived its scope — most often a fire-and-forget task started inside a
+    /// Non-zero means work outlived its scope: most often a fire-and-forget task started inside a
     /// request. Reporters surface it so that the number is a diagnostic rather than a silent loss.
     /// </remarks>
     public int DroppedRecordCount
@@ -189,7 +189,7 @@ public sealed class QueryGuardSession
     /// </returns>
     /// <remarks>
     /// A late record is dropped rather than throwing. This runs on the application's command path,
-    /// and QueryGuard's contract is that observing never changes behavior — throwing here would
+    /// and QueryGuard's contract is that observing never changes behavior: throwing here would
     /// turn a diagnostics race into an application failure. The drop is counted in
     /// <see cref="DroppedRecordCount"/> so it is visible rather than silent.
     /// </remarks>
@@ -218,7 +218,7 @@ public sealed class QueryGuardSession
             var isFirstOccurrence = _seenFingerprints.Add(fingerprint.Id);
 
             // Bounded to one trace per fingerprint. There is deliberately no configuration that
-            // captures a trace per command — that path does not exist in the API.
+            // captures a trace per command: that path does not exist in the API.
             // See docs/decisions/0007-stack-trace-policy.md.
             var stackTrace = isFirstOccurrence
                 && _redactor.Options.CaptureFirstStackTrace
@@ -251,7 +251,7 @@ public sealed class QueryGuardSession
     /// <remarks>
     /// Completion is idempotent: calling it again returns the same snapshot rather than throwing.
     /// The middleware completes in a <c>finally</c> and a test scope completes on disposal, so a
-    /// double completion is a normal consequence of an exception unwinding two layers — not a
+    /// double completion is a normal consequence of an exception unwinding two layers, not a
     /// programming error worth failing a request over.
     /// </remarks>
     public CompletedQueryGuardSession Complete()

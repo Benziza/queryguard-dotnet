@@ -10,7 +10,7 @@ namespace QueryGuard.ProviderTests;
 /// <remarks>
 /// <para>
 /// A contributor without Docker should be able to run the whole suite and get a green result. A
-/// contributor <em>with</em> Docker, and CI, should run these for real — so this skips rather than
+/// contributor <em>with</em> Docker, and CI, should run these for real, so this skips rather than
 /// disappearing behind a compile-time flag, and the skip reason says exactly why.
 /// </para>
 /// <para>

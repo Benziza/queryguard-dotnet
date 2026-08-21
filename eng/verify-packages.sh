@@ -9,7 +9,7 @@
 #
 # The last section is the part that actually matters: it installs the packed packages into a throwaway
 # project from a local feed and runs code against them. Everything before it inspects a zip file;
-# this proves the package works as a package — that the assemblies land in the right lib folders,
+# this proves the package works as a package: that the assemblies land in the right lib folders,
 # that the dependency graph resolves, and that the public API is reachable from outside the solution.
 #
 # Usage: eng/verify-packages.sh [package-directory]
@@ -97,7 +97,7 @@ for name in "${EXPECTED_PACKAGES[@]}"; do
     pass "symbol package present"
     require_entry "$PACKAGE_DIR/$name.$version.snupkg" "\.pdb$" "portable PDB in the symbol package"
   else
-    fail "no .snupkg — consumers would get no symbols"
+    fail "no .snupkg: consumers would get no symbols"
   fi
 
   for framework in "${EXPECTED_FRAMEWORKS[@]}"; do
@@ -117,13 +117,13 @@ for name in "${EXPECTED_PACKAGES[@]}"; do
   # SourceLink writes the repository URL and the exact commit into the nuspec. A consumer stepping
   # into source needs both, and its presence here is what makes the package traceable to a commit.
   #
-  # This is a metadata check, not proof that stepping works end to end — that needs a debugger
+  # This is a metadata check, not proof that stepping works end to end: that needs a debugger
   # against a published symbol server. What it does catch is the failure that actually happens:
   # packing outside a git checkout, which silently drops the commit and leaves the metadata blank.
   if grep -q '<repository type="git"' <<<"$nuspec" && grep -qE '<repository[^>]+commit="[0-9a-f]{40}"' <<<"$nuspec"; then
     pass "repository URL and commit recorded for SourceLink"
   else
-    fail "nuspec has no git repository URL and commit — SourceLink would not resolve"
+    fail "nuspec has no git repository URL and commit: SourceLink would not resolve"
   fi
 
   if grep -q '<license type="expression">MIT</license>' <<<"$nuspec"; then
@@ -170,7 +170,7 @@ else
     require_entry "$tool_nupkg" "^tools/$framework/any/queryguard\.dll$" "tool assembly for $framework"
 
     # Without this the package installs and the command does not exist, which is a confusing way to
-    # fail — `dotnet tool install` reports success.
+    # fail: `dotnet tool install` reports success.
     require_entry "$tool_nupkg" "^tools/$framework/any/DotnetToolSettings\.xml$" "tool manifest for $framework"
   done
 

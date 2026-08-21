@@ -11,7 +11,7 @@ namespace QueryGuard.Reporting.Tests;
 /// </summary>
 /// <remarks>
 /// The failure mode this format has that the others do not: a document can be valid SARIF, upload
-/// without complaint, and still show the wrong thing — an alert with no annotation, an annotation on the
+/// without complaint, and still show the wrong thing: an alert with no annotation, an annotation on the
 /// wrong file, or a fresh alert on every run because the identity moved. So the assertions here are about
 /// the fields GitHub actually reads, not only about the document parsing.
 /// </remarks>

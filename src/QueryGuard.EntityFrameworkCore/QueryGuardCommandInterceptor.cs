@@ -28,7 +28,7 @@ namespace QueryGuard.EntityFrameworkCore;
 /// </para>
 /// <para>
 /// Both the synchronous and asynchronous method pairs are implemented. Implementing only one would
-/// produce a tool that silently misses half of a real application's queries — and real ASP.NET Core
+/// produce a tool that silently misses half of a real application's queries, and real ASP.NET Core
 /// code is overwhelmingly asynchronous.
 /// </para>
 /// </remarks>
@@ -220,8 +220,8 @@ public sealed class QueryGuardCommandInterceptor : DbCommandInterceptor
     /// </para>
     /// <para>
     /// So a command executed as a reader is demoted to <see cref="QueryCommandKind.NonQuery"/> when
-    /// its statement clearly modifies data. The leading keyword is the only signal needed for that —
-    /// this is not, and must not become, SQL parsing.
+    /// its statement clearly modifies data. The leading keyword is the only signal needed for that.
+    /// This is not, and must not become, SQL parsing.
     /// </para>
     /// </remarks>
     private static QueryCommandKind Classify(QueryCommandKind executionKind, string? commandText)

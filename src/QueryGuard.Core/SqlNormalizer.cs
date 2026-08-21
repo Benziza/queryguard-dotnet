@@ -217,7 +217,7 @@ public sealed class SqlNormalizer : ISqlNormalizer
             // so that was every tagged query on every provider.
             //
             // It also means the same directive written either way normalizes identically, which is
-            // right — how the comment was delimited is not part of what the query does.
+            // right: how the comment was delimited is not part of what the query does.
             AppendSeparator(builder);
             builder.Append("/*").Append(comment).Append("*/");
         }
@@ -251,7 +251,7 @@ public sealed class SqlNormalizer : ISqlNormalizer
     /// <remarks>
     /// Covers the families EF Core providers actually emit: <c>@p0</c> and <c>@__city_0</c>
     /// (SQL Server, SQLite, MySQL), <c>$1</c> (PostgreSQL positional), and <c>:name</c> (Oracle and
-    /// some Npgsql configurations). Normalizing these is not optional — without it, provider-generated
+    /// some Npgsql configurations). Normalizing these is not optional: without it, provider-generated
     /// identifiers alone would split a repeated query into N separate groups, which is precisely the
     /// case QueryGuard exists to find.
     /// </remarks>
@@ -281,7 +281,7 @@ public sealed class SqlNormalizer : ISqlNormalizer
         }
 
         // @ and : are followed by an identifier. A lone sigil, or one followed by punctuation, is
-        // something else entirely — PostgreSQL's :: cast operator, for instance.
+        // something else entirely: PostgreSQL's :: cast operator, for instance.
         var nameStart = position;
         while (position < text.Length && (char.IsAsciiLetterOrDigit(text[position]) || text[position] == '_'))
         {

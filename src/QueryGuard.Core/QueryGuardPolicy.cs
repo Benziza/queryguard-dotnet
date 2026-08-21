@@ -409,8 +409,8 @@ public sealed class QueryGuardPolicy
     /// <returns>The reason, or <see langword="null"/> when no entry matches.</returns>
     /// <remarks>
     /// A <c>QueryGuard:Ignore</c> directive on the query itself is handled separately, by the
-    /// detector. Both routes produce the same outcome — a finding marked ignored, with its reason —
-    /// so a user can declare an exception wherever it belongs: next to the query, or next to the
+    /// detector. Both routes produce the same outcome: a finding marked ignored, with its reason, so
+    /// a user can declare an exception wherever it belongs: next to the query, or next to the
     /// policy that guards the endpoint.
     /// </remarks>
     public string? FindAllowlistReason(string? fingerprintId, IReadOnlyList<string>? tags)
