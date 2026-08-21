@@ -124,7 +124,8 @@ public sealed class QueryBudgetEvaluator : IQueryBudgetEvaluator
                     string.Create(CultureInfo.InvariantCulture, $"SQL: {group.Fingerprint.NormalizedSql}"),
                 ],
                 isIgnored: ignoreReason is not null,
-                ignoreReason: ignoreReason));
+                ignoreReason: ignoreReason,
+                stackTrace: group.FirstCapturedStackTrace));
         }
     }
 

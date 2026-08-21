@@ -14,6 +14,10 @@ namespace QueryGuard.Reporting.Tests;
 /// </remarks>
 internal static class ReportFixture
 {
+    private const string CapturedStackTrace =
+        "   at Program.<>c.<<<Main>$>b__0_3>d.MoveNext() in /src/Program.cs:line 89\n"
+        + "   at Program.Main(String[] args) in /src/Program.cs:line 20";
+
     internal static readonly DateTimeOffset FixedInstant = new(2026, 8, 19, 12, 0, 0, TimeSpan.Zero);
 
     internal static readonly Guid FixedSessionId = new("0f9a1c2d-3e4b-5a6c-7d8e-9f0a1b2c3d4e");
@@ -43,7 +47,8 @@ internal static class ReportFixture
                     busy,
                     expected: 5,
                     actual: 51,
-                    evidence: ["Occurrences: 51 (budget: 5)", "Total database time: 84.3 ms"]),
+                    evidence: ["Occurrences: 51 (budget: 5)", "Total database time: 84.3 ms"],
+                    stackTrace: CapturedStackTrace),
                 new QueryFinding(
                     QueryFindingKind.RepeatedQueryCandidate,
                     QueryGuardSeverity.Warning,
@@ -56,7 +61,8 @@ internal static class ReportFixture
                     [
                         "Occurrences: 51 (warning threshold: 3)",
                         "Repeated SQL is strong evidence, not proof of an application-level N+1 defect.",
-                    ]),
+                    ],
+                    stackTrace: CapturedStackTrace),
             ],
             readCommands: 52);
     }

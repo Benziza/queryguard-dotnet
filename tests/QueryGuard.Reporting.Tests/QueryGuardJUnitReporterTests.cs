@@ -47,6 +47,8 @@ public class QueryGuardJUnitReporterTests
         Assert.Equal(RuleNames.MaxOccurrencesPerFingerprint, failure.Attribute("type")!.Value);
         Assert.Contains("the budget is 5", failure.Attribute("message")!.Value, StringComparison.Ordinal);
         Assert.Contains("Occurrences: 51 (budget: 5)", failure.Value, StringComparison.Ordinal);
+        Assert.Contains("origin: /src/Program.cs:line 89", failure.Value, StringComparison.Ordinal);
+        Assert.DoesNotContain("first occurrence at:", failure.Value, StringComparison.Ordinal);
     }
 
     [Fact]

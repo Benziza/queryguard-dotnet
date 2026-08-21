@@ -75,6 +75,16 @@ public class QueryGuardConsoleReporterTests
     }
 
     [Fact]
+    public void A_captured_trace_is_rendered_as_a_readable_origin()
+    {
+        var rendered = _reporter.Render(ReportFixture.FailingResult());
+
+        Assert.Contains("origin: /src/Program.cs:line 89", rendered, StringComparison.Ordinal);
+        Assert.DoesNotContain("first occurrence at:", rendered, StringComparison.Ordinal);
+        Assert.DoesNotContain("<<<Main>$>", rendered, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Long_output_is_truncated_and_says_so()
     {
         // A report that quietly shows ten of forty reads as "there were ten".

@@ -110,6 +110,25 @@ public sealed class QueryFingerprintGroup
     public IReadOnlyList<QueryRecord> Samples { get; }
 
     /// <summary>
+    /// Gets the first retained stack trace for this group, if capture was enabled.
+    /// </summary>
+    internal string? FirstCapturedStackTrace
+    {
+        get
+        {
+            for (var i = 0; i < Samples.Count; i++)
+            {
+                if (Samples[i].StackTrace is { } trace)
+                {
+                    return trace;
+                }
+            }
+
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Gets the query tags recognized on any occurrence in this group.
     /// </summary>
     public IReadOnlyList<string> Tags { get; }
