@@ -77,7 +77,7 @@ a failure.
 The library can do all of this from a test. The command-line tool does the file handling for you:
 
 ```bash
-dotnet tool install -g QueryGuard.Cli --prerelease
+dotnet tool install -g QueryGuard.Cli
 ```
 
 Have the test run write JSON reports:

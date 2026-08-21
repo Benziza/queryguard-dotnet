@@ -4,7 +4,7 @@ This roadmap describes direction, not a schedule. Real usage and false-positive 
 moves next. Open an [issue or discussion](https://github.com/Benziza/queryguard-dotnet/issues/new/choose)
 to add evidence.
 
-## v0.1 preview
+## v0.1
 
 The goal is simple: install QueryGuard, run the sample, and get one actionable repeated-query finding
 in under three minutes.
@@ -61,9 +61,9 @@ next plausible integration because it sends results to tools teams already use.
 
 ### Adoption evidence
 
-Validate QueryGuard in public applications before declaring the API stable. The current target is
-three public projects with setup notes, false positives, and real feedback. Track it in
-[issue #117](https://github.com/Benziza/queryguard-dotnet/issues/117).
+The stable API was checked in three public projects. That work found and fixed one package dependency
+problem. The [validation notes](./case-studies/public-project-validation.md) record the results and
+limits, and [issue #117](https://github.com/Benziza/queryguard-dotnet/issues/117) is complete.
 
 ## How priority is decided
 
@@ -80,7 +80,7 @@ going quiet.
 
 The project should keep expanding when real use produces strong signals such as:
 
-- three public projects using it
+- successful compatibility checks in public projects
 - repeat users across releases
 - false-positive or provider feedback from real applications
 

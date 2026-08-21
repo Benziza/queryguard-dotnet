@@ -8,7 +8,7 @@ produce the same `QueryGuardResult` and use the same assertions.
 Install the helper package:
 
 ```bash
-dotnet add package QueryGuard.AspNetCore.Testing --prerelease
+dotnet add package QueryGuard.AspNetCore.Testing
 ```
 
 Measure a request made through `WebApplicationFactory`:
@@ -50,7 +50,7 @@ measure. Open separate measurements when a test needs separate budgets for separ
 Install the general testing package:
 
 ```bash
-dotnet add package QueryGuard.Testing --prerelease
+dotnet add package QueryGuard.Testing
 ```
 
 Attach QueryGuard when the context is configured:

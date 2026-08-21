@@ -12,6 +12,10 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-21
+
+First stable release. The package API is stable within the `0.1` release line.
+
 ### Added
 
 - Public validation notes record results from three ASP.NET Core projects and the package dependency
@@ -318,7 +322,8 @@ release.
   `Properties/launchSettings.json`, and corrected the query and warning counts quoted in
   `samples/README.md` to what the sample actually logs.
 
-[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.6...main
+[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0...main
+[0.1.0]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.6...v0.1.0
 [0.1.0-preview.6]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.5...v0.1.0-preview.6
 [0.1.0-preview.5]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.5
 [0.1.0-preview.4]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.4

@@ -41,7 +41,7 @@ visible with a written reason.
 For an ASP.NET Core integration test, install the WebApplicationFactory helper:
 
 ```bash
-dotnet add package QueryGuard.AspNetCore.Testing --prerelease
+dotnet add package QueryGuard.AspNetCore.Testing
 ```
 
 Open a measurement, run the request, and assert the result:
@@ -95,7 +95,7 @@ on request paths because they are much more expensive than normal capture.
 If you do not know the right budget yet, record current behavior and compare it in CI:
 
 ```bash
-dotnet tool install -g QueryGuard.Cli --prerelease
+dotnet tool install -g QueryGuard.Cli
 
 queryguard baseline record
 queryguard verify --summary artifacts/queryguard/summary.md
@@ -107,7 +107,7 @@ change and exits successfully.
 Publish the Markdown table as a job summary and sticky pull request comment:
 
 ```yaml
-- uses: Benziza/queryguard-dotnet@v0.1.0-preview.6
+- uses: Benziza/queryguard-dotnet@v0.1.0
   with:
     summary-path: artifacts/queryguard/summary.md
 ```
@@ -148,7 +148,7 @@ QueryGuard is focused on query-count regressions.
 - It does not observe Dapper or raw ADO.NET.
 - It does not collect execution plans or provide a profiler UI.
 - It does not rewrite queries or change HTTP responses.
-- It is still in preview, so public APIs may change before `1.0.0`.
+- The `0.1` public API is stable within the `0.1` release line. The project has not reached `1.0.0`.
 
 Parameter values and connection strings are not captured. Redaction runs before any reporter receives
 SQL. The JSON report has a `schemaVersion` so format changes are explicit.
