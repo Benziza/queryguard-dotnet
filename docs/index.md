@@ -5,7 +5,7 @@ description: Counts the EF Core queries your code actually runs, groups the repe
 
 # Your endpoint returns 200 OK. It also ran the same query 51 times.
 
-A refactor keeps the response correct, keeps the status `200`, keeps every test green — and turns one
+A refactor keeps the response correct, keeps the status `200`, keeps every test green, and turns one
 query into fifty. Nothing about the response says so, because tests assert *what came back*, not how
 many round trips produced it.
 
@@ -13,7 +13,7 @@ QueryGuard counts the EF Core queries your code actually runs, groups the repeat
 into something a test can fail on.
 
 > [!NOTE]
-> It reports repeated-query **candidates**. Repeated SQL is strong evidence of an N+1, not proof — some
+> It reports repeated-query **candidates**. Repeated SQL is strong evidence of an N+1, not proof. Some
 > repetition is correct. Every finding says so, and every intentional exception is recorded with a
 > reason instead of hidden.
 
@@ -75,7 +75,7 @@ has measured, nobody does. So record what it costs today and report what changed
 | `GET /api/reports` | 12 | 3 | -9 (improved) |
 
 The `orders` row is the one worth a second look: the read count did not move, but one query is now
-running seven more of them — which a total-count budget cannot see.
+running seven more of them, which a total-count budget cannot see.
 
 In CI, without writing plumbing:
 
@@ -87,7 +87,7 @@ queryguard verify --summary artifacts/queryguard/summary.md
 ```
 
 ```yaml
-- uses: Benziza/queryguard-dotnet/action@main
+- uses: Benziza/queryguard-dotnet/action@v0.1.0-preview.4
 ```
 
 The action posts that table as a sticky pull request comment. See [baselines](baselines/README.md).
@@ -112,8 +112,8 @@ relational EF Core provider is captured through the same official interception c
 
 It does not prove an N+1, does not see Dapper or raw ADO.NET, produces no execution plans or profiler
 UI, and will not fix your code. Profilers and APM answer *what is slow in production?* QueryGuard
-answers *did this change alter how many queries we run?* — before merge, as a build failure.
+answers *did this change alter how many queries we run?* before merge, as a build failure.
 
 It reads SQL, so the defaults are the contract: no parameter values, no connection strings, nothing
 written into HTTP responses. Redaction runs centrally before any reporter sees a string, so no
-reporter — including one you write — can leak what was never captured.
+reporter, including one you write, can leak what was never captured.

@@ -1,190 +1,115 @@
-# Contributing to QueryGuard.NET
+# Contributing
 
-Thank you for considering a contribution. QueryGuard is a small, deliberately focused
-library, and the fastest way to get a change merged is to keep it focused too.
+Thanks for helping QueryGuard.NET. Focused changes are easier to review and more likely to merge.
 
-## Table of contents
+## Before you start
 
-- [Ground rules](#ground-rules)
-- [Before you write code](#before-you-write-code)
-- [Development environment](#development-environment)
-- [Building and testing](#building-and-testing)
-- [Coding standards](#coding-standards)
-- [Privacy rules for contributions](#privacy-rules-for-contributions)
-- [Branch, commit, and pull request conventions](#branch-commit-and-pull-request-conventions)
-- [What makes a good first contribution](#what-makes-a-good-first-contribution)
-- [Reporting a false positive](#reporting-a-false-positive)
-- [Security issues](#security-issues)
+Small fixes can go straight to a pull request. This includes typos, broken links, small documentation
+improvements, and narrow test corrections.
 
-## Ground rules
+Open an issue first when a change affects:
 
-1. **Issue first.** Every behavior change starts with an accepted issue. This keeps the
-   scope, the acceptance criteria, and the decision history public.
-2. **One behavior per pull request.** A PR that adds a detector *and* refactors the
-   session model is two PRs.
-3. **Tests describe behavior.** A bug fix without a failing-then-passing test is not a
-   fix, it is a guess.
-4. **Never claim more than the evidence supports.** QueryGuard reports *potential* N+1 and
-   repeated-query candidates. Wording that promises certainty will be changed in review.
-5. **Capture less by default.** Any new captured field needs a privacy review and a
-   redaction test.
+- a public API
+- query capture or fingerprinting
+- privacy or redaction
+- detector behavior or default policy
+- provider support claims
 
-## Before you write code
+Search the [issues](https://github.com/Benziza/queryguard-dotnet/issues) and
+[discussions](https://github.com/Benziza/queryguard-dotnet/discussions) before starting a larger change.
+For a false positive, use the dedicated report form. Those reports are especially valuable.
 
-- Search the [issues](https://github.com/Benziza/queryguard-dotnet/issues) and
-  [discussions](https://github.com/Benziza/queryguard-dotnet/discussions) first.
-- For a new capability, open a **Feature request** and describe the workflow pain before
-  proposing an API. The problem statement matters more than the code sketch.
-- For unexpected behavior, open a **Bug report** with a minimal synthetic reproduction.
-- For a legitimate query pattern that QueryGuard flags, use the
-  **False-positive report** form. These are the highest-value reports the project receives.
-- Comment on the issue to claim it. Wait for `status:accepted` before investing
-  significant time — it protects you from writing code that will not be merged.
-
-## Development environment
+## Development setup
 
 | Requirement | Version |
 | --- | --- |
-| .NET SDK | 10.0.100 or later (see [`global.json`](./global.json)) |
-| .NET 8 runtime | Required only to execute the `net8.0` test pass locally |
-| Docker | Required only for the PostgreSQL provider suite |
-
-QueryGuard multi-targets `net8.0` and `net10.0`. The `net10.0` SDK can *build* both, but
-running the `net8.0` test pass locally needs the .NET 8 runtime installed. If you only have
-the .NET 10 runtime, run tests with `-f net10.0` and let CI cover `net8.0`.
+| .NET SDK | 10.0.100 or later, see [`global.json`](./global.json) |
+| .NET 8 runtime | Needed only to run the `net8.0` test pass locally |
+| Docker | Needed only for PostgreSQL, SQL Server, and MySQL provider tests |
 
 ```bash
 git clone https://github.com/Benziza/queryguard-dotnet.git
 cd queryguard-dotnet
 dotnet restore QueryGuard.slnx
+dotnet build QueryGuard.slnx -c Release
+dotnet test QueryGuard.slnx -c Release
 ```
 
-## Building and testing
+If only the .NET 10 runtime is installed, run:
 
-These are exactly the commands CI runs. Run them before marking a PR ready.
+```bash
+dotnet test QueryGuard.slnx -c Release -f net10.0
+```
+
+Provider tests skip when Docker is unavailable. CI runs them with real databases.
+
+Before marking a pull request ready, also run:
 
 ```bash
 dotnet format QueryGuard.slnx --verify-no-changes
-dotnet build QueryGuard.slnx -c Release
-dotnet test QueryGuard.slnx -c Release
-dotnet pack QueryGuard.slnx -c Release -o artifacts/packages
 ```
 
-Useful subsets:
+## Rules that matter
 
-```bash
-# Only the framework you have a runtime for
-dotnet test QueryGuard.slnx -c Release -f net10.0
+- Keep one behavior change per pull request.
+- Add a test for behavior changes and bug fixes.
+- Keep claims precise. QueryGuard reports repeated-query candidates, not semantic proof.
+- Never capture parameter values or connection strings.
+- Apply redaction before data reaches a reporter.
+- Use synthetic schemas and data in tests, samples, and documentation.
+- Do not change generated SQL, suppress commands, alter responses, or replace application exceptions.
+- Keep the interceptor stateless. Session state belongs in `QueryGuardSession`.
+- Do not block asynchronous work with `.Result` or `.Wait()`.
+- Document every public API. Warnings are treated as errors.
 
-# A single project
-dotnet test tests/QueryGuard.Core.Tests/QueryGuard.Core.Tests.csproj
+The full code rules and rationale are in [docs/coding-standards.md](./docs/coding-standards.md).
 
-# Reproduce the sample demo from the README
-dotnet test samples/QueryGuard.SampleTests/QueryGuard.SampleTests.csproj
+## Pull requests
+
+Use a clear branch name and commit message. Maintainer branches follow this pattern:
+
+```text
+feat/QG-123-short-description
+fix/QG-123-short-description
 ```
 
-The PostgreSQL provider suite starts a container through Testcontainers. It skips itself
-automatically when Docker is unavailable, so a missing Docker daemon will not fail your
-local run — but it *will* run in CI.
+External contributors do not need to rename an existing branch to match it.
 
-### The documentation site
+The pull request template asks three things: what changed, why, and how it was tested. That is enough
+for small changes. For public API, capture, privacy, or hot-path changes, also use
+[docs/review-checklist.md](./docs/review-checklist.md).
 
-The site at [benziza.github.io/queryguard-dotnet](https://benziza.github.io/queryguard-dotnet/) is built
-from the Markdown in `docs/` plus an API reference generated from the XML documentation:
+Draft pull requests are welcome. Keep the scope focused, explain unusually large diffs, and resolve
+review conversations before merge. The repository uses squash merges, so the final pull request title
+becomes the commit message.
+
+## Documentation site
+
+Build the local site with:
 
 ```bash
 dotnet tool restore
 dotnet docfx docs/docfx.json --serve
 ```
 
-Then open <http://localhost:8080>. CI runs the same build with `--warningsAsErrors`, so a link to a file
-that does not exist fails the pull request. Two things to know if that happens to you:
+Then open <http://localhost:8080>. CI treats documentation warnings as errors.
 
-- A link out of `docs/` — to `CONTRIBUTING.md` or a workflow file — cannot resolve on the site, because
-  those files are not part of it. Use the full `https://github.com/...` URL; it still works on GitHub.
-- Links into the generated API reference point at the `.yml` file, not the `.html`. DocFX rewrites the
-  extension, and linking the `.html` directly is the version that fails.
+Links from `docs/` to files outside that folder need a full GitHub URL because those files are not
+copied into the site. Links to generated API pages should target the `.yml` file. DocFX rewrites the
+extension.
 
+## Good first contributions
 
-## Coding standards
+Look for the [`good first issue`](https://github.com/Benziza/queryguard-dotnet/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+label. Useful contributions include:
 
-The full rationale lives in [`docs/coding-standards.md`](./docs/coding-standards.md).
-The rules that most often come up in review:
+- synthetic SQL fixtures for a new provider
+- intentional repeated-query scenarios
+- redaction edge cases
+- documentation and sample improvements
 
-- **Warnings are errors.** `TreatWarningsAsErrors` is on. Do not suppress a warning
-  without a comment explaining why the suppression is correct.
-- **Nullable reference types are enabled** and every public API is annotated.
-- **Public API is documented.** Missing XML documentation on a public member fails the build.
-- **The interceptor is stateless.** Request and test state lives in the QueryGuard session,
-  reached through `IQueryGuardSessionAccessor`. Never add static mutable session state.
-- **Never block on async work.** No `.Result`, no `.Wait()`. Implement both the sync and
-  async interceptor paths, and forward `CancellationToken`.
-- **`ConfigureAwait(false)` in library code.** Enforced by analyzer.
-- **Do not hide application behavior.** QueryGuard observes. It must never modify the
-  generated SQL, suppress a command, alter a response, or replace the original exception.
-- **Public collections are read-only** (`IReadOnlyList<T>`, not `List<T>`).
-- **Structured logging only.** Use event IDs and message templates, not interpolated strings.
-
-Formatting is not a review topic: `dotnet format` is the single source of truth and it
-runs as a required check.
-
-## Privacy rules for contributions
-
-QueryGuard reads SQL, so privacy is a product feature rather than a policy document.
-
-- Parameter values are **not** captured by default and must stay that way.
-- Connection strings are never captured, logged, or serialized.
-- Redaction is applied centrally, before any reporter writes output. A reporter must not
-  be able to bypass it.
-- Tests, samples, fixtures, and documentation must use **synthetic** schemas and data.
-  Do not contribute SQL, table names, or output taken from a real employer or customer system.
-
-## Branch, commit, and pull request conventions
-
-| Item | Convention | Example |
-| --- | --- | --- |
-| Branch | `<type>/QG-<id>-<short-kebab-description>` | `feat/QG-021-query-budget-policy` |
-| Commit | `<type>(<scope>): <imperative summary>` | `feat(core): add repeated-query budget` |
-| PR title | `<type>(<scope>): <summary> [QG-###]` | `fix(efcore): isolate parallel sessions [QG-014]` |
-
-Types: `feat`, `fix`, `perf`, `refactor`, `test`, `docs`, `chore`, `ci`.
-Scopes: `core`, `efcore`, `fingerprint`, `detector`, `policy`, `aspnetcore`, `testing`,
-`reporting`, `provider`, `packaging`, `release`, `repo`, `sample`, `docs`.
-
-Pull requests:
-
-- Open as a **draft** early. A visible scope invites feedback before the code is finished.
-- Fill in the pull request template. The privacy and performance sections are not optional.
-- Target **under 400 changed lines**. Above roughly 800 (excluding generated files),
-  explain in the description why the change cannot be split.
-- Merges are **squash only**, so the PR title becomes the commit message. Write it as a
-  changelog entry.
-- All required checks must pass and all conversations must be resolved before merge.
-
-## What makes a good first contribution
-
-Look for [`good first issue`](https://github.com/Benziza/queryguard-dotnet/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
-Particularly welcome:
-
-- **Provider SQL fixtures.** A synthetic SQL sample from a provider we do not test yet is
-  directly useful to the fingerprint normalizer.
-- **False-positive scenarios.** A repeated query that is intentional and bounded, expressed
-  as a test, makes the defaults better for everyone.
-- **Redaction tests.** Any input that could leak a value through a report is a bug worth a test.
-- **Documentation and sample improvements**, especially anything that shortened your own
-  time to a first result.
-
-## Reporting a false positive
-
-Use the false-positive issue form and include the fingerprint ID, occurrence count,
-redacted normalized SQL, and — most importantly — *why the repetition is intentional*.
-Accepted reports become regression fixtures so the behavior stays fixed.
-
-## Security issues
+## Security and conduct
 
 Do not open a public issue for a vulnerability. Follow [SECURITY.md](./SECURITY.md).
 
-## Code of conduct
-
-This project follows the [Contributor Covenant](./CODE_OF_CONDUCT.md). By participating you
-agree to uphold it.
+This project follows the [Contributor Covenant](./CODE_OF_CONDUCT.md).
