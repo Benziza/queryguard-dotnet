@@ -125,7 +125,8 @@ public sealed class QueryGuardConsoleReporter : QueryGuardReporter
 
             if (finding.StackTrace is { } stackTrace)
             {
-                builder.Append("          first occurrence at:").Append('\n').Append(stackTrace).Append('\n');
+                QueryGuardOriginFormatter.Append(builder, stackTrace, "          ");
+                builder.Append('\n');
             }
         }
 

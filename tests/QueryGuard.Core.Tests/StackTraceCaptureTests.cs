@@ -152,6 +152,30 @@ public class StackTraceCaptureTests
     }
 
     [Fact]
+    public void A_captured_trace_reaches_candidate_and_budget_findings()
+    {
+        var redactor = CapturingRedactor();
+        var policy = QueryGuardPolicy.Create("p").WithMaxOccurrencesPerFingerprint(2);
+        var session = new QueryGuardSession("GET /api/companies", policy, redactor);
+
+        for (var i = 0; i < 4; i++)
+        {
+            session.Record(
+                QueryCommandKind.Reader,
+                TestData.Fingerprint(),
+                TimeSpan.Zero,
+                stackTraceProvider: static () => "   at Contoso.Api.Companies.CompanyService.ListDepartments()");
+        }
+
+        var result = new QueryGuardAnalyzer(redactor).Analyze(session.Complete());
+        var candidate = Assert.Single(result.Findings, finding => finding.Kind == QueryFindingKind.RepeatedQueryCandidate);
+        var budget = Assert.Single(result.Findings, finding => finding.Kind == QueryFindingKind.FingerprintOccurrenceBudget);
+
+        Assert.Equal(candidate.StackTrace, budget.StackTrace);
+        Assert.Contains("ListDepartments", budget.StackTrace!, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void With_capture_off_a_finding_has_no_stack_trace()
     {
         var session = new QueryGuardSession("GET /api/companies", QueryGuardPolicy.Create("p"));

@@ -32,15 +32,6 @@ public static class QueryGuardAssert
     private const int MaxEvidenceLinesPerFinding = 6;
 
     /// <summary>
-    /// Frames shown after the origin line, as context.
-    /// </summary>
-    /// <remarks>
-    /// Enough to see the calling method and its caller, which is usually where the loop is. A full
-    /// trace in an assertion message is a wall people stop reading.
-    /// </remarks>
-    private const int MaxOriginContextFrames = 3;
-
-    /// <summary>
     /// Where a reader goes next when they think a finding is wrong.
     /// </summary>
     private const string FalsePositiveGuide =
@@ -273,7 +264,7 @@ public static class QueryGuardAssert
 
             if (finding.StackTrace is { } stackTrace)
             {
-                AppendOrigin(builder, stackTrace);
+                QueryGuardOriginFormatter.Append(builder, stackTrace, "      ");
             }
         }
 
@@ -287,130 +278,4 @@ public static class QueryGuardAssert
         }
     }
 
-    /// <summary>
-    /// Writes where the query was first executed.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The label used to be "first occurrence at:" followed by the raw filtered trace, which read as a
-    /// stack dump — something to skim past. It is the most actionable line in the whole message: it is
-    /// the difference between "this endpoint has a repeated query" and "line 87 has a repeated query".
-    /// </para>
-    /// <para>
-    /// So the nearest application frame goes on the <c>origin:</c> line itself, and the remaining
-    /// frames follow indented as context. Framework frames are already gone — the redactor filters
-    /// them — so the first line here is application code by construction.
-    /// </para>
-    /// </remarks>
-    private static void AppendOrigin(StringBuilder builder, string stackTrace)
-    {
-        var frames = stackTrace.Split('\n');
-        var first = -1;
-
-        for (var i = 0; i < frames.Length; i++)
-        {
-            if (!string.IsNullOrWhiteSpace(frames[i]))
-            {
-                first = i;
-                break;
-            }
-        }
-
-        if (first < 0)
-        {
-            // Filtering removed everything, which means the query came from somewhere with no
-            // application frames at all. Saying nothing beats an empty "origin:" heading.
-            return;
-        }
-
-        builder
-            .AppendLine()
-            .Append(CultureInfo.InvariantCulture, $"      origin: {Readable(frames[first])}");
-
-        var context = 0;
-        var previous = Callable(frames[first]);
-
-        for (var i = first + 1; i < frames.Length && context < MaxOriginContextFrames; i++)
-        {
-            if (string.IsNullOrWhiteSpace(frames[i]))
-            {
-                continue;
-            }
-
-            // An async method appears twice: once with file and line from the state machine's MoveNext,
-            // and once bare. Printing both doubles the trace and says nothing the first line did not.
-            var callable = Callable(frames[i]);
-            if (string.Equals(callable, previous, StringComparison.Ordinal))
-            {
-                continue;
-            }
-
-            previous = callable;
-
-            builder.AppendLine().Append(CultureInfo.InvariantCulture, $"              {frames[i].Trim()}");
-            context++;
-        }
-    }
-
-    /// <summary>
-    /// A stack frame with compiler-generated noise reduced to the part a developer can act on.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// A query issued from a minimal-API endpoint or any lambda comes back through a display class,
-    /// and the real frame reads:
-    /// </para>
-    /// <code>
-    /// at Program.&lt;&gt;c.&lt;&lt;&lt;Main&gt;$&gt;b__0_3&gt;d.MoveNext() in /src/Program.cs:line 89
-    /// </code>
-    /// <para>
-    /// The method name there is an implementation detail of the compiler and carries no information;
-    /// the file and line are the whole answer. So a mangled name is dropped and the location is kept.
-    /// A frame with a real method name keeps it, because then the name is the useful half.
-    /// </para>
-    /// </remarks>
-    private static string Readable(string frame)
-    {
-        var trimmed = frame.Trim();
-        var callable = Callable(frame);
-
-        var isCompilerGenerated = callable.Contains('<', StringComparison.Ordinal)
-            || callable.Contains('>', StringComparison.Ordinal);
-
-        if (!isCompilerGenerated)
-        {
-            return trimmed;
-        }
-
-        var inKeyword = trimmed.IndexOf(" in ", StringComparison.Ordinal);
-
-        // Without a location there is nothing left worth printing, so the mangled name stays: an
-        // unreadable answer beats no answer.
-        return inKeyword < 0 ? trimmed : trimmed[(inKeyword + 4)..].Trim();
-    }
-
-    /// <summary>
-    /// The method part of a stack frame, without file, line, or leading "at".
-    /// </summary>
-    /// <remarks>
-    /// Used only to spot the same method appearing twice. Comparing whole lines would not work: the two
-    /// copies differ precisely in the part that makes one of them useful.
-    /// </remarks>
-    private static string Callable(string frame)
-    {
-        var span = frame.AsSpan().Trim();
-
-        if (span.StartsWith("at ", StringComparison.Ordinal))
-        {
-            span = span[3..];
-        }
-
-        var inKeyword = span.IndexOf(" in ", StringComparison.Ordinal);
-        if (inKeyword >= 0)
-        {
-            span = span[..inKeyword];
-        }
-
-        return span.Trim().ToString();
-    }
 }
