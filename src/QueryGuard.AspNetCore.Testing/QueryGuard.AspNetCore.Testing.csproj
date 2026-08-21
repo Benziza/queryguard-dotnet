@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QueryGuard.AspNetCore.Testing</RootNamespace>
+    <Description>Measure EF Core queries from WebApplicationFactory tests with one setup call. Preserves the test execution context, disables request middleware, and wires the matching session accessor.</Description>
+    <PackageTags>aspnetcore;webapplicationfactory;integration-testing;query-budget;n-plus-one;ef-core</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../QueryGuard.AspNetCore/QueryGuard.AspNetCore.csproj" />
+    <ProjectReference Include="../QueryGuard.Testing/QueryGuard.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+
+</Project>

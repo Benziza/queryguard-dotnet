@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QueryGuard.AspNetCore.Testing.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/QueryGuard.AspNetCore.Testing/QueryGuard.AspNetCore.Testing.csproj" />
+    <ProjectReference Include="../../testapps/QueryGuard.AspNetCore.Testing.TestApp/QueryGuard.AspNetCore.Testing.TestApp.csproj" />
+  </ItemGroup>
+
+</Project>

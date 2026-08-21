@@ -12,6 +12,7 @@
 /src/QueryGuard.Core/                   @Benziza
 /src/QueryGuard.EntityFrameworkCore/    @Benziza
 /src/QueryGuard.AspNetCore/             @Benziza
+/src/QueryGuard.AspNetCore.Testing/     @Benziza
 /src/QueryGuard.Testing/                @Benziza
 /src/QueryGuard.Reporting/              @Benziza
 

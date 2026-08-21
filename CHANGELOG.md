@@ -12,6 +12,12 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+### Added
+
+- `QueryGuard.AspNetCore.Testing` opens a query measurement around a `WebApplicationFactory` client
+  with one call. It preserves the test execution context, disables request middleware, and wires the
+  hosted application's session accessor and EF Core context.
+
 ### Fixed
 
 - The documentation site rendered the navbar logo at its natural 128px inside a 60px navbar, so it

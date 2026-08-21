@@ -24,6 +24,7 @@ EXPECTED_PACKAGES=(
   QueryGuard.Core
   QueryGuard.EntityFrameworkCore
   QueryGuard.AspNetCore
+  QueryGuard.AspNetCore.Testing
   QueryGuard.Testing
   QueryGuard.Reporting
 )
@@ -43,7 +44,9 @@ pass() {
 require_entry() {
   local package="$1" pattern="$2" description="$3"
 
-  if unzip -Z1 "$package" | grep -qE "$pattern"; then
+  # Read the full archive listing. With pipefail, grep -q can close the pipe after the first match and
+  # make unzip report a broken pipe, which turns a present entry into an intermittent failure.
+  if unzip -Z1 "$package" | grep -E "$pattern" >/dev/null; then
     pass "$description"
   else
     fail "$description (no entry matching '$pattern')"
@@ -253,6 +256,7 @@ cat >Consumer.csproj <<XML
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="QueryGuard.EntityFrameworkCore" Version="$package_version" />
+    <PackageReference Include="QueryGuard.AspNetCore.Testing" Version="$package_version" />
     <PackageReference Include="QueryGuard.Testing" Version="$package_version" />
     <PackageReference Include="QueryGuard.Reporting" Version="$package_version" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
@@ -266,7 +270,9 @@ cat >Program.cs <<'CSHARP'
 using System;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Testing;
 using QueryGuard;
+using QueryGuard.AspNetCore.Testing;
 using QueryGuard.EntityFrameworkCore;
 using QueryGuard.Reporting;
 using QueryGuard.Testing;
@@ -316,6 +322,15 @@ if (!report.Contains("\"schemaVersion\"", StringComparison.Ordinal))
 
 Console.WriteLine($"Consumer smoke test passed: {result.ReadCommandCount} reads, {result.FailureCount} failure(s).");
 
+_ = (Func<WebApplicationFactory<ConsumerEntryPoint>, QueryGuardWebApplicationMeasurement<ConsumerEntryPoint>>)
+    CompileWebHelper;
+
+// Kept as a compile-only check. Starting a WebApplicationFactory needs a real web entry point, which
+// the package integration tests provide.
+static QueryGuardWebApplicationMeasurement<ConsumerEntryPoint> CompileWebHelper(
+    WebApplicationFactory<ConsumerEntryPoint> factory)
+    => factory.TrackQueries<ConsumerEntryPoint, CatalogContext>("consumer-web");
+
 internal sealed class CatalogContext : DbContext
 {
     public CatalogContext(DbContextOptions<CatalogContext> options)
@@ -324,6 +339,10 @@ internal sealed class CatalogContext : DbContext
     }
 
     public DbSet<Widget> Widgets => Set<Widget>();
+}
+
+internal sealed class ConsumerEntryPoint
+{
 }
 
 internal sealed class Widget
