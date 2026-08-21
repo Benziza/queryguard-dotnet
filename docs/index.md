@@ -87,7 +87,7 @@ queryguard verify --summary artifacts/queryguard/summary.md
 ```
 
 ```yaml
-- uses: Benziza/queryguard-dotnet/action@v0.1.0-preview.4
+- uses: Benziza/queryguard-dotnet@v0.1.0-preview.5
 ```
 
 The action posts that table as a sticky pull request comment. See [baselines](baselines/README.md).

@@ -101,7 +101,7 @@ change and exits successfully.
 Publish the Markdown table as a job summary and sticky pull request comment:
 
 ```yaml
-- uses: Benziza/queryguard-dotnet/action@v0.1.0-preview.4
+- uses: Benziza/queryguard-dotnet@v0.1.0-preview.5
   with:
     summary-path: artifacts/queryguard/summary.md
 ```

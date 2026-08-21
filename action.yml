@@ -1,0 +1,49 @@
+name: QueryGuard Report
+description: Publish EF Core query regressions as a job summary and sticky pull request comment.
+author: Mohamed Benziza
+
+branding:
+  icon: activity
+  color: purple
+
+inputs:
+  summary-path:
+    description: Path or glob for the Markdown report to publish.
+    required: false
+    default: artifacts/queryguard/summary.md
+
+  github-token:
+    description: Token used to post the pull request comment.
+    required: false
+    default: ${{ github.token }}
+
+  comment:
+    description: Set to false to publish only the job summary.
+    required: false
+    default: 'true'
+
+  title:
+    description: Heading used to find and update the sticky comment.
+    required: false
+    default: QueryGuard
+
+  fail-on-missing:
+    description: Set to true when a missing summary file should fail the step.
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Publish QueryGuard report
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        QG_SUMMARY_PATH: ${{ inputs.summary-path }}
+        QG_COMMENT: ${{ inputs.comment }}
+        QG_TITLE: ${{ inputs.title }}
+        QG_FAIL_ON_MISSING: ${{ inputs.fail-on-missing }}
+        QG_REPO: ${{ github.repository }}
+        QG_EVENT: ${{ github.event_name }}
+        QG_PR: ${{ github.event.pull_request.number }}
+      run: bash "${{ github.action_path }}/action/publish.sh"

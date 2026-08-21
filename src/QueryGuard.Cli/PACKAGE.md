@@ -83,7 +83,7 @@ a sticky pull request comment:
 ```yaml
 - run: dotnet test
 - run: queryguard verify --summary artifacts/queryguard/summary.md
-- uses: Benziza/queryguard-dotnet/action@main
+- uses: Benziza/queryguard-dotnet@v0.1.0-preview.5
 ```
 
 Full documentation:
