@@ -105,7 +105,7 @@ public class QueryGuardPolicyTests
     public void A_repeated_query_threshold_below_two_is_rejected(int threshold)
     {
         // A threshold of one would report every single query as repeated, which is not a useful
-        // configuration — it is a misunderstanding worth failing loudly.
+        // configuration: it is a misunderstanding worth failing loudly.
         var exception = Assert.Throws<ArgumentOutOfRangeException>(
             () => QueryGuardPolicy.Create("bad").WithRepeatedQueryThreshold(threshold));
 

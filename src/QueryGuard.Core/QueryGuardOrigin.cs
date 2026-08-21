@@ -9,7 +9,7 @@ namespace QueryGuard;
 /// <remarks>
 /// <para>
 /// A captured trace is text, which is fine for printing and useless for anything that needs the file and
-/// the line as separate values — SARIF wants a URI and an integer, not a sentence. This turns the first
+/// the line as separate values: SARIF wants a URI and an integer, not a sentence. This turns the first
 /// application frame into those two values, or reports that it could not.
 /// </para>
 /// <para>

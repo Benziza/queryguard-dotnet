@@ -8,7 +8,7 @@ namespace QueryGuard.Tests;
 /// </summary>
 /// <remarks>
 /// The consequence of getting this wrong is not an exception, it is an annotation on the wrong line of
-/// the wrong file — so the cases that matter most are the ones where it must decline to answer.
+/// the wrong file, so the cases that matter most are the ones where it must decline to answer.
 /// </remarks>
 public class QueryGuardOriginTests
 {

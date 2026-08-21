@@ -18,7 +18,7 @@ public static class QueryGuardApplicationBuilderExtensions
     /// <para>
     /// <strong>Placement matters.</strong> Call this <em>after</em> <c>UseRouting</c>, because the scope
     /// name comes from the matched endpoint's route pattern. Called earlier, no endpoint is matched yet
-    /// and every request lands in a single unmatched scope — QueryGuard still works, but every report
+    /// and every request lands in a single unmatched scope: QueryGuard still works, but every report
     /// loses the one label that makes it useful.
     /// </para>
     /// <para>

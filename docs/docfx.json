@@ -54,7 +54,7 @@
       "_appTitle": "QueryGuard.NET",
       "_appLogoPath": "assets/queryguard-logo.svg",
       "_appFaviconPath": "assets/queryguard-icon.png",
-      "_appFooter": "<span>QueryGuard.NET — MIT licensed. Preview: the API will change before 1.0.0.</span>",
+      "_appFooter": "<span>QueryGuard.NET: MIT licensed. Preview: the API will change before 1.0.0.</span>",
       "_enableSearch": true,
       "_gitContribute": {
         "repo": "https://github.com/Benziza/queryguard-dotnet",

@@ -26,7 +26,7 @@ builder.Services.AddQueryGuard(options =>
     options.Enabled = builder.Environment.IsDevelopment();
 
     // A warning, not a failure. Installing QueryGuard should tell you what it sees before it starts
-    // failing anything — that is what makes it safe to add to an existing project.
+    // failing anything: that is what makes it safe to add to an existing project.
     options.DefaultPolicy = QueryGuardPolicy.Create("default")
         .WithMaxQueries(20, QueryGuardSeverity.Warning)
         .WithRepeatedQueryThreshold(3);

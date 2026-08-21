@@ -21,7 +21,7 @@ namespace QueryGuard.AspNetCore.Tests;
 /// regression that was never really there.
 /// </para>
 /// <para>
-/// So the routes exercised here have <em>deliberately different</em> read counts — 7, 3 and 1. If
+/// So the routes exercised here have <em>deliberately different</em> read counts: 7, 3 and 1. If
 /// every route ran the same number of queries, a record crossing between two requests would still
 /// produce the expected totals everywhere and the bug would pass. Distinct counts are what make
 /// leakage detectable rather than merely unlikely.
@@ -188,7 +188,7 @@ public class RequestIsolationStressTests
     /// </summary>
     /// <remarks>
     /// Read back out of the formatted message rather than through a test-only hook, because the log
-    /// line <em>is</em> the middleware's observable output — the thing an operator actually reads.
+    /// line <em>is</em> the middleware's observable output: the thing an operator actually reads.
     /// Parsing it means these tests also fail if its shape changes, which is the right place for that
     /// to surface.
     /// </remarks>

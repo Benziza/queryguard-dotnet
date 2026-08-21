@@ -15,7 +15,7 @@ namespace QueryGuard.EntityFrameworkCore;
 /// Before this existed, capturing a single query took three correct decisions: construct the
 /// interceptor, hand it a fingerprint factory, and make sure its session accessor was the same
 /// instance the scope would use. Getting the third one wrong produced the least helpful failure
-/// available — the scope completed with zero commands, so an assertion about query counts failed for
+/// available: the scope completed with zero commands, so an assertion about query counts failed for
 /// a reason that had nothing to do with query counts.
 /// </para>
 /// <para>

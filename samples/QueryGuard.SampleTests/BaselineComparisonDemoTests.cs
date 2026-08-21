@@ -24,7 +24,7 @@ namespace QueryGuard.SampleTests;
 /// <para>
 /// It is also the regression test for the sample itself. The numbers in the README and in
 /// <c>samples/README.md</c> are the numbers in that baseline file, so if an endpoint's query count ever
-/// moves, this fails and says which one — rather than the documentation quietly becoming wrong.
+/// moves, this fails and says which one, rather than the documentation quietly becoming wrong.
 /// </para>
 /// </remarks>
 public sealed class BaselineComparisonDemoTests : IClassFixture<SampleApiFactory>
@@ -87,7 +87,7 @@ public sealed class BaselineComparisonDemoTests : IClassFixture<SampleApiFactory
     /// <remarks>
     /// Skipped, because accepting a change in what the sample costs should be a deliberate act rather
     /// than something a test run does on its own. Remove the <c>Skip</c>, run this one test, and commit
-    /// the file — the diff is then the record of the decision. This is the same workflow a real project
+    /// the file: the diff is then the record of the decision. This is the same workflow a real project
     /// follows, which is why it lives here rather than in a script.
     /// </remarks>
     [Fact(Skip = "Maintenance helper. Remove the Skip, run it, and commit the file it writes.")]
@@ -152,7 +152,7 @@ public sealed class BaselineComparisonDemoTests : IClassFixture<SampleApiFactory
     /// </summary>
     /// <remarks>
     /// A file rather than  directly. The test's job is to measure and render;
-    /// deciding where a report goes — job summary, pull request comment, both — belongs to whatever
+    /// deciding where a report goes, job summary, pull request comment, both, belongs to whatever
     /// publishes it, and writing a file works identically on a laptop and in CI.
     /// </remarks>
     private static async Task WriteSummaryAsync(string markdown)

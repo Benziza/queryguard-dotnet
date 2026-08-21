@@ -6,8 +6,8 @@ namespace QueryGuard;
 /// Thrown when a baseline document cannot be read.
 /// </summary>
 /// <remarks>
-/// A distinct type so a caller can tell "the baseline file is wrong" — a configuration problem someone
-/// has to fix — from "this scope has no baseline yet", which is normal and is reported by
+/// A distinct type so a caller can tell "the baseline file is wrong": a configuration problem someone
+/// has to fix, from "this scope has no baseline yet", which is normal and is reported by
 /// <see cref="QueryGuardBaseline.Find"/> returning <see langword="null"/>.
 /// </remarks>
 public sealed class QueryGuardBaselineFormatException : Exception

@@ -14,7 +14,7 @@ namespace QueryGuard;
 /// </para>
 /// <para>
 /// Only the recognized <c>QueryGuard:</c> prefix is retained. An arbitrary tag is a comment like any
-/// other and is stripped during normalization — QueryGuard does not keep text it was not asked to
+/// other and is stripped during normalization: QueryGuard does not keep text it was not asked to
 /// interpret.
 /// </para>
 /// </remarks>
@@ -47,7 +47,7 @@ public static class QueryGuardQueryTag
     /// </summary>
     /// <param name="commandText">The command text, which may be <see langword="null"/>.</param>
     /// <returns>
-    /// The directives found, or <see langword="null"/> when there are none — which is the common case
+    /// The directives found, or <see langword="null"/> when there are none, which is the common case
     /// and avoids allocating an empty collection per command.
     /// </returns>
     /// <remarks>

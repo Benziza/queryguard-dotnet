@@ -115,7 +115,7 @@ public sealed class QueryGuardCommandInterceptorTests : IDisposable
     [Fact]
     public async Task A_write_is_recorded_but_does_not_count_toward_a_read_budget()
     {
-        // A budget of ten reads must mean ten reads regardless of how many entities are saved — and
+        // A budget of ten reads must mean ten reads regardless of how many entities are saved, and
         // regardless of which execution path the provider happens to use. On SQLite, EF Core runs
         // INSERT ... RETURNING through the reader path so it can read the generated key back, so
         // trusting the execution method alone would count every inserted row as a read.

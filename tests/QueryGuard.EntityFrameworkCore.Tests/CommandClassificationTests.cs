@@ -21,7 +21,7 @@ namespace QueryGuard.EntityFrameworkCore.Tests;
 /// </code>
 /// <para>
 /// Classification tested only the leading keyword, saw <c>SET</c>, and left the command counted as a
-/// read — so every <c>SaveChanges</c> on SQL Server consumed a read budget. The captured fixtures
+/// read, so every <c>SaveChanges</c> on SQL Server consumed a read budget. The captured fixtures
 /// could not notice, because a fixture only contains SQL somebody thought to capture.
 /// </para>
 /// <para>
@@ -64,7 +64,7 @@ public class CommandClassificationTests
     /// </summary>
     /// <remarks>
     /// The statements reference tables that do not exist, so every one of them fails. That is fine and
-    /// deliberate: a failed command is still recorded, and classification is the thing under test —
+    /// deliberate: a failed command is still recorded, and classification is the thing under test,
     /// not whether SQLite can run SQL Server's syntax. It also exercises the failure path, where EF
     /// Core reports no execution method and the statement is the only evidence available.
     /// </remarks>

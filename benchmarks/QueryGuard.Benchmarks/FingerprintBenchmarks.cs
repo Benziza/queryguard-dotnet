@@ -11,8 +11,8 @@ namespace QueryGuard.Benchmarks;
 /// <remarks>
 /// <para>
 /// This runs once per intercepted command, so it is the second-most-executed code in the project after
-/// the session lookup. The scenarios separate the two halves — normalization and redaction versus the
-/// hash — because if this ever becomes a problem, knowing which half to attack matters more than
+/// the session lookup. The scenarios separate the two halves: normalization and redaction versus the
+/// hash, because if this ever becomes a problem, knowing which half to attack matters more than
 /// knowing the total.
 /// </para>
 /// <para>
@@ -153,7 +153,7 @@ public class SessionCaptureBenchmarks
 /// What the optional stack trace costs when it is turned on.
 /// </summary>
 /// <remarks>
-/// The point of this benchmark is to justify — or overturn — the default in
+/// The point of this benchmark is to justify, or overturn, the default in
 /// <c>docs/decisions/0007-stack-trace-policy.md</c>. Capture is bounded to one trace per fingerprint,
 /// so the parameter that matters is how many <em>distinct</em> queries a scope sees, not how many
 /// commands it runs.

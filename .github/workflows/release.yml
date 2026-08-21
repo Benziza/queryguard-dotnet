@@ -4,7 +4,7 @@ name: Release
 # credentials. See docs/decisions/0012-trusted-publishing.md.
 #
 # The work is split in two on purpose. `verify` builds, tests, packs and checks the packages, and
-# runs on a manual dispatch as well as on a tag — so a release can be rehearsed end to end without
+# runs on a manual dispatch as well as on a tag, so a release can be rehearsed end to end without
 # publishing anything. `publish` is the only job that can push, it runs only for a `v*` tag, and it
 # consumes the artifact `verify` produced rather than building its own. What ships is exactly what
 # was verified, by construction rather than by convention.
@@ -15,7 +15,7 @@ on:
       - "v*"
 
   # A manual run is always a dry run. There is no input that turns publishing on, because the
-  # publish job is gated on the ref being a tag — a rehearsal cannot become a release by accident,
+  # publish job is gated on the ref being a tag: a rehearsal cannot become a release by accident,
   # or by someone ticking the wrong box.
   workflow_dispatch: {}
 
@@ -51,7 +51,7 @@ jobs:
         run: dotnet restore QueryGuard.slnx
 
       # A tag that disagrees with the packaged version would publish something nobody asked for, under
-      # a name that can never be corrected — a published NuGet version is immutable.
+      # a name that can never be corrected: a published NuGet version is immutable.
       #
       # Asked of MSBuild rather than parsed out of XML. The first version of this step used a regex
       # over Directory.Build.props containing a variable-length lookbehind, which PCRE rejects: grep
@@ -84,7 +84,7 @@ jobs:
             fi
           else
             # A rehearsal has no tag to compare against, so it checks the shape instead. Without this
-            # a broken version resolution passes every dry run and fails only on the tag — which is
+            # a broken version resolution passes every dry run and fails only on the tag, which is
             # exactly how the bug above survived two rehearsals.
             if ! printf '%s' "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
               echo "::error::Resolved version '$version' is not a valid semantic version."

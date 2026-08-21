@@ -13,8 +13,8 @@ namespace QueryGuard.ProviderTests;
 /// </summary>
 /// <remarks>
 /// SQLite is the workhorse: real relational execution with no container to start, so it can afford to
-/// cover the whole surface — interception, fingerprint stability, budget evaluation, failure handling —
-/// on every change. PostgreSQL then checks that none of it is accidentally SQLite-shaped.
+/// cover interception, fingerprint stability, budget evaluation, and failure handling on every change.
+/// PostgreSQL then checks that none of it is accidentally SQLite-shaped.
 /// </remarks>
 public sealed class SqliteProviderSuiteTests : IDisposable
 {

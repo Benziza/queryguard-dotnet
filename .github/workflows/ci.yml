@@ -175,7 +175,7 @@ jobs:
 
       # Publishes the baseline table the sample tests just wrote. Dogfooding the action this
       # repository ships: if it breaks, it breaks here first rather than in someone else's pipeline.
-      # Ubuntu only — one comment per pull request, not one per matrix leg.
+      # Ubuntu only: one comment per pull request, not one per matrix leg.
       - name: Publish the QueryGuard report
         if: matrix.os == 'ubuntu-latest'
         uses: ./
@@ -188,7 +188,7 @@ jobs:
       #
       # This is the only check that a SARIF document is not merely valid. GitHub rejects a malformed
       # upload, so it validates the schema, and the resulting alert shows whether the location
-      # actually resolved — a file can parse, upload, and annotate nothing.
+      # actually resolved: a file can parse, upload, and annotate nothing.
       #
       # Ubuntu only, and never from a fork: an upload needs security-events: write, which a pull
       # request from a fork does not get, and a step that fails for a permission it was never going
@@ -259,7 +259,7 @@ jobs:
   # A smoke run, not a measurement. `--job Dry` executes every benchmark once, which proves the
   # harness still compiles and runs; it says nothing about timing. A benchmark job that gated a pull
   # request would be either too slow to be useful or too short to be accurate, and CI runners are
-  # shared hardware. Published numbers come from a quiet machine and disclose it — see
+  # shared hardware. Published numbers come from a quiet machine and disclose it: see
   # docs/benchmarks.md.
   benchmark-smoke:
     name: benchmark-smoke

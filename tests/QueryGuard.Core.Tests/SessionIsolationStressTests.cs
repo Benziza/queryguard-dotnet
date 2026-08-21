@@ -18,7 +18,7 @@ namespace QueryGuard.Tests;
 /// </para>
 /// <para>
 /// These tests are never retried. A flake here is a real defect in either the code or the test,
-/// and it is the most expensive class of bug QueryGuard can have — every number it reports depends
+/// and it is the most expensive class of bug QueryGuard can have: every number it reports depends
 /// on this working. See <c>docs/testing-strategy.md</c>.
 /// </para>
 /// </remarks>
@@ -163,7 +163,7 @@ public class SessionIsolationStressTests
     public async Task Concurrent_completion_and_recording_never_corrupts_a_session()
     {
         // A request can be cancelled or time out while EF operations are still in flight. The
-        // session must either record a command or drop it — never produce a torn record or lose
+        // session must either record a command or drop it: never produce a torn record or lose
         // count of what happened.
         const int Writers = 16;
         const int WritesPerWriter = 200;
@@ -204,7 +204,7 @@ public class SessionIsolationStressTests
             await completer;
 
             // Completion is idempotent, so this returns the same snapshot the racing completer
-            // produced — but with the drop count refreshed now that every writer has finished.
+            // produced, but with the drop count refreshed now that every writer has finished.
             var completed = session.Complete();
 
             Assert.Equal(completed.Records.Count, accepted.Count);

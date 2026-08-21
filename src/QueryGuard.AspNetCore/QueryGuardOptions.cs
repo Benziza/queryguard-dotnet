@@ -71,7 +71,7 @@ public sealed class QueryGuardOptions
     /// </summary>
     /// <param name="routePattern">
     /// The endpoint's route pattern, for example <c>GET /api/reports/{id}</c>. This is the pattern, not
-    /// a resolved URL — see <see cref="QueryGuardMiddleware"/>.
+    /// a resolved URL; see <see cref="QueryGuardMiddleware"/>.
     /// </param>
     /// <param name="configure">Adjusts the policy for this endpoint.</param>
     /// <returns>These options, for chaining.</returns>

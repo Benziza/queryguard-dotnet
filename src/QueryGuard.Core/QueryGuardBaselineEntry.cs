@@ -13,7 +13,7 @@ namespace QueryGuard;
 /// </para>
 /// <para>
 /// No timings either. Durations vary between a laptop and a shared runner, so a baseline containing
-/// them would report a regression whenever CI was busy — which is the failure mode that teaches people
+/// them would report a regression whenever CI was busy, which is the failure mode that teaches people
 /// to ignore a tool.
 /// </para>
 /// </remarks>
@@ -22,7 +22,7 @@ public sealed class QueryGuardBaselineEntry
     /// <summary>
     /// Initializes a new instance of the <see cref="QueryGuardBaselineEntry"/> class.
     /// </summary>
-    /// <param name="scope">The scope this entry describes — a route pattern or a test name.</param>
+    /// <param name="scope">The scope this entry describes: a route pattern or a test name.</param>
     /// <param name="readCommands">Counted read commands the scope executed.</param>
     /// <param name="distinctQueries">How many distinct fingerprints it executed.</param>
     /// <param name="topFingerprintOccurrences">

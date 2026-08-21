@@ -8,7 +8,7 @@ namespace QueryGuard;
 /// aggregated.
 /// </summary>
 /// <remarks>
-/// Grouping happens once, when the session completes — never per command. The capture path stays
+/// Grouping happens once, when the session completes: never per command. The capture path stays
 /// an append so that installing QueryGuard does not change how the application performs.
 /// </remarks>
 public sealed class QueryFingerprintGroup

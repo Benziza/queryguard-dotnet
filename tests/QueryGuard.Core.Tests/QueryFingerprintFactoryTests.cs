@@ -32,7 +32,7 @@ public class QueryFingerprintFactoryTests
     public void The_identifier_does_not_depend_on_string_hash_randomization()
     {
         // string.GetHashCode() is randomized per process, so a fingerprint built on it would change
-        // between runs — breaking allowlists, issue reports, and CI comparisons. This asserts the
+        // between runs: breaking allowlists, issue reports, and CI comparisons. This asserts the
         // digest is derived from the text itself rather than from a runtime hash.
         var fingerprint = _factory.Create("SELECT 1", QueryCommandKind.Reader);
 

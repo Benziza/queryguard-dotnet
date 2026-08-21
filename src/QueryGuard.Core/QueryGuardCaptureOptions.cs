@@ -9,8 +9,8 @@ namespace QueryGuard;
 /// <remarks>
 /// <para>
 /// These defaults are part of the package's public contract, not a convenience. QueryGuard output
-/// is meant to be shared — pasted into a pull request, uploaded as a CI artifact, attached to a
-/// GitHub issue — so anything it captures should be assumed to end up somewhere public. Every
+/// is meant to be shared: pasted into a pull request, uploaded as a CI artifact, attached to a
+/// GitHub issue, so anything it captures should be assumed to end up somewhere public. Every
 /// default here is the least it can retain while still producing usable evidence.
 /// </para>
 /// <para>
@@ -57,7 +57,7 @@ public sealed class QueryGuardCaptureOptions
     /// Enabling this puts real user data into every report QueryGuard produces, including any you
     /// then attach to a public issue or a CI artifact. It exists because a repeated query executed
     /// with 51 <em>different</em> key values is much stronger evidence of an N+1 than the same query
-    /// executed 51 times — but that is a trade you have to make deliberately.
+    /// executed 51 times, but that is a trade you have to make deliberately.
     /// </para>
     /// <para>
     /// Parameter <em>names</em> are never retained either way; only the count is.

@@ -16,13 +16,13 @@ namespace QueryGuard.Benchmarks;
 /// </para>
 /// <para>
 /// A smoke run that proves the harness works without waiting for statistical convergence:
-/// <c>… -- --filter * --job Dry</c>. That is what CI uses — a benchmark job that gates a pull request
+/// <c>… -- --filter * --job Dry</c>. That is what CI uses: a benchmark job that gates a pull request
 /// would either be too slow to be useful or too short to be accurate.
 /// </para>
 /// <para>
 /// Every published number must carry the hardware, OS, .NET version, EF Core version, provider,
 /// scenario configuration, sample size, and source commit that produced it. BenchmarkDotNet prints all
-/// of that in its header — publish the header with the table, or the table means nothing. See
+/// of that in its header: publish the header with the table, or the table means nothing. See
 /// <c>docs/testing-strategy.md</c>.
 /// </para>
 /// </remarks>

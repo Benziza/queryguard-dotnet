@@ -16,7 +16,7 @@ namespace QueryGuard.ProviderTests;
 /// <para>
 /// SQLite proves the design works. PostgreSQL proves it is not accidentally SQLite-shaped. Npgsql
 /// generates positional <c>$1</c> parameters and casts identifiers differently, which is exactly the
-/// class of difference that would hide in a single-provider suite — and if the normalizer failed to
+/// class of difference that would hide in a single-provider suite, and if the normalizer failed to
 /// group Npgsql's SQL, a per-parent query in a loop would look like N distinct queries and QueryGuard
 /// would report nothing at all.
 /// </para>

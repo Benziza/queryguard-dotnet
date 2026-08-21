@@ -14,7 +14,7 @@ namespace QueryGuard.Cli;
 /// <remarks>
 /// <para>
 /// The library can already record a baseline and compare against it. Doing that meant writing file
-/// handling into a test — reading JSON, walking a directory, deciding where the repository root is. That
+/// handling into a test: reading JSON, walking a directory, deciding where the repository root is. That
 /// is plumbing every project would write identically, and getting it subtly wrong produces a report that
 /// is silently missing rather than wrong.
 /// </para>
@@ -243,7 +243,7 @@ internal static class Program
     /// </summary>
     /// <remarks>
     /// A directory, a glob, or a single file all work, because a caller should not have to know which
-    /// shape this expects. Files that are not QueryGuard reports are skipped rather than fatal — a
+    /// shape this expects. Files that are not QueryGuard reports are skipped rather than fatal: a
     /// coverage file sitting in the same directory should not stop the run.
     /// </remarks>
     private static List<QueryGuardBaselineEntry> ReadReports(string path, out int scanned)
@@ -316,7 +316,7 @@ internal static class Program
     /// </summary>
     /// <remarks>
     /// The informational version rather than the assembly version, because the assembly version of every
-    /// preview is <c>0.1.0.0</c> — a bug report quoting it cannot say which preview it came from. This one
+    /// preview is <c>0.1.0.0</c>: a bug report quoting it cannot say which preview it came from. This one
     /// carries the suffix and the commit SourceLink stamped in, which is what makes a report actionable.
     /// </remarks>
     internal static string Version()

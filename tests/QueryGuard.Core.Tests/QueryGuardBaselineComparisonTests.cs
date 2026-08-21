@@ -9,7 +9,7 @@ namespace QueryGuard.Tests;
 /// </summary>
 /// <remarks>
 /// The behaviours worth pinning are mostly about what is <em>not</em> a regression. A check that fails
-/// for adding an endpoint, or for running a filtered subset of the tests, gets turned off — and a check
+/// for adding an endpoint, or for running a filtered subset of the tests, gets turned off, and a check
 /// that is off protects nothing.
 /// </remarks>
 public class QueryGuardBaselineComparisonTests

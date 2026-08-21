@@ -14,7 +14,7 @@ namespace QueryGuard.ProviderTests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// MySQL brings a third identifier-quoting style — backticks — and inlines some constants the other
+/// MySQL brings a third identifier-quoting style, backticks, and inlines some constants the other
 /// providers parameterize, so it exercises the literal-redaction path where SQL Server exercises the
 /// parameter path. Both have to end up hiding the value.
 /// </para>
@@ -266,7 +266,7 @@ public sealed class MySqlProviderTests : IAsyncLifetime
     public async Task A_tagged_query_reports_sql_the_tag_has_not_commented_out()
     {
         // Found here. TagWith emits a line comment, normalization collapses the line break that ended
-        // it, and the directive was kept as "--" — so the reported SQL for every tagged query on every
+        // it, and the directive was kept as "--", so the reported SQL for every tagged query on every
         // provider read as entirely commented out. Asserted against a live provider because that is
         // where the shape came from.
         await using var context = CreateContext();

@@ -7,7 +7,7 @@
 # a ten-commit branch into ten identical comments, which is how a bot earns being muted.
 #
 # Deliberately never fails the build for its own reasons. A diagnostics tool that breaks CI because it
-# could not post a comment has cost more than it delivered — a missing token or a fork's read-only
+# could not post a comment has cost more than it delivered: a missing token or a fork's read-only
 # token warns and exits 0. The one exception is fail-on-missing, which the caller opts into.
 
 set -uo pipefail
@@ -18,7 +18,7 @@ SHOULD_COMMENT="${QG_COMMENT:-true}"
 FAIL_ON_MISSING="${QG_FAIL_ON_MISSING:-false}"
 
 # The marker is an HTML comment, so it is invisible in the rendered comment but findable in its body.
-# Keyed on the title so two QueryGuard runs in one workflow — say unit and integration — can each own
+# Keyed on the title so two QueryGuard runs in one workflow, say unit and integration, can each own
 # a comment instead of overwriting each other.
 MARKER="<!-- queryguard:${TITLE} -->"
 
@@ -27,7 +27,7 @@ MARKER="<!-- queryguard:${TITLE} -->"
 #
 # Each candidate is tested with -f rather than trusted. `printf '%s\n' <unmatched-glob>` under nullglob
 # receives no arguments and still prints one empty line, so the obvious one-liner produced an array of
-# length 1 containing "" — which meant a missing file took the "empty report" branch and fail-on-missing
+# length 1 containing "", which meant a missing file took the "empty report" branch and fail-on-missing
 # never fired. Found by testing the flag rather than by reading the code.
 #
 # Unquoted on purpose, to let the shell expand the pattern. A path containing spaces therefore has to

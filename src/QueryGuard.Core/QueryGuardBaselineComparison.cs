@@ -8,7 +8,7 @@ namespace QueryGuard;
 /// How one scope compares to what it cost when the baseline was recorded.
 /// </summary>
 /// <remarks>
-/// The useful sentence a tool can say about a pull request is not "this endpoint runs 51 queries" — it
+/// The useful sentence a tool can say about a pull request is not "this endpoint runs 51 queries": it
 /// is "this pull request changed this endpoint from 3 to 51". The first needs a reader who knows what
 /// good looks like. The second does not.
 /// </remarks>
@@ -171,13 +171,13 @@ public sealed class QueryGuardBaselineComparison
     /// <exception cref="ArgumentNullException">A required argument is <see langword="null"/>.</exception>
     /// <remarks>
     /// <para>
-    /// For measurements that did not come from a live run — read back from JSON reports, for instance,
+    /// For measurements that did not come from a live run: read back from JSON reports, for instance,
     /// which is how the command-line tool works. An entry is what a comparison actually needs; a result
     /// is just a convenient thing to derive one from.
     /// </para>
     /// <para>
     /// A separate name rather than an overload, because two overloads differing only in element type
-    /// make <c>Compare(baseline, [])</c> ambiguous — a collection expression has nothing to infer from.
+    /// make <c>Compare(baseline, [])</c> ambiguous: a collection expression has nothing to infer from.
     /// The compiler caught that on the existing tests, which is a better place to find it than a user's
     /// build.
     /// </para>

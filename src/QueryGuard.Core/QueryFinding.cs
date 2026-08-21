@@ -9,8 +9,8 @@ namespace QueryGuard;
 /// <remarks>
 /// <para>
 /// A finding is evidence, not a verdict on the application's design. It carries the numbers that
-/// justify it — occurrence counts, expected and actual values, timing, and a bounded SQL sample —
-/// so that a reader can disagree with it on the facts.
+/// justify it: occurrence counts, expected and actual values, timing, and a bounded SQL sample, so
+/// a reader can disagree with it on the facts.
 /// </para>
 /// <para>
 /// A finding that is allowlisted is marked <see cref="IsIgnored"/> and keeps its

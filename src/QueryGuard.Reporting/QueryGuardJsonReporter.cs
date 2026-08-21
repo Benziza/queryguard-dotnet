@@ -203,7 +203,7 @@ public sealed class QueryGuardJsonReporter : QueryGuardReporter
     /// </summary>
     /// <remarks>
     /// Without this, the full double precision of a measured duration would land in the output and no
-    /// two runs would ever produce comparable JSON — every diff would be noise. Snapshot tests supply
+    /// two runs would ever produce comparable JSON: every diff would be noise. Snapshot tests supply
     /// fixed durations, so this only affects real measurements.
     /// </remarks>
     private static double Round(double milliseconds) => Math.Round(milliseconds, 3, MidpointRounding.AwayFromZero);

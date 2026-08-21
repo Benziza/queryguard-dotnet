@@ -13,7 +13,7 @@ namespace QueryGuard.AspNetCore;
 /// <para>
 /// <strong>This middleware observes.</strong> It does not write to the response body, add headers, or
 /// throw on the request path. The response the application produces and the exception it raises are
-/// exactly what a client sees, with QueryGuard enabled or disabled — there is a test that runs the same
+/// exactly what a client sees, with QueryGuard enabled or disabled: there is a test that runs the same
 /// request both ways and compares. See <c>docs/decisions/0006-aspnet-observe-only.md</c>.
 /// </para>
 /// <para>
@@ -93,7 +93,7 @@ public sealed class QueryGuardMiddleware
         }
         finally
         {
-            // In a finally, so a request that throws still produces a report — the failing request is
+            // In a finally, so a request that throws still produces a report: the failing request is
             // usually the interesting one. Report() never throws, so it cannot replace the
             // application's exception on the way out.
             Report(session, context);

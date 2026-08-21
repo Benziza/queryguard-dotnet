@@ -10,7 +10,7 @@
       "queryguard".
 
       Multi-targeted like the rest of the solution, so a team on the .NET 8 SDK and a team on .NET 10 can
-      both install it — the tool host picks the framework that is present. Single-targeting net8.0 would
+      both install it: the tool host picks the framework that is present. Single-targeting net8.0 would
       have worked for consumers and made the tool untestable on a machine with only the .NET 10 runtime
       installed, which is how this was found.
     -->
@@ -33,7 +33,7 @@
 
   <!--
     Named explicitly, because the shared rule in src/Directory.Build.props grants to
-    $(AssemblyName).Tests — and this project's assembly is "queryguard", so the convention would grant
+    $(AssemblyName).Tests, and this project's assembly is "queryguard", so the convention would grant
     to "queryguard.Tests" and the test project could not see anything.
   -->
   <ItemGroup>

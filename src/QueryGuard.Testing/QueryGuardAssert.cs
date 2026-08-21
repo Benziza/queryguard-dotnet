@@ -9,7 +9,7 @@ namespace QueryGuard.Testing;
 /// Assertions over a <see cref="QueryGuardResult"/>.
 /// </summary>
 /// <remarks>
-/// The value here is not the <c>if</c> statement — anyone can write that against
+/// The value here is not the <c>if</c> statement: anyone can write that against
 /// <see cref="QueryGuardResult.IsSuccess"/>. It is the failure message. Because QueryGuard takes no test
 /// framework dependency, there is no native formatter to lean on, so the message has to carry the whole
 /// evidence trail itself. A failure a developer cannot act on without opening documentation is a bug in
@@ -158,7 +158,7 @@ public static class QueryGuardAssert
     /// <returns>The report.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="result"/> is <see langword="null"/>.</exception>
     /// <remarks>
-    /// Public because it is useful on its own — printing a passing result while tuning a budget saves
+    /// Public because it is useful on its own: printing a passing result while tuning a budget saves
     /// guessing at the right number.
     /// </remarks>
     public static string Describe(QueryGuardResult result)
@@ -207,7 +207,7 @@ public static class QueryGuardAssert
         builder
             .AppendLine()
             .AppendLine()
-            .Append("If a finding is wrong, do not disable QueryGuard — record an allowlist entry with a reason, or raise")
+            .Append("If a finding is wrong, do not disable QueryGuard: record an allowlist entry with a reason, or raise")
             .AppendLine()
             .Append(CultureInfo.InvariantCulture, $"the repetition threshold. See {FalsePositiveGuide}");
 

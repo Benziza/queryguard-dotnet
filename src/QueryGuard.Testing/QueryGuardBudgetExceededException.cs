@@ -9,7 +9,7 @@ namespace QueryGuard.Testing;
 /// <para>
 /// A plain exception, deliberately. Every test framework reports an unexpected exception with its
 /// message, so xUnit, NUnit, MSTest, and TUnit all render this failure without QueryGuard referencing
-/// any of them — and installing <c>QueryGuard.Testing</c> does not drag a test framework into a
+/// any of them, and installing <c>QueryGuard.Testing</c> does not drag a test framework into a
 /// consumer's project. See <c>docs/decisions/0010-testing-api.md</c>.
 /// </para>
 /// <para>

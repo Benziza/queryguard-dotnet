@@ -19,7 +19,7 @@ namespace QueryGuard.Reporting;
 /// The mapping is: one <c>testsuite</c> per scope, and one <c>testcase</c> per rule that was evaluated.
 /// A satisfied rule is a passing case, a failure is a <c>failure</c>, a warning is a
 /// <c>system-out</c> note on a passing case, and an ignored finding is a <c>skipped</c> case carrying
-/// its reason. Warnings deliberately do not fail the suite — turning evidence into a red build by
+/// its reason. Warnings deliberately do not fail the suite: turning evidence into a red build by
 /// default is how a tool gets switched off.
 /// </para>
 /// </remarks>
@@ -166,7 +166,7 @@ public sealed class QueryGuardJUnitReporter : QueryGuardReporter
     /// </summary>
     /// <remarks>
     /// A clean scope still emits one passing case. An empty suite renders as "no tests" in most CI
-    /// viewers, which reads as "QueryGuard did not run" — the opposite of the truth.
+    /// viewers, which reads as "QueryGuard did not run": the opposite of the truth.
     /// </remarks>
     private static List<JUnitCase> BuildCases(QueryGuardResult result)
     {

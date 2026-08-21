@@ -102,7 +102,7 @@ public class QueryGuardMiddlewareTests
     public async Task A_failing_endpoint_still_produces_a_report_and_still_fails()
     {
         // The session is completed in a finally, because the failing request is usually the
-        // interesting one — and QueryGuard must not swallow the failure to get there. The endpoint's
+        // interesting one, and QueryGuard must not swallow the failure to get there. The endpoint's
         // single query produces no finding, so the clean summary has to be enabled to observe it.
         await using var app = await SampleApplication.StartAsync(options => options.LogSummaryWhenClean = true);
         using var client = app.CreateClient();

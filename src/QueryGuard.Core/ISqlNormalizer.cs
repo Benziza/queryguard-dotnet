@@ -7,8 +7,8 @@ namespace QueryGuard;
 /// <remarks>
 /// The two failure modes are not symmetric, and that asymmetry drives every design choice here.
 /// Over-normalizing merges genuinely different statements, which makes a report point at the wrong
-/// SQL — actively misleading. Under-normalizing splits one logical query into several groups, so a
-/// real repeated-query pattern goes unreported — the tool is merely quieter. When in doubt, do less.
+/// SQL: actively misleading. Under-normalizing splits one logical query into several groups, so a
+/// real repeated-query pattern goes unreported: the tool is merely quieter. When in doubt, do less.
 /// See <c>docs/decisions/0005-sql-fingerprints.md</c>.
 /// </remarks>
 public interface ISqlNormalizer

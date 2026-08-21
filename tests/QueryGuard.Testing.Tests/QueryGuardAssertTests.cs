@@ -132,7 +132,7 @@ public class QueryGuardAssertTests
     public void The_failure_message_is_bounded_and_says_when_it_truncates()
     {
         // A pathological session can produce dozens of findings. Flooding a CI log would bury the one
-        // that matters — and a report that quietly shows five of forty reads as "there were five".
+        // that matters, and a report that quietly shows five of forty reads as "there were five".
         var policy = QueryGuardPolicy.Create("p").WithMaxOccurrencesPerFingerprint(1);
         var commands = Enumerable.Range(0, 20)
             .Select(index => (string.Create(CultureInfo.InvariantCulture, $"q{index:00}"), 4))

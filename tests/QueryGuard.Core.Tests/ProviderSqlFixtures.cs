@@ -12,7 +12,7 @@ namespace QueryGuard.Tests;
 /// <para>
 /// Every statement here is invented over an invented schema. No SQL, table name, or column name in
 /// this repository comes from a real application. When a fixture changes, the diff <em>is</em> the
-/// review — never regenerate one without reading what changed.
+/// review: never regenerate one without reading what changed.
 /// </para>
 /// </remarks>
 internal static class ProviderSqlFixtures
@@ -106,7 +106,7 @@ internal static class ProviderSqlFixtures
 
     /// <summary>
     /// A query whose column list is reordered. It is a genuinely different statement and must not be
-    /// merged — the normalizer never reorders or sorts tokens.
+    /// merged: the normalizer never reorders or sorts tokens.
     /// </summary>
     public const string SqliteDepartmentsReorderedColumns = """
         SELECT "d"."Name", "d"."CompanyId", "d"."Id"

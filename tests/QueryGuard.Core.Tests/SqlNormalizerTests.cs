@@ -98,7 +98,7 @@ public class SqlNormalizerTests
     public void A_queryguard_directive_survives_comment_removal()
     {
         // The one comment that changes behavior has to survive, which also means a tagged query is a
-        // distinct fingerprint — a call site the author chose to single out.
+        // distinct fingerprint: a call site the author chose to single out.
         var normalized = _normalizer.Normalize(ProviderSqlFixtures.SqliteTaggedIgnore);
 
         Assert.Contains("QueryGuard:Ignore", normalized, StringComparison.Ordinal);
@@ -213,7 +213,7 @@ public class SqlNormalizerTests
         Assert.EndsWith("= ?", bare, StringComparison.Ordinal);
         Assert.Contains("SET NOCOUNT ON", withPrologue, StringComparison.Ordinal);
 
-        // The prologue is a real difference in the statement, so it is not silently discarded — but
+        // The prologue is a real difference in the statement, so it is not silently discarded, but
         // the statement that follows it normalizes the same way.
         Assert.EndsWith(bare, withPrologue, StringComparison.Ordinal);
     }

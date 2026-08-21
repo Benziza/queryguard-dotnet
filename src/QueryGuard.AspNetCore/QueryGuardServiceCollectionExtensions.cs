@@ -26,8 +26,8 @@ public static class QueryGuardServiceCollectionExtensions
     /// implementation registers it first and QueryGuard defers.
     /// </para>
     /// <para>
-    /// The interceptor is a singleton because that is how EF Core treats it. It holds no request state —
-    /// see <c>docs/decisions/0002-session-propagation.md</c>.
+    /// The interceptor is a singleton because that is how EF Core treats it. It holds no request state.
+    /// See <c>docs/decisions/0002-session-propagation.md</c>.
     /// </para>
     /// </remarks>
     /// <example>

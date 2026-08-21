@@ -11,7 +11,7 @@ namespace QueryGuard.EntityFrameworkCore.Tests;
 /// </summary>
 /// <remarks>
 /// Two entities related one-to-many is the minimum needed to produce a genuine repeated-query
-/// pattern — one child query per parent row. Everything here is invented; no schema, name, or SQL in
+/// pattern: one child query per parent row. Everything here is invented; no schema, name, or SQL in
 /// this repository comes from a real application.
 /// </remarks>
 public sealed class SampleDbContext : DbContext
@@ -72,8 +72,8 @@ public sealed class Department
 /// </summary>
 /// <remarks>
 /// <para>
-/// SQLite gives real relational command execution — real SQL generation, real parameters, real
-/// provider behavior — with no container to start and no file to clean up.
+/// SQLite gives real relational command execution: real SQL generation, real parameters, real
+/// provider behavior, with no container to start and no file to clean up.
 /// </para>
 /// <para>
 /// It uses a <em>named</em> shared-cache in-memory database rather than a bare <c>:memory:</c>

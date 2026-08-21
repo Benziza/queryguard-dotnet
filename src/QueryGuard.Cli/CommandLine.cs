@@ -89,7 +89,7 @@ internal sealed class CommandLine
             }
 
             // A value only if the next token is not itself an option. That makes flags and options
-            // distinguishable without a schema, at the cost of rejecting values that begin with "--" —
+            // distinguishable without a schema, at the cost of rejecting values that begin with "--",
             // which no path or title needs.
             if (index + 1 < args.Length && !args[index + 1].StartsWith("--", StringComparison.Ordinal))
             {

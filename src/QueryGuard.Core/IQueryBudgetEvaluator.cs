@@ -9,7 +9,7 @@ namespace QueryGuard;
 /// <para>
 /// Separate from grouping because they are different questions. Grouping asks "what happened?" and
 /// has one right answer. Budgets ask "is that acceptable?" and the answer is whatever the user
-/// configured — so the rules live behind a seam that a team with its own definition of acceptable can
+/// configured, so the rules live behind a seam that a team with its own definition of acceptable can
 /// replace.
 /// </para>
 /// <para>
