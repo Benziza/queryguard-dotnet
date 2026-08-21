@@ -12,14 +12,27 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+## [0.1.0-preview.5] - 2026-08-21
+
+Testing and reporting are easier to adopt in ASP.NET Core applications and GitHub workflows.
+
 ### Added
 
 - `QueryGuard.AspNetCore.Testing` opens a query measurement around a `WebApplicationFactory` client
   with one call. It preserves the test execution context, disables request middleware, and wires the
   hosted application's session accessor and EF Core context.
+- The report action now has root `action.yml` metadata, Marketplace branding, and release-tagged
+  examples. The existing `action/` path remains compatible with earlier releases.
+
+### Changed
+
+- The README, project front page, provider support, contribution guide, and roadmap are shorter and
+  use consistent support claims.
 
 ### Fixed
 
+- Assertions, console reports, and JUnit reports now use the same finding origin. Budget findings use
+  the first captured query trace, and generated method names are removed when a source location exists.
 - The documentation site rendered the navbar logo at its natural 128px inside a 60px navbar, so it
   spilled out over the header on every page. The asset declares its size intrinsically, which is what
   makes the plain `<img>` in `README.md` size correctly on GitHub, and the DocFX template sets no
@@ -283,7 +296,8 @@ release.
   `Properties/launchSettings.json`, and corrected the query and warning counts quoted in
   `samples/README.md` to what the sample actually logs.
 
-[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.4...main
+[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.5...main
+[0.1.0-preview.5]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.5
 [0.1.0-preview.4]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.4
 [0.1.0-preview.3]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.3
 [0.1.0-preview.2]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.2
