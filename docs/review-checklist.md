@@ -1,7 +1,7 @@
 # Review checklist
 
-**Not required for a pull request.** The template asks for three things — what changed, why, and how
-it was tested — and that is enough for most changes, including every docs fix and typo.
+**Not required for a pull request.** The template asks for three things: what changed, why, and how
+it was tested, and that is enough for most changes, including every docs fix and typo.
 
 This page is for the changes where being systematic pays: anything touching query capture, redaction,
 the hot path, or the public API. Read it as prompts, not as boxes to tick.
@@ -14,7 +14,7 @@ fixing a typo is a good way to never receive the fix, so it moved here.
 The one section worth being pedantic about, because a mistake here ships user data to a CI artifact
 and sometimes to a public issue.
 
-- No connection strings, credentials, private URLs, or real customer data anywhere — including tests.
+- No connection strings, credentials, private URLs, or real customer data anywhere, including tests.
 - SQL in tests and docs is synthetic or redacted.
 - Parameter values stay disabled by default.
 - A newly captured field is documented and covered by a redaction test.

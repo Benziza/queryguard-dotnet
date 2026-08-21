@@ -25,7 +25,7 @@ inputs:
 
   comment:
     description: >-
-      Whether to post a pull request comment. Set to false to publish only the job summary — useful on
+      Whether to post a pull request comment. Set to false to publish only the job summary: useful on
       a busy repository, or while trying the action out.
     required: false
     default: 'true'
@@ -38,7 +38,7 @@ inputs:
   fail-on-missing:
     description: >-
       Whether a missing summary file fails the step. Off by default, because a test run that found
-      nothing to measure is not a CI failure — and a diagnostics tool should not be the reason a build
+      nothing to measure is not a CI failure, and a diagnostics tool should not be the reason a build
       goes red.
     required: false
     default: 'false'
@@ -57,7 +57,7 @@ runs:
         QG_REPO: ${{ github.repository }}
         QG_EVENT: ${{ github.event_name }}
         QG_PR: ${{ github.event.pull_request.number }}
-      # Invoked through bash rather than executed directly. The executable bit is easy to lose — it does
+      # Invoked through bash rather than executed directly. The executable bit is easy to lose: it does
       # not survive being authored on Windows unless someone remembers `git update-index --chmod=+x`,
       # and the resulting failure is a permission-denied that looks nothing like a missing file mode.
       # This works either way.

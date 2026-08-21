@@ -33,7 +33,7 @@ No interceptor to construct and no accessor to match up: `UseQueryGuard()` and `
 default to the same ambient accessor, so they are wired to each other. Calling `UseQueryGuard()` twice
 is a no-op rather than a double count.
 
-Outside a scope, nothing is captured — so leaving the call in place costs about a nanosecond per
+Outside a scope, nothing is captured, so leaving the call in place costs about a nanosecond per
 command and no allocation.
 
 ## When you do need to pass an accessor
@@ -54,7 +54,7 @@ With `WebApplicationFactory` there is one more thing to know: `TestServer` does 
 
 This package references no test framework. `QueryGuardAssert` throws
 `QueryGuardBudgetExceededException`, and every test framework reports an unexpected exception with its
-message — so xUnit, NUnit, MSTest, and TUnit all work unchanged, and installing this package does not
+message, so xUnit, NUnit, MSTest, and TUnit all work unchanged, and installing this package does not
 drag a framework into your project.
 
 Because there is no framework-native formatting to lean on, the exception message carries the evidence:

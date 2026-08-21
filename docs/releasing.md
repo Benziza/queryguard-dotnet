@@ -14,7 +14,7 @@ Two jobs, and the split is the safety mechanism.
 
 **`verify`** runs on a `v*` tag *and* on a manual dispatch. It resolves the version, checks the tag
 against it, restores, builds, runs the whole test suite, packs the `src/` projects, and runs
-[`eng/verify-packages.sh`](https://github.com/Benziza/queryguard-dotnet/blob/main/eng/verify-packages.sh) — which asserts the package metadata and then
+[`eng/verify-packages.sh`](https://github.com/Benziza/queryguard-dotnet/blob/main/eng/verify-packages.sh), which asserts the package metadata and then
 installs the packed packages into a throwaway project and runs code against them. It uploads
 everything it produced.
 
@@ -35,11 +35,11 @@ Two consequences worth stating plainly:
 These are manual, and they are the part most likely to be rediscovered painfully later.
 
 1. **Create the `release` environment** in repository settings. Add whatever protection rules make
-   sense for the number of maintainers — for a single maintainer, a required reviewer still adds a
+   sense for the number of maintainers: for a single maintainer, a required reviewer still adds a
    deliberate pause between pushing a tag and shipping to everyone.
 2. **Configure a trusted publishing policy on nuget.org** for each `QueryGuard.*` package, bound to
    this repository and the `Release` workflow. Until the packages exist, nuget.org allows a policy
-   for a package ID that has not been published yet — use that for the first release rather than
+   for a package ID that has not been published yet: use that for the first release rather than
    falling back to an API key.
 3. **Add the `NUGET_USER` secret** with the nuget.org account name. This is not a credential; the
    credential is obtained per-run through OIDC.
@@ -79,8 +79,8 @@ Rehearse first. A dry run costs a few minutes and has caught real problems here.
    ```
 
 7. **Approve the `release` environment** if a reviewer is required, and watch the run.
-8. **Verify what shipped.** Install the package into a scratch project from nuget.org — not from a
-   local feed — and check the README, icon, and license render on the package page. Confirm the
+8. **Verify what shipped.** Install the package into a scratch project from nuget.org, not from a
+   local feed, and check the README, icon, and license render on the package page. Confirm the
    symbol package is listed.
 
 ## When something goes wrong
@@ -93,7 +93,7 @@ git push --delete origin v0.1.0-preview.1
 ```
 
 **Package verification fails.** Nothing has been published; `publish` never starts. Fix forward on
-`main` and cut a new tag. Do not reuse the tag — a tag that once pointed at a different commit is a
+`main` and cut a new tag. Do not reuse the tag: a tag that once pointed at a different commit is a
 lie in the history for anyone who already fetched it.
 
 **A publish half-succeeded.** Some packages pushed, some did not. Re-run the `publish` job:
@@ -107,7 +107,7 @@ anyone who already depends on it. This is the outcome every check above exists t
 ## A note on why the tag check earns its keep
 
 The first real tag push failed here, correctly. The version-resolution step had parsed
-`Directory.Build.props` with a regex containing a variable-length lookbehind — invalid in PCRE — so
+`Directory.Build.props` with a regex containing a variable-length lookbehind, invalid in PCRE, so
 `grep` failed, a `|| true` swallowed the failure, the version suffix silently became empty, and the step
 resolved `0.1.0` for a tag that said `0.1.0-preview.1`. Nothing was published, because the tag
 comparison refused it.
@@ -115,5 +115,5 @@ comparison refused it.
 Two lessons are now built into the workflow. The version comes from MSBuild rather than from parsing
 XML, so it is the same property `dotnet pack` stamps on the package and the two cannot disagree. And a
 dry run validates the version it resolved instead of ignoring it, because the original bug passed two
-rehearsals without complaint — a check that only runs when a tag exists is a check that cannot protect
+rehearsals without complaint: a check that only runs when a tag exists is a check that cannot protect
 the rehearsal.

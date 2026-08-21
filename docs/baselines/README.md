@@ -1,7 +1,7 @@
 # Baselines
 
 A query budget asks you for a number you probably do not have. `WithMaxQueries(10)` needs someone to
-know that ten is right, and on an endpoint nobody has measured, nobody does — so the number gets
+know that ten is right, and on an endpoint nobody has measured, nobody does, so the number gets
 guessed, or set high enough never to fire, or set low and then raised until the build goes green.
 
 A baseline asks for nothing. It records what the code does today and reports what changed.
@@ -33,7 +33,7 @@ moved.
 }
 ```
 
-Counts only — no SQL, no timings. SQL would make the file a second copy of the report and would produce
+Counts only: no SQL, no timings. SQL would make the file a second copy of the report and would produce
 a diff on every unrelated schema change. Timings vary between a laptop and a busy runner, so a baseline
 containing them would report a regression whenever CI was loaded, which is how a check earns being
 ignored.
@@ -53,7 +53,7 @@ foreach (var result in measuredResults)
 File.WriteAllText("queryguard-baseline.json", baseline.ToJson());
 ```
 
-`QueryGuardBaseline` is immutable — `Record` returns a new instance — so building one across a test run
+`QueryGuardBaseline` is immutable. `Record` returns a new instance, so building one across a test run
 is safe without locking.
 
 ## Comparing against one
@@ -69,7 +69,7 @@ if (comparison.HasRegressions)
 ```
 
 `Compare` does not fail anything. More queries is a fact; whether it is a defect is a judgement, and
-the library does not get to make it — the same reason a repeated-query finding is a warning rather than
+the library does not get to make it: the same reason a repeated-query finding is a warning rather than
 a failure.
 
 ## Without writing any plumbing
@@ -140,12 +140,12 @@ Which produces this on the workflow run page:
 > | --- | --: | --: | --- |
 > | `GET /api/companies` | 3 | 51 | +48, most-repeated query +48 |
 > | `GET /api/orders` | 8 | 8 | most-repeated query +7 |
-> | `GET /api/invoices` | — | 3 | new scope |
+> | `GET /api/invoices` | - | 3 | new scope |
 > | `GET /api/users` | 4 | 4 | unchanged |
 > | `GET /api/reports` | 12 | 3 | -9 (improved) |
 
-The `GET /api/orders` row is the one worth looking at twice. The read count did not move — **8 before,
-8 now** — but one query is now running seven more of them than it used to. Twenty distinct lookups
+The `GET /api/orders` row is the one worth looking at twice. The read count did not move: **8 before,
+8 now**, but one query is now running seven more of them than it used to. Twenty distinct lookups
 becoming one query repeated twenty times leaves a total-count budget perfectly satisfied. That is why
 `topFingerprintOccurrences` is stored separately.
 
@@ -161,7 +161,7 @@ otherwise claim every endpoint it did not exercise had been deleted.
 delivers bad news is one people stop reading.
 
 **Accepting a regression is deliberate.** Regenerate the file and commit it. The diff then shows a
-reviewer that a scope went from 3 to 51 and somebody decided that was fine — which is a much better
+reviewer that a scope went from 3 to 51 and somebody decided that was fine, which is a much better
 record than a threshold quietly raised in a config file.
 
 ## Things to know
@@ -169,7 +169,7 @@ record than a threshold quietly raised in a config file.
 - **The file will occasionally conflict on merge.** It is generated and ordered, so regenerating is
   always a valid resolution.
 - **Renaming a route loses that scope's history.** Scope names are the join key, so a rename reads as
-  one scope disappearing and another appearing — both non-events by the rules above.
+  one scope disappearing and another appearing: both non-events by the rules above.
 - **A future schema version is rejected, not guessed at.** Reading a baseline wrong is worse than
   refusing to read it: a silently empty baseline reports every scope as new, which hides every
   regression in the run.

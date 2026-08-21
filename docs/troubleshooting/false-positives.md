@@ -5,7 +5,7 @@ cannot prove the application-level defect. So some findings will be wrong, and t
 do when one is.
 
 If you are here because a finding looks wrong, you are using the tool correctly. Please
-[tell us about it](https://github.com/Benziza/queryguard-dotnet/issues/new?template=false_positive.yml) —
+[tell us about it](https://github.com/Benziza/queryguard-dotnet/issues/new?template=false_positive.yml):
 accepted reports become regression fixtures, which is how the defaults get better for everyone.
 
 ## Why the wording matters
@@ -15,7 +15,7 @@ repeated SQL and an N+1 defect are genuinely different sets:
 
 **Repeated SQL that is not a defect**
 
-- A bounded lookup — three report sections, each fetching a reference row.
+- A bounded lookup: three report sections, each fetching a reference row.
 - A deliberate poll on a fixed interval.
 - A retry after a transient failure.
 - Per-tenant fan-out in a job that handles several tenants on purpose.
@@ -89,8 +89,8 @@ Prefer the first three options when you can.
 ## The reason is not optional
 
 Every allowlist mechanism requires reason text, and that is the whole design. "Turn this off" is not
-something a reviewer can evaluate. "Bounded provider lookup; at most three report sections" is — and it
-appears in a pull request diff where they can check it.
+something a reviewer can evaluate. "Bounded provider lookup; at most three report sections" is clear,
+and it appears in a pull request diff where a reviewer can check it.
 
 A reason also reaches reports. If a report is shared, so is the reason. Write it for a reader who does
 not have your context.
@@ -109,8 +109,8 @@ wrong. Budgets exist so the answer is a decision rather than a default.
 
 ## Ignored findings stay visible
 
-An allowlisted finding appears in every output — console, JSON, JUnit, logs — marked ignored, with its
-reason. That is not an oversight. An allowlist that hides findings becomes the place real problems go to
+An allowlisted finding appears in every output, including console, JSON, JUnit, and logs. It is marked
+as ignored and includes the reason. That is not an oversight. An allowlist that hides findings becomes the place real problems go to
 die: someone silences a query in March, the code changes in June, and nobody ever looks again.
 
 `IgnoredFindingCount` on the result makes it easy to notice when a scope is carrying more exceptions than
@@ -120,7 +120,7 @@ anyone remembers granting.
 
 Use the
 [false-positive form](https://github.com/Benziza/queryguard-dotnet/issues/new?template=false_positive.yml).
-It asks for the fingerprint, occurrence count, redacted normalized SQL, and — most importantly — *why the
+It asks for the fingerprint, occurrence count, redacted normalized SQL, and, most importantly, *why the
 repetition is intentional*. That last part is what turns a report into a fixture.
 
 Use synthetic or fully redacted SQL. Do not paste production schema names, parameter values, or customer

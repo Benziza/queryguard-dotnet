@@ -1,7 +1,7 @@
 # QueryGuard.Cli
 
 Records a query baseline from [QueryGuard.NET](https://github.com/Benziza/queryguard-dotnet) JSON
-reports, and verifies later runs against it — so a query-count regression shows up in CI without any
+reports, and verifies later runs against it, so a query-count regression shows up in CI without any
 baseline plumbing written by hand.
 
 ```bash
@@ -37,7 +37,7 @@ queryguard verify --summary artifacts/queryguard/summary.md
 If that is intended, re-record the baseline and commit it.
 ```
 
-`3 -> 51` needs no threshold to read, which is the point — `WithMaxQueries(10)` needs someone to know
+`3 -> 51` needs no threshold to read, which is the point: `WithMaxQueries(10)` needs someone to know
 that ten is right, and on an unmeasured endpoint nobody does.
 
 ## Commands
@@ -51,10 +51,10 @@ queryguard verify [--reports <path>] [--baseline <file>] [--summary <file>] [--f
 | --- | --- | --- |
 | `--reports` | `artifacts/queryguard` | Directory, glob, or file holding the JSON reports |
 | `--baseline` | `queryguard-baseline.json` | The committed baseline |
-| `--summary` | — | Write the Markdown table here, for a job summary or a pull request comment |
+| `--summary` | - | Write the Markdown table here, for a job summary or a pull request comment |
 | `--fail-on-regression` | off | Exit 2 when a scope runs more queries than the baseline |
 
-Exit codes: `0` success — including a regression found without the flag; `1` bad usage or an unreadable
+Exit codes: `0` success, including a regression found without the flag; `1` bad usage or an unreadable
 file; `2` a regression, with `--fail-on-regression`.
 
 ## Things worth knowing
@@ -66,7 +66,7 @@ judgement. A new feature legitimately costs queries.
 baseline for every endpoint it did not exercise.
 
 **A new scope is not a regression**, and a scope missing from the run is ignored rather than reported as
-removed — a filtered test run would otherwise claim every endpoint it skipped had been deleted.
+removed: a filtered test run would otherwise claim every endpoint it skipped had been deleted.
 
 **It does not run your tests.** Measurement happens in the test process where the `DbContext` lives. A
 tool that owned that would have to guess your test command, your target framework, and your fixture
@@ -93,4 +93,4 @@ Full documentation:
 
 Public APIs and the baseline schema may change before `1.0.0`. The baseline document carries its own
 `schemaVersion`, and a file written by a future major version is rejected rather than read optimistically
-— a silently empty baseline would report every scope as new and hide every regression in the run.
+a silently empty baseline would report every scope as new and hide every regression in the run.

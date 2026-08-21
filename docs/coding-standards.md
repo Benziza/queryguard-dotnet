@@ -28,7 +28,7 @@ Multi-target `net8.0` and `net10.0`; do not target `net9.0`. See
 [ADR-0008](./decisions/0008-target-frameworks.md).
 
 Write C# that compiles on both. Use a new language or BCL feature because it makes the code
-clearer, not because it is new — and never leave a consumer of the older target with a
+clearer, not because it is new, and never leave a consumer of the older target with a
 different behavior. Anything genuinely version-specific is isolated behind conditional
 compilation with a comment explaining what differs and why.
 
@@ -105,7 +105,7 @@ QueryGuard runs per database command, so hot-path work is a product decision.
   message string that gets filtered out is waste.
 - Event IDs are stable and centralized. They are part of the observable contract for anyone
   filtering logs.
-- Default output is one summary per scope plus the findings — not a line per query.
+- Default output is one summary per scope plus the findings, not a line per query.
 - Log levels mean something: `Warning` for a candidate finding, `Error` reserved for
   QueryGuard's own failures, never for an application's budget verdict.
 
@@ -138,6 +138,6 @@ No UI, CLI, or serialization framework dependency in `QueryGuard.Core`.
   method is renamed is a maintenance tax.
 - A bug fix includes a test that fails before the fix.
 - Snapshot and approval tests pin fingerprint normalization, report schemas, and assertion
-  messages — the things that must not change accidentally.
+  messages: the things that must not change accidentally.
 - Zero tolerance for flakiness on correctness tests. A flaky isolation test is not retried, it
   is diagnosed. See [testing strategy](./testing-strategy.md).

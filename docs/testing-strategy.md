@@ -43,7 +43,7 @@ These are the behaviors that must never regress. Each maps to at least one test.
 - The same SQL with different whitespace or comments produces the same fingerprint.
 - The same EF query with different generated parameter names produces the same fingerprint, per
   provider fixture.
-- A `QueryGuard:Ignore` tag survives comment stripping and marks the finding ignored — visibly,
+- A `QueryGuard:Ignore` tag survives comment stripping and marks the finding ignored: visibly,
   with its reason, never silently dropped.
 - Fingerprint IDs are identical across runs, processes, and both target frameworks.
 
@@ -65,7 +65,7 @@ These are the behaviors that must never regress. Each maps to at least one test.
   in any reporter's output.
 - Stack traces off by default: no capture, no allocation.
 - Stack traces enabled: exactly one filtered trace per fingerprint group, not one per command.
-- Every reporter's output passes the same redaction assertions — a reporter cannot bypass the
+- Every reporter's output passes the same redaction assertions: a reporter cannot bypass the
   central policy.
 
 **ASP.NET Core**

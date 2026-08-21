@@ -21,7 +21,7 @@ Three strategies:
 There are two opposite failure modes, and they are not symmetric:
 
 - **Over-normalizing** merges genuinely different queries into one group. The report becomes
-  actively misleading — it points at the wrong SQL. This is the worse failure.
+  actively misleading: it points at the wrong SQL. This is the worse failure.
 - **Under-normalizing** splits one logical query into several groups, so a real repeated-query
   pattern goes unreported. Bad, but the tool is merely silent rather than wrong.
 
@@ -47,7 +47,7 @@ Hard constraints:
   recognize that two differently written queries are semantically equivalent.
 - Unrecognized input degrades to hashing the whitespace-normalized text. Unknown SQL produces
   a *less useful* fingerprint, never a wrong one.
-- The ID must be identical across runs, processes, and both target frameworks — so the hash is
+- The ID must be identical across runs, processes, and both target frameworks, so the hash is
   an explicit stable algorithm, never `string.GetHashCode()`, which is randomized per process.
 - The normalized text is retained alongside the ID, because a fingerprint the user cannot read
   is not evidence.
@@ -58,7 +58,7 @@ SQLite, PostgreSQL, and SQL Server. Changing a rule changes a fixture, visibly, 
 ## Rejected alternatives
 
 **Full SQL parsing.** The correct answer to a different, much larger problem. A parser per
-dialect, kept current with each provider's SQL generation, is a project on its own — and every
+dialect, kept current with each provider's SQL generation, is a project on its own, and every
 gap in it becomes a wrong grouping in QueryGuard. Rejected as out of scope, permanently for
 v0.1 and probably beyond.
 
@@ -69,7 +69,7 @@ case QueryGuard exists to find.
 ## Consequences
 
 - Fingerprint quality varies by provider. The support matrix says which providers are verified
-  and which are best-effort — see [ADR-0009](./0009-provider-matrix.md).
+  and which are best-effort; see [ADR-0009](./0009-provider-matrix.md).
 - Both failure modes need a public reporting path: the false-positive form for over-grouping,
   the provider form for under-grouping.
 - Normalization runs on the hot path, so it is measured by a benchmark on representative short

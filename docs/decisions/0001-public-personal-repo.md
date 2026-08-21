@@ -17,8 +17,8 @@ Three options were on the table:
 3. Publish immediately under a personal account.
 
 The project also carries a specific risk: it was conceived while working on EF Core
-performance problems professionally. Nothing from that work — code, SQL, schema names,
-architecture, or tickets — may appear here.
+performance problems professionally. Nothing from that work, including code, SQL, schema names,
+architecture, or tickets, may appear here.
 
 ## Decision
 
@@ -37,11 +37,11 @@ Publishing is **not** gated on the code being finished.
 that has never been challenged by an outside user ships with defaults tuned to one person's
 imagination. Repeated-SQL detection is exactly the kind of feature that needs adversarial
 input early, when changing the defaults is still cheap. Polish is also a poor reason to stay
-private — a public repository with visible tests, CI, and honest limitations reads as more
+private: a public repository with visible tests, CI, and honest limitations reads as more
 credible than a private one, not less.
 
-**A GitHub organization immediately.** An organization solves governance problems —
-multiple maintainers, team-based review routing, shared ownership. QueryGuard has none of
+**A GitHub organization immediately.** An organization solves governance problems such as
+multiple maintainers, team-based review routing, and shared ownership. QueryGuard has none of
 those problems yet. What it does have is a need for the work to be attributable, and a
 personal account does that better.
 
@@ -61,7 +61,7 @@ personal account does that better.
 
 - A second trusted maintainer joins, at which point required approvals go to one and
   code-owner review is enabled.
-- Governance stops fitting a personal account — a funded roadmap, a foundation, or a team
+- Governance stops fitting a personal account: a funded roadmap, a foundation, or a team
   taking shared ownership. Then, and only then, transfer to an organization.
 - Any question arises about employer intellectual property in the repository. In that case
   work stops until it is resolved, ahead of every other priority.

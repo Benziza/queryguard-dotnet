@@ -11,7 +11,7 @@ Generated from the source and its XML documentation, so what you read here is wh
 | --- | --- |
 | `QueryGuard` | The core model: sessions, policies, results, findings, fingerprints, redaction, baselines |
 | `QueryGuard.EntityFrameworkCore` | `UseQueryGuard`, the command interceptor, the session accessor |
-| `QueryGuard.Testing` | `QueryGuardScope` and `QueryGuardAssert` — the two types most projects touch |
+| `QueryGuard.Testing` | `QueryGuardScope` and `QueryGuardAssert`: the two types most projects touch |
 | `QueryGuard.Reporting` | Console, JSON, JUnit, and Markdown reporters, and the report reader |
 | `QueryGuard.AspNetCore` | Per-request capture middleware for a running application |
 

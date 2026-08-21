@@ -15,7 +15,7 @@ The single most common report, and it is almost always one of five things.
 
 ### 1. No scope was open
 
-QueryGuard captures nothing unless a session is active. That is deliberate — it stays silent rather
+QueryGuard captures nothing unless a session is active. That is deliberate: it stays silent rather
 than guessing which scope a command belongs to. A scope comes from either:
 
 - `app.UseQueryGuard()`, which opens one per request; or
@@ -85,7 +85,7 @@ services.Configure<QueryGuardOptions>(options => options.Enabled = false);
 
 ### Still nothing?
 
-- `QueryGuardOptions.Enabled` may be `false` — the sample gates it on `IsDevelopment()`.
+- `QueryGuardOptions.Enabled` may be `false`: the sample gates it on `IsDevelopment()`.
 - The path may be excluded. `/health`, `/healthz`, `/metrics`, and `/favicon.ico` are ignored by default.
 - A clean request logs nothing unless `LogSummaryWhenClean` is set. That is not a bug; QueryGuard runs on
   every request, and a clean summary each time is noise.
@@ -93,7 +93,7 @@ services.Configure<QueryGuardOptions>(options => options.Enabled = false);
 
 ## Fingerprints that do not group
 
-If one logical query appears as several fingerprints, a repeated-query pattern will not be reported —
+If one logical query appears as several fingerprints, a repeated-query pattern will not be reported:
 the tool goes quiet rather than wrong, which makes this failure mode easy to miss.
 
 Normalization is deliberately conservative: it collapses whitespace, removes non-directive comments,
@@ -104,7 +104,7 @@ Check the normalized SQL in the report. Common causes:
 
 | Cause | What to do |
 | --- | --- |
-| The queries really are different (different predicate, different projection) | Nothing — this is correct |
+| The queries really are different (different predicate, different projection) | Nothing: this is correct |
 | Different providers | Expected. Identifier quoting differs and is not rewritten |
 | Inlined literals differ and redaction is off | Leave `RedactNumericLiterals` and `RedactStringLiterals` on |
 | A `TagWith` tag differs between call sites | A tagged query is a distinct fingerprint by design |
@@ -124,7 +124,7 @@ app.UseQueryGuard();   // after routing
 app.MapControllers();
 ```
 
-QueryGuard still works in the wrong order — it just loses the one label that makes a report useful.
+QueryGuard still works in the wrong order: it just loses the one label that makes a report useful.
 
 ## Duration budgets firing intermittently
 

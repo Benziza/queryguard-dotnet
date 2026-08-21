@@ -14,8 +14,8 @@ policy.WithMaxQueries(10)
 ```
 
 Ten what? On an endpoint nobody has measured, the honest answer is that nobody knows. So the number
-gets guessed, or set high enough to never fire, or set low and then raised until the build goes green —
-and a threshold that gets raised whenever it fires is not a guard.
+gets guessed, set high enough to never fire, or raised until the build goes green. A threshold that
+gets raised whenever it fires is not a guard.
 
 A baseline asks for nothing. It records what the code does today and reports what changed:
 
@@ -52,7 +52,7 @@ that file says on the branch being built.**
 ### Counts only, and no timings
 
 A baseline recording SQL text would be a second copy of the report, would need redaction rules of its
-own, and would produce a diff on every unrelated schema change — so nobody would read it.
+own, and would produce a diff on every unrelated schema change, so nobody would read it.
 
 Durations are excluded for a stronger reason: they vary between a laptop and a shared runner, so a
 baseline containing them would report a regression whenever CI was busy. That is the failure mode that
@@ -77,7 +77,7 @@ and invisible: a regression would be reported or not depending on whether the ca
 warm, and nobody could tell from the repository what the baseline was. A committed file is auditable
 by reading it.
 
-**Git history — measure the merge base by checking it out and running it.** The most correct answer,
+**Git history: measure the merge base by checking it out and running it.** The most correct answer,
 and it doubles every CI run and requires the old commit to still build. Worth revisiting if the
 committed file turns out to cause merge conflicts often enough to matter.
 
@@ -101,7 +101,7 @@ comparison reports; the caller decides what to do with `HasRegressions`.
   history. Acceptable: the alternative is tracking identity across renames, which needs more
   information than a route pattern carries.
 - The comparison is a library API, not a command-line tool. Producing the file and posting the comment
-  is the caller's job — a test that writes Markdown, and a CI step that appends it to
+  is the caller's job: a test that writes Markdown, and a CI step that appends it to
   `$GITHUB_STEP_SUMMARY`.
 
 ## Revisit when

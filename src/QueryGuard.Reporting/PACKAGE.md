@@ -22,7 +22,7 @@ await new QueryGuardSarifReporter(repositoryRoot).WriteAsync(result, "artifacts/
 ## SARIF puts a finding on the diff
 
 Upload the file and a repeated query appears as an annotation on the line that caused it, in the viewer
-CodeQL already uses — no dashboard, nothing to install:
+CodeQL already uses: no dashboard, nothing to install:
 
 ```yaml
 - uses: github/codeql-action/upload-sarif@v4
@@ -37,7 +37,7 @@ finding still appears, just without the annotation.
 
 A candidate is reported as a **warning**, never an error, whatever the policy severity says about failing
 the build. Failing a build on evidence is how a check gets switched off rather than tuned. An allowlisted
-finding becomes a SARIF *suppression* carrying its reason, rather than being dropped — the repetition is
+finding becomes a SARIF *suppression* carrying its reason, rather than being dropped: the repetition is
 still there, and the report should not imply otherwise.
 
 ## Output is deterministic and versioned
@@ -49,7 +49,7 @@ repurposing a field is a breaking change even in a preview. See
 
 ## Redaction cannot be bypassed
 
-A reporter receives a result that was already redacted, so no reporter — including one you write —
+A reporter receives a result that was already redacted, so no reporter, including one you write,
 can emit a parameter value or a connection string. That is enforced by construction rather than by
 convention.
 

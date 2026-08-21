@@ -5,7 +5,7 @@ All notable changes to QueryGuard.NET are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 While the version is below `1.0.0`, breaking changes may appear in a minor or preview
-release — every one of them is listed here with migration notes.
+release: every one of them is listed here with migration notes.
 
 Generated GitHub release notes list the merged pull requests. This file is the curated
 record: breaking changes, privacy-relevant behavior, and report-schema compatibility.
@@ -48,8 +48,8 @@ integration-tested provider.
 > `QueryGuard:` directive to the same form whichever way it was written, so any query carrying one gets
 > a new fingerprint id.
 >
-> **Baselines are not affected.** A baseline stores counts only — no SQL and no fingerprint ids
-> ([ADR-0013](https://benziza.github.io/queryguard-dotnet/decisions/0013-baseline-storage.html)) — and a
+> **Baselines are not affected.** A baseline stores counts only: no SQL and no fingerprint ids
+> ([ADR-0013](https://benziza.github.io/queryguard-dotnet/decisions/0013-baseline-storage.html)), and a
 > delimiter cannot change a count. Nothing to re-record.
 >
 > **What does need attention:** an allowlist entry keyed on the fingerprint id of a *tagged* query
@@ -61,7 +61,7 @@ integration-tested provider.
 
 - **A documentation site** at [benziza.github.io/queryguard-dotnet](https://benziza.github.io/queryguard-dotnet/),
   built with DocFX from the same Markdown the repository already had, plus an API reference generated
-  from the XML documentation — roughly 330 pages that were previously only readable as source comments.
+  from the XML documentation: roughly 330 pages that were previously only readable as source comments.
   Built on every pull request that touches it with warnings promoted to errors, so a dead link fails the
   pull request that introduced it rather than the deployment after it merged.
 - Package metadata points at the site. `PackageProjectUrl` is now the documentation site rather than a
@@ -72,7 +72,7 @@ integration-tested provider.
   repository root, because only a repository-relative path can be matched against a diff.
 
   Two things about GitHub specifically, both learned by uploading rather than by reading the schema.
-  It rejects an entire SARIF file if any one result has no location — which the schema permits — so a
+  It rejects an entire SARIF file if any one result has no location, which the schema permits, so a
   finding whose origin was not captured goes to a `fallbackPath`, or is left out and counted in
   `runs[0].properties.findingsWithoutLocation`. And a deterministic CI build embeds `/_/` in place of
   the source root, so a stack trace reads `/_/src/Thing.cs`; those paths are recognised and mapped
@@ -88,21 +88,21 @@ integration-tested provider.
   covering backtick quoting, parameter placeholders, literal redaction, both write shapes, failures, and
   query tags. It moves MySQL from Community to Integration-tested in
   [ADR-0009](docs/decisions/0009-provider-matrix.md), with one caveat stated wherever the claim appears:
-  the suite runs against Oracle's `MySql.EntityFrameworkCore`, because Pomelo — the more widely used
-  MySQL provider — has no EF Core 10 release. MariaDB deliberately stays Community.
+  the suite runs against Oracle's `MySql.EntityFrameworkCore`, because Pomelo, the more widely used
+  MySQL provider, has no EF Core 10 release. MariaDB deliberately stays Community.
 
 ### Fixed
 
 - **A tagged query reported SQL that was entirely commented out.** `TagWith` emits its tag as a line
   comment, and normalization collapses runs of whitespace including the line break that ended it. A
   recognized `QueryGuard:` directive has to survive that pass, and it was kept in the form it arrived
-  in — so the normalized text became `--QueryGuard:Ignore reason=x SELECT ...` on one line, with the
+  in, so the normalized text became `--QueryGuard:Ignore reason=x SELECT ...` on one line, with the
   statement inside the comment. Every reporter prints that text, and an ignored finding is still
   reported with its reason, so this was on a path users see. A directive is now normalized to a block
   comment however it was written, which the block-comment branch was already doing correctly.
 
   Two consequences. The same directive written `--` or `/* */` now produces one fingerprint rather than
-  two, which is right — the delimiter is not part of what the query does. And **the fingerprint id of a
+  two, which is right: the delimiter is not part of what the query does. And **the fingerprint id of a
   tagged query changes**, so an allowlist entry keyed on one needs the new value. Allowlisting by tag is
   unaffected. Baselines are unaffected too: they store counts, not fingerprint ids.
 
@@ -112,7 +112,7 @@ integration-tested provider.
   carrying a block-comment directive alongside it.
 
   Found by running the new MySQL suite; it was never MySQL-specific.
-- `queryguard --version` reported the assembly version, `0.1.0.0`, which every preview shares — a bug
+- `queryguard --version` reported the assembly version, `0.1.0.0`, which every preview shares: a bug
   report quoting it could not say which build it came from. It now reports the informational version,
   `0.1.0-preview.3+62d58ff…`, carrying the prerelease suffix and the commit SourceLink stamped in.
 
@@ -131,7 +131,7 @@ ran the query, and the baseline workflow no longer needs plumbing written by han
   `QueryGuardBaselineComparison.CompareEntries`, for measurements that did not come from a live run.
 - **A GitHub Action** (`Benziza/queryguard-dotnet/action@main`) that publishes the baseline table to the
   job summary and, on a pull request, to a sticky comment it edits rather than duplicating. A composite
-  action running one bash script — no JavaScript bundle, no Docker image. It never fails a build for its
+  action running one bash script: no JavaScript bundle, no Docker image. It never fails a build for its
   own reasons, and this repository runs it on its own pull requests.
 - **A failure now says where the query came from.** A test scope records the call site of each distinct
   query by default and the assertion message prints it as `origin:`, so a failure names the code rather
@@ -140,11 +140,11 @@ ran the query, and the baseline workflow no longer needs plumbing written by han
 
 ### Fixed
 
-- The baseline Markdown table said "1 scope now run more queries" — the noun was pluralised and the verb
+- The baseline Markdown table said "1 scope now run more queries": the noun was pluralised and the verb
   was not. It is the first line of the pull request comment, which makes it the most read sentence the
   tool produces.
 - The documented tool install was `dotnet tool install -g QueryGuard.Cli`, which fails while every
-  published version is a prerelease — the first command a reader runs would have reported the package
+  published version is a prerelease: the first command a reader runs would have reported the package
   did not exist. Every instance now passes `--prerelease`.
 
 ## [0.1.0-preview.2] - 2026-08-20
@@ -156,7 +156,7 @@ integration-tested rather than assumed, and a baseline can replace a guessed bud
 
 - **A write was counted as a read on SQL Server.** EF Core prefixes its insert batch with
   `SET IMPLICIT_TRANSACTIONS OFF; SET NOCOUNT ON;`, and command classification tested only the leading
-  keyword — so it saw `SET`, concluded the command was not a modification, and left it counted as a
+  keyword, so it saw `SET`, concluded the command was not a modification, and left it counted as a
   read. Every `SaveChanges` on SQL Server consumed a read budget, which made a budget of ten reads
   mean something different there than on SQLite. Classification now walks every statement in the
   batch. Present in `0.1.0-preview.1`.
@@ -168,7 +168,7 @@ integration-tested rather than assumed, and a baseline can replace a guessed bud
 ### Added
 
 - **Baseline comparison.** `QueryGuardBaseline` records what each scope costs today into a committed
-  JSON file; `QueryGuardBaselineComparison` reports what changed. Removes the guess a budget requires —
+  JSON file; `QueryGuardBaselineComparison` reports what changed. Removes the guess a budget requires:
   `3 -> 51 queries` needs no threshold to read. A new scope is not a regression, a scope missing from
   the run is ignored rather than reported as removed, and improvements are reported too. See
   `docs/baselines/README.md` and ADR-0013.
@@ -185,7 +185,7 @@ integration-tested rather than assumed, and a baseline can replace a guessed bud
 
 ### Removed
 
-- `docs/launch/` — the article draft, demo script, and community post drafts. They documented how the
+- `docs/launch/`: the article draft, demo script, and community post drafts. They documented how the
   project would be marketed, which is of no use to anyone evaluating whether to install it, and made
   the repository read as a campaign rather than a tool. Kept as local notes instead.
 
@@ -234,7 +234,7 @@ release.
   so the same package works with xUnit, NUnit, MSTest, or TUnit.
 - `QueryGuard.AspNetCore`: `AddQueryGuard` registration, `UseQueryGuard` middleware that opens a
   session per request, per-route-pattern policy resolution, and a structured summary with stable
-  event IDs. The middleware observes only — the response, its headers, and the original exception are
+  event IDs. The middleware observes only: the response, its headers, and the original exception are
   never modified.
 - Optional first-occurrence stack trace: off by default, bounded to one filtered trace per
   fingerprint, and framework frames removed so what remains is application code. False-positive
@@ -257,7 +257,7 @@ release.
   fixtures pin the behavior for SQLite, PostgreSQL, SQL Server, and MySQL.
 - `QueryGuard.EntityFrameworkCore`: captures relational command execution through the official
   `DbCommandInterceptor` API on EF Core 8 and 10, covering the synchronous and asynchronous reader,
-  scalar, and non-query paths plus command failures. Observes only — the generated SQL, the result,
+  scalar, and non-query paths plus command failures. Observes only: the generated SQL, the result,
   and the original exception are never modified.
 - `IQueryFingerprintFactory` with a stable SHA-256-derived identifier, and `QueryGuardQueryTag` for
   recognizing `QueryGuard:` directives attached with EF Core `TagWith`.
@@ -282,7 +282,7 @@ release.
 
 - The release workflow resolved the package version by parsing `Directory.Build.props` with a regex
   containing a variable-length lookbehind, which PCRE rejects. `grep` failed, a `|| true` swallowed the
-  failure, and the version silently lost its suffix — resolving `0.1.0` for a tag reading
+  failure, and the version silently lost its suffix: resolving `0.1.0` for a tag reading
   `0.1.0-preview.1`. The tag comparison refused to publish. The version now comes from
   `dotnet msbuild -getProperty:PackageVersion`, the same property `dotnet pack` stamps on the package,
   and a dry run validates the version it resolved instead of ignoring it.

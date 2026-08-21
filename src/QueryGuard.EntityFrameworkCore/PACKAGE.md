@@ -26,8 +26,8 @@ cannot be wired to the wrong accessor:
 options.UseSqlite(connectionString).UseQueryGuard();
 ```
 
-Nothing is captured unless a QueryGuard scope is open — through `QueryGuard.AspNetCore` middleware for
-a request, or `QueryGuard.Testing` for a test. With no active scope the interceptor does no work at
+Nothing is captured unless a QueryGuard scope is open. Use `QueryGuard.AspNetCore` middleware for a
+request or `QueryGuard.Testing` for a test. With no active scope the interceptor does no work at
 all.
 
 ## Privacy defaults
