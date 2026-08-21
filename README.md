@@ -38,36 +38,42 @@ visible with a written reason.
 
 ## Quick start
 
-Install the test package:
+For an ASP.NET Core integration test, install the WebApplicationFactory helper:
 
 ```bash
-dotnet add package QueryGuard.Testing --prerelease
+dotnet add package QueryGuard.AspNetCore.Testing --prerelease
 ```
 
-Attach QueryGuard where the context is configured:
+Open a measurement, run the request, and assert the result:
 
 ```csharp
-options.UseSqlite(connectionString).UseQueryGuard();
-```
-
-Open a scope, run the request, and assert the result:
-
-```csharp
-await using var scope = QueryGuardScope.Start(
+using var factory = new WebApplicationFactory<Program>();
+await using var guard = factory.TrackQueries<Program, AppDbContext>(
     "GET /api/companies",
     QueryGuardPolicy.Create("companies")
         .WithMaxOccurrencesPerFingerprint(5));
 
-await client.GetAsync("/api/companies");
+var response = await guard.Client.GetAsync("/api/companies");
+response.EnsureSuccessStatusCode();
 
-QueryGuardAssert.Passes(await scope.CompleteAsync());
+QueryGuardAssert.Passes(await guard.CompleteAsync());
 ```
 
-`QueryGuard.Testing` brings the EF Core integration with it and has no test framework dependency.
-It works with xUnit, NUnit, MSTest, and TUnit.
+The helper attaches QueryGuard to `AppDbContext`, preserves the test execution context, and prevents
+request middleware from opening a second scope. It has no test framework dependency, so it works with
+xUnit, NUnit, MSTest, and TUnit.
 
-Use `QueryGuard.AspNetCore` for request middleware. Use `QueryGuard.Reporting` for console, JSON,
-JUnit, Markdown, and SARIF output.
+Testing a service or background job without `WebApplicationFactory`? Install `QueryGuard.Testing`,
+attach `.UseQueryGuard()` where the context is configured, and open an explicit `QueryGuardScope`.
+See the [testing guide](./docs/testing/README.md) for both paths.
+
+| Package | Use it for |
+| --- | --- |
+| `QueryGuard.AspNetCore.Testing` | Measuring real `WebApplicationFactory` requests |
+| `QueryGuard.Testing` | Explicit scopes and assertions around services or jobs |
+| `QueryGuard.AspNetCore` | Request middleware and route policies |
+| `QueryGuard.Reporting` | Console, JSON, JUnit, Markdown, and SARIF output |
+| `QueryGuard.Cli` | Recording and checking baselines in CI |
 
 ## Useful failures
 
@@ -152,6 +158,7 @@ Full documentation and the generated API reference are available at
 | Guide | Covers |
 | --- | --- |
 | [How it works](./docs/concepts/README.md) | Sessions, fingerprints, redaction, analysis |
+| [Testing](./docs/testing/README.md) | WebApplicationFactory requests and explicit scopes |
 | [Configuration](./docs/configuration/README.md) | Budgets and defaults |
 | [Baselines](./docs/baselines/README.md) | Recording and comparing query behavior |
 | [Troubleshooting](./docs/troubleshooting/README.md) | Missing capture, grouping, middleware order |

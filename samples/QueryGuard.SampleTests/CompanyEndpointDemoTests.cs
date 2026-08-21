@@ -13,6 +13,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QueryGuard.AspNetCore;
+using QueryGuard.AspNetCore.Testing;
 using QueryGuard.Reporting;
 using QueryGuard.SampleApi;
 using QueryGuard.Testing;
@@ -51,14 +52,11 @@ public sealed class CompanyEndpointDemoTests : IClassFixture<SampleApiFactory>
     [Fact]
     public async Task The_problem_endpoint_returns_200_OK_and_still_breaks_its_query_budget()
     {
-        using var client = _factory.CreateClient();
-
-        await using var scope = QueryGuardScope.Start(
+        await using var guard = _factory.TrackQueries<Program, CatalogDbContext>(
             "GET /api/companies",
-            QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(5),
-            accessor: _factory.SessionAccessor);
+            QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(5));
 
-        var response = await client.GetAsync(new Uri("/api/companies", UriKind.Relative));
+        var response = await guard.Client.GetAsync(new Uri("/api/companies", UriKind.Relative));
         var payload = await response.Content.ReadFromJsonAsync<List<CompanySummary>>();
 
         // Nothing about the response is wrong. That is the whole point.
@@ -66,7 +64,7 @@ public sealed class CompanyEndpointDemoTests : IClassFixture<SampleApiFactory>
         Assert.Equal(SeededCompanies, payload!.Count);
         Assert.All(payload, company => Assert.Equal(3, company.DepartmentCount));
 
-        var result = await scope.CompleteAsync();
+        var result = await guard.CompleteAsync();
         _output.WriteLine(new QueryGuardConsoleReporter().Render(result));
 
         // One query for the list, then one per company.
@@ -87,23 +85,20 @@ public sealed class CompanyEndpointDemoTests : IClassFixture<SampleApiFactory>
     [Fact]
     public async Task The_fixed_endpoint_returns_the_same_data_from_one_query()
     {
-        using var client = _factory.CreateClient();
-
-        await using var scope = QueryGuardScope.Start(
+        await using var guard = _factory.TrackQueries<Program, CatalogDbContext>(
             "GET /api/companies/projected",
             QueryGuardPolicy.Create("companies")
                 .WithMaxQueries(3)
-                .WithMaxOccurrencesPerFingerprint(1),
-            accessor: _factory.SessionAccessor);
+                .WithMaxOccurrencesPerFingerprint(1));
 
-        var response = await client.GetAsync(new Uri("/api/companies/projected", UriKind.Relative));
+        var response = await guard.Client.GetAsync(new Uri("/api/companies/projected", UriKind.Relative));
         var payload = await response.Content.ReadFromJsonAsync<List<CompanySummary>>();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(SeededCompanies, payload!.Count);
         Assert.All(payload, company => Assert.Equal(3, company.DepartmentCount));
 
-        var result = await scope.CompleteAsync();
+        var result = await guard.CompleteAsync();
         _output.WriteLine(new QueryGuardConsoleReporter().Render(result));
 
         Assert.Equal(1, result.ReadCommandCount);
@@ -134,18 +129,15 @@ public sealed class CompanyEndpointDemoTests : IClassFixture<SampleApiFactory>
     {
         // Three lookups, bounded by the shape of the report rather than by the number of rows. The tag
         // documents that next to the query, and the finding stays visible with its reason.
-        using var client = _factory.CreateClient();
-
-        await using var scope = QueryGuardScope.Start(
+        await using var guard = _factory.TrackQueries<Program, CatalogDbContext>(
             "GET /api/reports/summary",
-            QueryGuardPolicy.Create("reports").WithMaxOccurrencesPerFingerprint(1),
-            accessor: _factory.SessionAccessor);
+            QueryGuardPolicy.Create("reports").WithMaxOccurrencesPerFingerprint(1));
 
-        var response = await client.GetAsync(new Uri("/api/reports/summary", UriKind.Relative));
+        var response = await guard.Client.GetAsync(new Uri("/api/reports/summary", UriKind.Relative));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var result = await scope.CompleteAsync();
+        var result = await guard.CompleteAsync();
         _output.WriteLine(new QueryGuardConsoleReporter().Render(result));
 
         Assert.All(result.Findings, finding => Assert.True(finding.IsIgnored));
@@ -162,16 +154,13 @@ public sealed class CompanyEndpointDemoTests : IClassFixture<SampleApiFactory>
     public async Task The_json_and_junit_reports_render_the_failing_run()
     {
         // What a CI job would upload as an artifact.
-        using var client = _factory.CreateClient();
-
-        await using var scope = QueryGuardScope.Start(
+        await using var guard = _factory.TrackQueries<Program, CatalogDbContext>(
             "GET /api/companies",
-            QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(5),
-            accessor: _factory.SessionAccessor);
+            QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(5));
 
-        _ = await client.GetAsync(new Uri("/api/companies", UriKind.Relative));
+        _ = await guard.Client.GetAsync(new Uri("/api/companies", UriKind.Relative));
 
-        var result = await scope.CompleteAsync();
+        var result = await guard.CompleteAsync();
 
         var json = new QueryGuardJsonReporter().Render(result);
         var junit = new QueryGuardJUnitReporter().Render(result);
@@ -189,16 +178,13 @@ public sealed class CompanyEndpointDemoTests : IClassFixture<SampleApiFactory>
         // real findings on every pull request rather than only against fixtures. A document can be valid
         // SARIF, upload without complaint, and still annotate nothing: the assertion that matters is
         // that a location survived all the way to the emitted URI.
-        using var client = _factory.CreateClient();
-
-        await using var scope = QueryGuardScope.Start(
+        await using var guard = _factory.TrackQueries<Program, CatalogDbContext>(
             "GET /api/companies",
-            QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(5),
-            accessor: _factory.SessionAccessor);
+            QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(5));
 
-        _ = await client.GetAsync(new Uri("/api/companies", UriKind.Relative));
+        _ = await guard.Client.GetAsync(new Uri("/api/companies", UriKind.Relative));
 
-        var result = await scope.CompleteAsync();
+        var result = await guard.CompleteAsync();
         var root = RepositoryRoot();
         // The fallback is where a finding with no captured origin is attached. GitHub rejects a whole
         // SARIF file if any result has no location, so the choice is a real one rather than cosmetic:

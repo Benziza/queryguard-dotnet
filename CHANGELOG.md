@@ -12,6 +12,16 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+### Changed
+
+- The main quick start now uses `QueryGuard.AspNetCore.Testing`, and the sample request tests exercise
+  the same `TrackQueries` path that new users are asked to copy.
+- A testing guide separates `WebApplicationFactory` requests from explicit service and background-job
+  scopes.
+- Generated release notes include unlabeled pull requests instead of producing an empty release body.
+- The sample SARIF report is uploaded on pull requests only, so deliberate demo findings do not remain
+  open on the default branch.
+
 ## [0.1.0-preview.5] - 2026-08-21
 
 Testing and reporting are easier to adopt in ASP.NET Core applications and GitHub workflows.
