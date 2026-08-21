@@ -20,7 +20,7 @@ into something a test can fail on.
 ## Install
 
 ```bash
-dotnet add package QueryGuard.AspNetCore.Testing --prerelease
+dotnet add package QueryGuard.AspNetCore.Testing
 ```
 
 This package measures real `WebApplicationFactory` requests and works with any test framework.
@@ -76,14 +76,14 @@ running seven more of them, which a total-count budget cannot see.
 In CI, without writing plumbing:
 
 ```bash
-dotnet tool install -g QueryGuard.Cli --prerelease
+dotnet tool install -g QueryGuard.Cli
 
 queryguard baseline record          # once, then commit the file
 queryguard verify --summary artifacts/queryguard/summary.md
 ```
 
 ```yaml
-- uses: Benziza/queryguard-dotnet@v0.1.0-preview.5
+- uses: Benziza/queryguard-dotnet@v0.1.0
 ```
 
 The action posts that table as a sticky pull request comment. See [baselines](baselines/README.md).

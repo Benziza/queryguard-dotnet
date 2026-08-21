@@ -5,7 +5,7 @@ reports, and verifies later runs against it, so a query-count regression shows u
 baseline plumbing written by hand.
 
 ```bash
-dotnet tool install -g QueryGuard.Cli --prerelease
+dotnet tool install -g QueryGuard.Cli
 ```
 
 ## The workflow
@@ -83,14 +83,14 @@ a sticky pull request comment:
 ```yaml
 - run: dotnet test
 - run: queryguard verify --summary artifacts/queryguard/summary.md
-- uses: Benziza/queryguard-dotnet@v0.1.0-preview.5
+- uses: Benziza/queryguard-dotnet@v0.1.0
 ```
 
 Full documentation:
 [docs/baselines](https://benziza.github.io/queryguard-dotnet/baselines/README.html).
 
-## Preview
+## Versioning
 
-Public APIs and the baseline schema may change before `1.0.0`. The baseline document carries its own
-`schemaVersion`, and a file written by a future major version is rejected rather than read optimistically
-a silently empty baseline would report every scope as new and hide every regression in the run.
+The `0.1` public API is stable within the `0.1` release line. The baseline document carries its own
+`schemaVersion`, and a file written by a future major version is rejected rather than read
+optimistically. A silently empty baseline would report every scope as new and hide every regression.

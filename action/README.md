@@ -4,12 +4,12 @@ Publishes a QueryGuard query-count report to the job summary and, on a pull requ
 comment**: one comment that gets edited rather than a new one per push.
 
 ```yaml
-- uses: Benziza/queryguard-dotnet@v0.1.0-preview.5
+- uses: Benziza/queryguard-dotnet@v0.1.0
 ```
 
 That is the whole thing.
 
-The root form starts with `v0.1.0-preview.5`. Older releases keep the compatible
+The root form starts with `v0.1.0`. Older releases keep the compatible
 `Benziza/queryguard-dotnet/action@<tag>` path.
 
 ## What it looks like
@@ -45,10 +45,10 @@ jobs:
 
       - run: dotnet test
 
-      - run: dotnet tool install -g QueryGuard.Cli --prerelease
+      - run: dotnet tool install -g QueryGuard.Cli
       - run: queryguard verify --summary artifacts/queryguard/summary.md
 
-      - uses: Benziza/queryguard-dotnet@v0.1.0-preview.5
+      - uses: Benziza/queryguard-dotnet@v0.1.0
         with:
           summary-path: artifacts/queryguard/summary.md
 ```
