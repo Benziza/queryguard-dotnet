@@ -178,7 +178,7 @@ jobs:
       # Ubuntu only — one comment per pull request, not one per matrix leg.
       - name: Publish the QueryGuard report
         if: matrix.os == 'ubuntu-latest'
-        uses: ./action
+        uses: ./
         with:
           summary-path: artifacts/queryguard/summary.md
 
