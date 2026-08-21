@@ -10,7 +10,7 @@
 A NuGet API key with push rights to `QueryGuard.*` is, in practice, permission to ship code to
 everyone who installs the package. Stored as a long-lived repository secret it is exposed to every
 workflow that can read secrets, to anyone with the right repository access, and to any future
-supply-chain mistake — and it expires only when someone remembers to rotate it.
+supply-chain mistake, and it expires only when someone remembers to rotate it.
 
 nuget.org supports trusted publishing: the workflow exchanges a GitHub OIDC token for a
 short-lived credential scoped to a specific repository and workflow. Nothing long-lived is stored.
@@ -25,15 +25,15 @@ short-lived credentials obtained at publish time.**
 
 - The release workflow triggers on a `v*` tag push. Nothing publishes from a branch, a
   pull request, or a manual run against arbitrary code.
-- The job runs in the GitHub `release` environment, so environment protection rules — not just
-  branch permissions — gate publication.
+- The job runs in the GitHub `release` environment, so environment protection rules, not just
+  branch permissions, gate publication.
 - Permissions are the minimum that works: `contents: write` to create the release,
   `id-token: write` for the OIDC exchange. Everything else stays read-only. The repository default
   for workflow tokens is read-only.
 - The tag is verified against the packaged version before anything is pushed. A mismatch stops
   the release.
 - The release runs as two jobs. `verify` resolves and checks the version, builds, tests, packs, and
-  runs the package verification script — including the consumer smoke test that installs the packed
+  runs the package verification script, including the consumer smoke test that installs the packed
   packages and runs code against them. `publish` runs only when the ref is a tag, downloads the
   artifact `verify` produced, and pushes it. Publication therefore ships the exact bytes that were
   verified rather than a second build that was not.

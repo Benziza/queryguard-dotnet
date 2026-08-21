@@ -9,7 +9,7 @@ limit it.
 **These are microbenchmarks.** They measure QueryGuard's own code in isolation, with no database, no
 network, and no HTTP pipeline. A real EF Core query against a real database takes hundreds of
 microseconds to milliseconds; the numbers below are nanoseconds. Do not convert them into a percentage
-of request latency — that requires measuring *your* application, and the honest statement is that this
+of request latency: that requires measuring *your* application, and the honest statement is that this
 page cannot tell you what QueryGuard costs in production.
 
 What it *can* tell you is the relative cost of QueryGuard's own choices, which is what the design
@@ -28,12 +28,12 @@ dotnet run -c Release --project benchmarks/QueryGuard.Benchmarks -- --filter "*"
 | Source commit | [`46ec17e`](https://github.com/Benziza/queryguard-dotnet/commit/46ec17ebb9704694e71eb67f73ead60e5556ecca) |
 | Measured on | 2026-08-20 |
 | BenchmarkDotNet | 0.15.8 |
-| Job | `ShortRun` — 3 warmup, 3 iterations, 1 launch |
+| Job | `ShortRun`: 3 warmup, 3 iterations, 1 launch |
 | OS | Windows 11 (10.0.26200.9168/25H2) |
 | CPU | Intel Core Ultra 5 225F, 3.30 GHz, 10 physical / 10 logical cores |
 | SDK | .NET 10.0.302, host .NET 10.0.10, X64 RyuJIT `x86-64-v3` |
-| EF Core | Not exercised — see below |
-| Provider | None — these are in-process only |
+| EF Core | Not exercised; see below |
+| Provider | None: these are in-process only |
 
 **EF Core is not on the measured path.** The benchmark project references it, but every scenario here
 drives QueryGuard's own types directly with pre-generated SQL strings. That is deliberate: including a
@@ -49,13 +49,13 @@ machine; this page exists to support design decisions, and for that the ratios a
 [`docs/benchmarks/2026-08-20-46ec17e/`](https://github.com/Benziza/queryguard-dotnet/tree/main/docs/benchmarks/2026-08-20-46ec17e) holds the GitHub-format
 tables and CSV exactly as BenchmarkDotNet wrote them, including the full environment header. A summary
 table without its raw output is a number nobody can check. CI also runs every benchmark once per pull
-request with `--job Dry` and uploads the artifacts — that proves the harness still runs, and nothing
+request with `--job Dry` and uploads the artifacts: that proves the harness still runs, and nothing
 about timing.
 
 ## Being installed costs nothing measurable
 
 The most important number here. This is what QueryGuard costs per command when it is registered but no
-scope is open — every request outside a measured path, and every request at all when
+scope is open: every request outside a measured path, and every request at all when
 `Enabled = false`.
 
 | Commands | Mean | Allocated |
@@ -79,8 +79,8 @@ this row were expensive, that claim would be false.
 | 10 | 770 ns | 1,359 ns | 4,488 B |
 | 100 | 5,586 ns | 7,064 ns | 15,728 B |
 
-Per-command cost falls as the scope grows — roughly 270 ns for a single command, 77 ns each at ten, 56 ns
-each at a hundred — because the fixed cost of opening a scope amortises. Analysis adds between a quarter
+Per-command cost falls as the scope grows: roughly 270 ns for a single command, 77 ns each at ten, 56 ns
+each at a hundred, because the fixed cost of opening a scope amortises. Analysis adds between a quarter
 and three quarters on top depending on scope size, and it happens once when the scope closes rather than
 per command.
 
@@ -89,7 +89,7 @@ orders of magnitude more than that.
 
 ## Fingerprinting
 
-Normalize, redact, then hash — the work done once per intercepted command.
+Normalize, redact, then hash: the work done once per intercepted command.
 
 | Columns in the statement | Full | Normalize only | Redact only |
 | --- | --- | --- | --- |
@@ -121,7 +121,7 @@ stack trace per distinct query.
 
 **One trace per fingerprint costs 20–30× the entire rest of the capture path, and allocates roughly 350 KB
 across ten fingerprints.** That settles the question: capture stays off by default, and the API
-deliberately offers no way to capture a trace per command — at ten commands per fingerprint that would
+deliberately offers no way to capture a trace per command: at ten commands per fingerprint that would
 be another order of magnitude.
 
 It also confirms the feature is worth keeping as an opt-in. When you are actively hunting the source of a
@@ -135,9 +135,9 @@ says so.
 Per [docs/testing-strategy.md](./testing-strategy.md), the following will not appear in QueryGuard's
 documentation:
 
-- "Zero overhead" — the no-scope path is close, but "close to zero" and "zero" are different claims.
+- "Zero overhead": the no-scope path is close, but "close to zero" and "zero" are different claims.
 - "Negligible cost" without the number beside it.
-- "Fastest EF Core profiler" — QueryGuard is not a profiler and this is not a comparison.
+- "Fastest EF Core profiler": QueryGuard is not a profiler and this is not a comparison.
 - Any production latency figure derived from a microbenchmark.
 
 If you measure QueryGuard in a real application and the numbers differ from what you expected, that is

@@ -13,7 +13,7 @@ users touch.
 
 The obvious implementation is to depend on xUnit and throw `Xunit.Sdk.XunitException`, so failures
 render natively. But `QueryGuard.Testing` is a shipped package, and a package that references a
-test framework forces that framework on everyone who installs it — including teams on NUnit,
+test framework forces that framework on everyone who installs it, including teams on NUnit,
 MSTest, or TUnit. The alternative, shipping an adapter per framework, multiplies the surface area
 of an unstable pre-1.0 API by four.
 
@@ -24,7 +24,7 @@ message good enough that the framework's own reporting is enough.**
 
 - `QueryGuardScope` opens and completes a named session, supporting both `IDisposable` and
   `IAsyncDisposable`, and returns the completed result.
-- `QueryGuardAssert` throws `QueryGuardBudgetExceededException` — a plain exception type. Every
+- `QueryGuardAssert` throws `QueryGuardBudgetExceededException`: a plain exception type. Every
   test framework reports an unexpected exception with its message and stack, so no framework
   integration is required to get a usable failure.
 - Because there is no framework-native formatting to lean on, the **message carries the evidence**:
@@ -45,7 +45,7 @@ the core API is explicitly unstable, each needing its own tests and its own rele
 This is the scope explosion the risk register warns about, and it buys ergonomics rather than
 capability.
 
-**Return a result and let users assert themselves.** Already supported — `QueryGuardScope` hands
+**Return a result and let users assert themselves.** Already supported: `QueryGuardScope` hands
 back the completed result, and anyone can assert on it however they like. It is not sufficient as
 the *only* option: the value of `QueryGuardAssert` is that the message is written once, well, by
 the person who knows what evidence matters.
@@ -54,7 +54,7 @@ the person who knows what evidence matters.
 
 - Assertion ergonomics are slightly less idiomatic than a native framework assertion. Accepted,
   and mitigated by making the message excellent.
-- The failure message is a tested artifact, not incidental output — it has snapshot coverage, so a
+- The failure message is a tested artifact, not incidental output: it has snapshot coverage, so a
   change to it is visible in review.
 - Because the result object is public and stable, a community adapter for any framework is a small
   wrapper. That is the intended path, once the core API has settled.

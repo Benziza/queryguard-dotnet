@@ -16,7 +16,7 @@ QueryGuard is middleware in the same pipeline as the application: whatever it do
 response, the application experiences.
 
 The risk is precise. A diagnostics tool that changes observed behavior is worse than no tool,
-because it makes every subsequent test result suspect — "does it fail because of the bug, or
+because it makes every subsequent test result suspect: "does it fail because of the bug, or
 because QueryGuard is enabled?" Response mutation is also unsafe in practice for streamed
 responses, already-started responses, and content types that are not documents at all.
 
@@ -29,7 +29,7 @@ responses, already-started responses, and content types that are not documents a
 - Output goes to `ILogger` as a structured summary plus findings, with stable event IDs. Nothing
   is written to the response body, and no headers are added.
 - The original response and the original exception pass through untouched. QueryGuard never
-  swallows, wraps, replaces, or reorders an application exception — a reporter failing must not
+  swallows, wraps, replaces, or reorders an application exception: a reporter failing must not
   be able to mask an application failure.
 - The middleware never throws on the request path. Only the explicit testing API
   (see [ADR-0010](./0010-testing-api.md)) turns a budget verdict into an exception, because in
@@ -38,7 +38,7 @@ responses, already-started responses, and content types that are not documents a
   URL, so `/api/companies/1` and `/api/companies/2` share one policy instead of creating a new
   one per identifier.
 - The intended default deployment is development and test environments. Enabling it in
-  production is a documented, deliberate choice — not the default.
+  production is a documented, deliberate choice, not the default.
 
 ## Rejected alternatives
 
@@ -66,6 +66,6 @@ place to fail is a test.
 
 ## Revisit when
 
-There is real demand for opt-in development-only response headers — for example from a team
+There is real demand for opt-in development-only response headers: for example from a team
 whose local workflow cannot easily read structured logs. It would ship disabled, be documented
 as development-only, and be covered by a test asserting it is inert by default.

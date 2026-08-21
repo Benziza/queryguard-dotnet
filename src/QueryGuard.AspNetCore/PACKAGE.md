@@ -27,7 +27,7 @@ var app = builder.Build();
 app.UseRouting();
 
 // After UseRouting, so a scope is named by its matched route pattern rather than its URL. Earlier and
-// every request lands in one "(unmatched)" scope — QueryGuard still works, the reports just lose the
+// every request lands in one "(unmatched)" scope: QueryGuard still works, the reports just lose the
 // one label that makes them useful.
 app.UseQueryGuard();
 ```
@@ -38,7 +38,7 @@ It does **not** write to the response body, add headers, or throw on the request
 your application produces and the exception it raises are exactly what a client sees, with QueryGuard
 enabled or disabled. Findings go to `ILogger` with stable event IDs.
 
-That is a deliberate constraint, not a missing feature — see
+That is a deliberate constraint, not a missing feature: see
 [ADR-0006](https://benziza.github.io/queryguard-dotnet/decisions/0006-aspnet-observe-only.html).
 
 ## Policies are per route pattern

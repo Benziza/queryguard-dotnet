@@ -11,7 +11,7 @@ QueryGuard sits on the database command path. Everything flowing through there i
 sensitive: parameter values are user data, connection strings are credentials, and SQL text can
 reveal a private schema.
 
-It is also a tool whose output is *meant to be shared* — pasted into a pull request, attached to
+It is also a tool whose output is *meant to be shared*: pasted into a pull request, attached to
 a CI run, uploaded as a JUnit report, or copied into a GitHub issue. Any data QueryGuard captures
 should be assumed to end up somewhere public.
 
@@ -42,7 +42,7 @@ Enforcement rules:
 2. String literals that survive normalization in the command text are redacted, so a query
    built with inline values does not become a data leak by accident.
 3. Every new captured field requires a privacy review, a redaction test, and a documentation
-   entry — enforced by the pull request template, not by memory.
+   entry: enforced by the pull request template, not by memory.
 4. `CaptureParameterValues` exists but defaults to `false`, and the documentation states
    plainly what enabling it means for anything you then share publicly.
 
@@ -56,7 +56,7 @@ values" from "51 identical values" without storing the data. Rejected for v0.1 o
 Hashes of low-cardinality values are trivially reversible, so the privacy claim would be weaker
 than it looks and would need careful documentation to avoid misleading users. And it adds
 hot-path cost for evidence quality that no user has asked for yet. This is the most likely
-capability to be revisited — behind an explicit opt-in and with the reversibility caveat stated.
+capability to be revisited: behind an explicit opt-in and with the reversibility caveat stated.
 
 **No parameter handling at all.** Not viable: without normalizing parameter *names*,
 provider-generated identifiers (`@p0`, `@__city_0`, `$1`) prevent equivalent queries from
@@ -73,6 +73,6 @@ sharing a fingerprint, which breaks the core feature.
 
 ## Revisit when
 
-A concrete user need arrives *and* a safe design exists — most plausibly opt-in parameter
+A concrete user need arrives *and* a safe design exists: most plausibly opt-in parameter
 value hashing with documented reversibility limits, or capturing only value *cardinality* per
 fingerprint, which improves evidence without retaining any value at all.

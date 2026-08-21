@@ -11,8 +11,8 @@ EF Core registers a `DbCommandInterceptor` as a **singleton** for the lifetime o
 `DbContext` options. A single interceptor instance therefore observes commands from every
 concurrent request, every parallel test, and every fan-out inside one request.
 
-QueryGuard needs the opposite: commands grouped by the *scope* that caused them — one HTTP
-request, or one integration test. Getting this wrong is not a cosmetic bug. If a command
+QueryGuard needs commands grouped by the *scope* that caused them, such as one HTTP request or
+one integration test. Getting this wrong is not a cosmetic bug. If a command
 leaks from one scope into another, every downstream number is wrong: query counts,
 fingerprint groups, budget verdicts. And it fails intermittently, which is the worst
 possible failure mode for a tool whose entire purpose is to make test results trustworthy.

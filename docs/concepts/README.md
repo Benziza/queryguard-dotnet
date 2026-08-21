@@ -31,7 +31,7 @@ Sessions come from two places:
 - `app.UseQueryGuard()` opens one per request.
 - `QueryGuardScope.Start(...)` opens one explicitly, for a test or a background job.
 
-Both nest, and the innermost wins. **No open session means no capture** — QueryGuard stays silent rather
+Both nest, and the innermost wins. **No open session means no capture**: QueryGuard stays silent rather
 than guessing which scope a command belongs to.
 
 A session is mutable while open and frozen when it completes. `CompletedQueryGuardSession` is a separate
@@ -41,7 +41,7 @@ convention.
 ## 2. The interceptor is stateless
 
 EF Core registers a `DbCommandInterceptor` as a **singleton**. One instance sees commands from every
-concurrent request, every parallel test, and every fan-out inside a single request — so it cannot hold
+concurrent request, every parallel test, and every fan-out inside a single request, so it cannot hold
 per-scope state. It asks `IQueryGuardSessionAccessor` which session the command it is looking at belongs
 to.
 
@@ -50,7 +50,7 @@ The default accessor is backed by `AsyncLocal<T>`, which flows with `ExecutionCo
 around.
 
 The limitation is the same mechanism: work that suppresses context flow is not captured. In practice the
-one place this bites is `TestServer`, which does not flow context into requests unless asked — see
+one place this bites is `TestServer`, which does not flow context into requests unless asked. See
 [troubleshooting](../troubleshooting/README.md#4-testserver-is-not-flowing-executioncontext).
 
 The interceptor **observes**. It never modifies the generated SQL, suppresses a command, changes a result,
@@ -63,9 +63,9 @@ To say "this query ran 51 times", QueryGuard has to decide when two command text
 Raw text will not do: provider-generated parameter names differ between executions, and formatting
 differs between providers and EF versions.
 
-So the command text is **normalized** — whitespace collapsed, non-directive comments removed, every
-parameter syntax mapped to one placeholder — then **redacted**, then hashed into a short stable
-identifier like `QG-FP-1A2B3C4D`.
+The command text is **normalized** by collapsing whitespace, removing non-directive comments, and
+mapping every parameter syntax to one placeholder. It is then **redacted** and hashed into a short
+stable identifier like `QG-FP-1A2B3C4D`.
 
 Normalization is deliberately conservative. It never reorders tokens, sorts clauses, canonicalizes
 aliases, or rewrites quoted identifiers, because the two failure modes are not symmetric:
@@ -85,22 +85,22 @@ are bounded, and stack traces are off unless asked for.
 
 Centralizing this is the point: a reporter that had to *remember* to redact would eventually forget, and
 adding a reporter would be a way to introduce a leak. Because redaction happens before a result exists,
-no reporter — including one you write — can emit what was never captured.
+no reporter, including one you write, can emit what was never captured.
 
 See [ADR-0004](../decisions/0004-parameter-privacy.md).
 
 ## 5. Analysis happens after the work, not during it
 
-Capture is one append per command. Everything else — grouping by fingerprint, evaluating budgets,
-building findings — happens once, when the scope closes.
+Capture is one append per command. Grouping, budget evaluation, and finding creation happen once when
+the scope closes.
 
 That split is why being installed costs about a nanosecond per command
 ([benchmarks](../benchmarks.md)). It also means analysis can afford to sort and allocate, which is what
 makes deterministic ordering affordable: two runs over the same data produce byte-identical reports, so a
 snapshot test on a report is meaningful.
 
-A **finding** is evidence, not a verdict on your design. It carries the numbers that justify it —
-occurrence counts, expected against actual, timing, redacted SQL — so you can disagree with it on the
+A **finding** is evidence, not a verdict on your design. It carries the numbers that justify it:
+occurrence counts, expected against actual, timing, redacted SQL, so you can disagree with it on the
 facts. A repeated-query candidate is a *warning*, because repeated SQL is strong evidence and not proof.
 Making it a failure requires configuring a budget, deliberately.
 

@@ -22,17 +22,17 @@ Once `0.1.0` is released, the supported window will be documented in
 
 Report privately through either channel:
 
-1. **GitHub private vulnerability reporting** (preferred) —
+1. **GitHub private vulnerability reporting** (preferred):
    [open a draft advisory](https://github.com/Benziza/queryguard-dotnet/security/advisories/new).
    This keeps the report, the discussion, and the fix in one private place.
-2. **Email** — benizizamohamed@gmail.com with `QueryGuard security` in the subject.
+2. **Email**: benizizamohamed@gmail.com with `QueryGuard security` in the subject.
 
 Please include:
 
 - affected package and version;
 - .NET and EF Core version, and the database provider;
 - a description of the impact, not only the symptom;
-- a **synthetic** reproduction — no production credentials, connection strings,
+- a **synthetic** reproduction: no production credentials, connection strings,
   customer data, or private schema details;
 - any known mitigation or workaround.
 
@@ -53,7 +53,7 @@ rather than silence.
 
 In scope:
 
-- QueryGuard capturing, retaining, or emitting data it documents as excluded — parameter
+- QueryGuard capturing, retaining, or emitting data it documents as excluded: parameter
   values, connection strings, credentials, or unbounded SQL samples.
 - A reporter bypassing the central redaction policy.
 - QueryGuard altering application behavior: modifying generated SQL, suppressing a command,

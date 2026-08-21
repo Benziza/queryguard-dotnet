@@ -25,7 +25,7 @@ builder.Services.AddDbContext<AppDbContext>((provider, db) =>
 var app = builder.Build();
 
 app.UseRouting();
-app.UseQueryGuard();   // after UseRouting — see below
+app.UseQueryGuard();   // after UseRouting; see below
 ```
 
 Two things people miss:
@@ -49,7 +49,7 @@ Two things people miss:
 Every budget is a **maximum**: exactly at the limit passes.
 
 Severity is per rule, and the defaults differ for a reason. Counting rules default to `Failure` because
-query count is deterministic — same code, same count. Timing rules default to `Warning` because they are
+query count is deterministic: same code, same count. Timing rules default to `Warning` because they are
 not, and a guard that fires intermittently on a shared runner teaches people to distrust every other
 finding.
 
@@ -86,7 +86,7 @@ policy.WithCountedKinds(QueryCommandKind.Reader);   // exclude scalars too
 ```
 
 Note that "what a command does" is not the same as "which EF Core method executed it". On SQLite, EF Core
-runs `INSERT … RETURNING` through the reader path to read the generated key back — QueryGuard classifies
+runs `INSERT … RETURNING` through the reader path to read the generated key back: QueryGuard classifies
 that as a write anyway, or a budget of ten reads would mean something different on every provider.
 
 ## Capture and privacy
@@ -108,7 +108,7 @@ any you then attach to a CI artifact or a public issue. It exists because a quer
 *different* keys is stronger evidence than the same query 51 times, but that is a trade to make
 deliberately.
 
-**`CaptureFirstStackTrace = true` costs 20–30× the rest of the capture path** — measured, in
+**`CaptureFirstStackTrace = true` costs 20–30× the rest of the capture path**: measured, in
 [benchmarks](../benchmarks.md). Excellent while hunting a specific repeated query on a development
 machine; not something to leave on.
 
@@ -118,7 +118,7 @@ default treats it as data.
 
 ## Documenting intentional repetition
 
-Never reach for a global off switch — there isn't one. Record the exception with its reason, which stays
+Never reach for a global off switch: there isn't one. Record the exception with its reason, which stays
 visible in reports:
 
 ```csharp
@@ -142,7 +142,7 @@ A clean request logs nothing by default. QueryGuard runs on every request, and a
 is noise that trains people to filter it out entirely. `/health`, `/healthz`, `/metrics`, and
 `/favicon.ico` are excluded out of the box.
 
-Event IDs are stable and documented on `QueryGuardEventIds` — they are part of the observable contract, so
+Event IDs are stable and documented on `QueryGuardEventIds`: they are part of the observable contract, so
 a dashboard can be built on them. `LogLevel.Error` is reserved for QueryGuard's own failures, never for an
 application exceeding a budget, so alerting on `Error` stays meaningful.
 
@@ -158,7 +158,7 @@ than only the SQL:
 ```
 
 One trace per distinct query, never one per execution. Framework and generated frames are filtered out,
-so a named method is shown by name and a lambda is shown by file and line — a minimal-API endpoint
+so a named method is shown by name and a lambda is shown by file and line: a minimal-API endpoint
 compiles to something like `Program.<>c.<<<Main>$>b__0_3>d.MoveNext()`, which carries no information the
 location does not.
 
@@ -169,7 +169,7 @@ await using var scope = QueryGuardScope.Start("GET /api/companies", policy, capt
 ```
 
 This is on in a scope and **off** on a request path, because it costs 20–30× the rest of the capture
-path — free in a test, not free in production. See
+path: free in a test, not free in production. See
 [ADR-0007](../decisions/0007-stack-trace-policy.md) and [benchmarks](../benchmarks.md).
 
 ## In tests
@@ -192,5 +192,5 @@ QueryGuardAssert.Passes(await scope.CompleteAsync());
 to match up and calling `UseQueryGuard()` twice is a no-op rather than a double count. Pass an accessor
 explicitly only when the interceptor came from a container.
 
-With `WebApplicationFactory`, also set `TestServerOptions.PreserveExecutionContext` — see
+With `WebApplicationFactory`, also set `TestServerOptions.PreserveExecutionContext`: see
 [troubleshooting](../troubleshooting/README.md#4-testserver-is-not-flowing-executioncontext).

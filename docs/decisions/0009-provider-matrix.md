@@ -10,7 +10,7 @@
 QueryGuard captures commands through EF Core's relational interception contract, which every
 relational provider implements. So in one sense every relational provider "works".
 
-But the feature users care about — grouping repeated queries — depends on the *shape of the SQL
+But the feature users care about, grouping repeated queries, depends on the *shape of the SQL
 the provider generates*. Parameter naming, quoting, declaration blocks, and formatting all differ,
 and the fingerprint normalizer is deliberately conservative (see
 [ADR-0005](./0005-sql-fingerprints.md)). So capture and fingerprint *quality* are two different
@@ -38,13 +38,13 @@ Rules that keep the tiers meaningful:
 
 - SQLite is the workhorse: fast, real relational execution, no container, so it covers
   interception, fingerprinting, budgets, middleware, and failure paths.
-- PostgreSQL exists to prove the design against a *second, genuinely different* SQL dialect —
-  different parameter syntax, different quoting. One provider would have let dialect assumptions
+- PostgreSQL proves the design against a *second, genuinely different* SQL dialect with
+  different parameter syntax and quoting. One provider would have let dialect assumptions
   hide in the normalizer.
 - SQL Server is integration-tested because it is the provider most .NET developers evaluate first,
   and because "probably works" was the weakest claim on this page. Adding it found a real bug on the
-  first run — see below.
-- MySQL is integration-tested for the third quoting style — backticks — and because it inlines some
+  first run; see below.
+- MySQL is integration-tested for the third quoting style, backticks, and because it inlines some
   constants the other providers parameterize, which is the only live coverage of literal redaction.
   It runs against Oracle's `MySql.EntityFrameworkCore` and not Pomelo, because Pomelo has no EF Core
   10 line; the tier is still "integration-tested" but the provider is named wherever the claim is made.
@@ -56,7 +56,7 @@ Rules that keep the tiers meaningful:
 ## Rejected alternatives
 
 **Support every provider in v0.1.** Not achievable, and claiming it would be worse than not
-trying — the first user on an untested provider would find a bad fingerprint and reasonably
+trying: the first user on an untested provider would find a bad fingerprint and reasonably
 conclude the tool does not work.
 
 **SQLite only.** Cheapest, and it would leave a genuine design risk unexamined: with one dialect,
@@ -78,7 +78,7 @@ INSERT INTO [Departments] ([Id], [CompanyId], [Name]) VALUES (@p0, @p1, @p2);
 ```
 
 Command classification tested only the leading keyword, saw `SET`, and left the command counted as a
-**read** — so every `SaveChanges` on SQL Server consumed a read budget, and a budget of ten reads meant
+**read**, so every `SaveChanges` on SQL Server consumed a read budget, and a budget of ten reads meant
 something different on SQL Server than on SQLite. That had shipped in `0.1.0-preview.1`.
 
 The fixtures could not have caught it, and that is the general lesson rather than an accident of this
@@ -86,7 +86,7 @@ particular bug: a fixture proves the normalizer still does what it did when the 
 cannot notice SQL that the fixture never contained, and nobody captures a fixture for a shape they did
 not know existed.
 
-The cost turned out to be smaller than assumed too — the whole provider suite, both containers, runs in
+The cost turned out to be smaller than assumed too: the whole provider suite, both containers, runs in
 about a minute. The licensing consideration is the developer edition the container image ships with,
 which is licensed for development and testing.
 
@@ -129,6 +129,6 @@ Two constraints this amendment does not resolve:
   maintain it.
 - Pomelo ships an EF Core 10 line. Running the existing MySQL suite against it as a second
   configuration is a small change and would close the caveat above.
-- Provider support becomes a demonstrated adoption blocker — a user who would use QueryGuard but
+- Provider support becomes a demonstrated adoption blocker: a user who would use QueryGuard but
   cannot because their provider's fingerprints are wrong. That is worth a provider-specific
   normalizer; a hypothetical user is not.

@@ -20,8 +20,8 @@ The .NET support picture at the time of this decision:
 | .NET 10 | LTS | 2028-11-14 |
 
 The relevant asymmetry: .NET 8 and .NET 9 leave support on the *same day*, but .NET 8 is where
-production applications actually are. Real teams — including the ones with exactly the EF Core
-performance problem QueryGuard solves — sit on the previous LTS, not on the STS.
+production applications actually are. Real teams, including those with the EF Core performance
+problem QueryGuard solves, sit on the previous LTS, not on the STS.
 
 ## Decision
 
@@ -49,7 +49,7 @@ Corollaries:
 ## Rejected alternatives
 
 **`net10.0` only.** Simplest build, half the CI time, one EF Core version. It also excludes
-every team on .NET 8 — a large share of the addressable users, at exactly the moment the project
+every team on .NET 8: a large share of the addressable users, at exactly the moment the project
 needs its first real adopters.
 
 **`net8.0` only.** Would work on .NET 10 through roll-forward, but it forfeits anything newer,
