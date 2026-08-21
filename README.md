@@ -107,7 +107,7 @@ change and exits successfully.
 Publish the Markdown table as a job summary and sticky pull request comment:
 
 ```yaml
-- uses: Benziza/queryguard-dotnet@v0.1.0-preview.5
+- uses: Benziza/queryguard-dotnet@v0.1.0-preview.6
   with:
     summary-path: artifacts/queryguard/summary.md
 ```
@@ -125,6 +125,20 @@ See the [baseline guide](./docs/baselines/README.md) and [action guide](./action
 
 MySQL tests use Oracle's `MySql.EntityFrameworkCore`. Pomelo does not have an EF Core 10 release yet.
 See [provider support](./docs/providers/README.md) for the exact claim and current caveats.
+
+## Tested in public projects
+
+`0.1.0-preview.6` was added to three public ASP.NET Core test suites before the stable release:
+
+| Project | Test stack | Request | Result |
+| --- | --- | --- | --- |
+| [CleanArchitecture](https://github.com/jasontaylordev/CleanArchitecture/tree/10f1a45df0d86bb87b083f3a0e249d755093fbbd) | NUnit, SQLite | `POST /api/Users/register` | 1 query, 1 group |
+| [SSW.VerticalSliceArchitecture](https://github.com/SSWConsulting/SSW.VerticalSliceArchitecture/tree/b3926fe461fa79fd81e163d851f1dec00a5ba84e) | xUnit, SQL Server | `GET /api/heroes` | 2 queries, 2 groups |
+| [CleanArchitecture](https://github.com/alex289/CleanArchitecture/tree/70a13e310abf8742b938a80dff48ae0735f6b5ef) | NUnit, SQL Server | `GET /api/v1/Tenant/{id}` | 2 queries, 2 groups |
+
+All three request tests passed with no repeated-query finding. The
+[validation notes](./docs/case-studies/public-project-validation.md) include the setup, the package
+compatibility problem the work found, and the limits of this check.
 
 ## Scope and privacy
 
@@ -159,6 +173,7 @@ Full documentation and the generated API reference are available at
 | --- | --- |
 | [How it works](./docs/concepts/README.md) | Sessions, fingerprints, redaction, analysis |
 | [Testing](./docs/testing/README.md) | WebApplicationFactory requests and explicit scopes |
+| [Public validation](./docs/case-studies/public-project-validation.md) | Results from three public ASP.NET Core projects |
 | [Configuration](./docs/configuration/README.md) | Budgets and defaults |
 | [Baselines](./docs/baselines/README.md) | Recording and comparing query behavior |
 | [Troubleshooting](./docs/troubleshooting/README.md) | Missing capture, grouping, middleware order |

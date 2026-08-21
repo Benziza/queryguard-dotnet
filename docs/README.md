@@ -6,6 +6,8 @@
   and analysis, in the order a command travels through them.
 - [Testing](./testing/README.md): measure `WebApplicationFactory` requests or open an explicit scope
   around a service or background job.
+- [Public project validation](./case-studies/public-project-validation.md): results from three public
+  ASP.NET Core test suites, including the package problem the work found.
 - [Configuration](./configuration/README.md): every budget and option, what it defaults to, and the
   reasoning behind each default.
 - [Baselines](./baselines/README.md): record what a scope costs today and report what changed, so
