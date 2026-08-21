@@ -5,7 +5,7 @@ Two projects, one point: the same endpoint, once with a hidden N+1 and once with
 | Project | What it is |
 | --- | --- |
 | `QueryGuard.SampleApi` | A minimal ASP.NET Core API over a synthetic company catalogue, wired up with QueryGuard |
-| `QueryGuard.SampleTests` | The same endpoints under `QueryGuard.Testing`, showing the assertions you would write for real |
+| `QueryGuard.SampleTests` | The same endpoints under `QueryGuard.AspNetCore.Testing`, showing the assertions you would write for real |
 
 Everything here is invented. No schema, name, or SQL in this repository comes from a real application.
 
@@ -75,7 +75,18 @@ asserts exactly that.
 dotnet test samples/QueryGuard.SampleTests
 ```
 
-Five tests, written to be read:
+The request tests use the same helper shown in the main README:
+
+```csharp
+await using var guard = factory.TrackQueries<Program, CatalogDbContext>(
+    "GET /api/companies",
+    QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(5));
+
+var response = await guard.Client.GetAsync("/api/companies");
+var result = await guard.CompleteAsync();
+```
+
+The main scenarios are written to be read:
 
 - `The_problem_endpoint_returns_200_OK_and_still_breaks_its_query_budget`: asserts that the budget
   failure *does* happen, and prints the failure message a developer would actually see. A passing test
@@ -86,6 +97,10 @@ Five tests, written to be read:
   to be cheaper.
 - `An_intentional_repetition_is_reported_as_ignored_with_its_reason`.
 - `The_json_and_junit_reports_render_the_failing_run`: what a CI job would upload as an artifact.
+- `The_sarif_report_points_code_scanning_at_the_line_that_ran_the_query`: what a code-scanning upload
+  needs to annotate the application line.
+
+`BaselineComparisonDemoTests` measures all three endpoints and checks the committed baseline.
 
 ## Two setup details worth copying
 
@@ -93,12 +108,10 @@ Five tests, written to be read:
 pattern, so calling it earlier puts every request into a single unmatched scope. QueryGuard still works;
 the reports just lose the one label that makes them useful.
 
-**With `WebApplicationFactory`, set `TestServerOptions.PreserveExecutionContext`.** `TestServer` does not
-flow `ExecutionContext` into the request pipeline by default, and QueryGuard finds the active session
-through `AsyncLocal`. Without it, a scope opened in a test is invisible to the interceptor running inside
-the request: the scope completes with zero commands, and an assertion about query counts fails for a
-reason that has nothing to do with query counts. `SampleApiFactory` shows the one-line fix, and explains
-why setting `Server.PreserveExecutionContext` *after* `CreateClient()` is too late.
+**Use `TrackQueries` and the client it returns with `WebApplicationFactory`.** The helper preserves the
+execution context, disables request middleware for that measurement, attaches the interceptor, and uses
+the hosted application's session accessor. `BaselineComparisonDemoTests` keeps the manual setup as an
+advanced example for measuring several requests with one client.
 
 ## Where the data lives
 

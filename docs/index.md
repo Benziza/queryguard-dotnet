@@ -20,34 +20,30 @@ into something a test can fail on.
 ## Install
 
 ```bash
-dotnet add package QueryGuard.Testing --prerelease
+dotnet add package QueryGuard.AspNetCore.Testing --prerelease
 ```
 
-One package for testing: it brings the EF Core interceptor with it.
+This package measures real `WebApplicationFactory` requests and works with any test framework.
 
-## Two lines of setup
+## Measure one request
 
-Attach QueryGuard where the context is configured:
-
-```csharp
-options.UseSqlite(connectionString).UseQueryGuard();
-```
-
-Then assert:
+Open a measurement for the application's EF Core context:
 
 ```csharp
-await using var scope = QueryGuardScope.Start(
+using var factory = new WebApplicationFactory<Program>();
+await using var guard = factory.TrackQueries<Program, AppDbContext>(
     "GET /api/companies",
     QueryGuardPolicy.Create("companies").WithMaxOccurrencesPerFingerprint(5));
 
-await client.GetAsync("/api/companies");
+var response = await guard.Client.GetAsync("/api/companies");
+response.EnsureSuccessStatusCode();
 
-QueryGuardAssert.Passes(await scope.CompleteAsync());
+QueryGuardAssert.Passes(await guard.CompleteAsync());
 ```
 
-Outside a scope nothing is captured, so leaving the call in place costs about a nanosecond per command
-and no allocation. `QueryGuard.Testing` references no test framework, so xUnit, NUnit, MSTest, and TUnit
-all work unchanged.
+The helper attaches QueryGuard, preserves the execution context used by `TestServer`, and prevents the
+request middleware from hiding the test scope. Outside a scope nothing is captured. See the
+[testing guide](testing/README.md) for service tests, background jobs, and manual scopes.
 
 ## What a failure tells you
 
@@ -97,6 +93,7 @@ The action posts that table as a sticky pull request comment. See [baselines](ba
 | | |
 | --- | --- |
 | [How it works](concepts/README.md) | Sessions, fingerprints, redaction, analysis |
+| [Testing](testing/README.md) | WebApplicationFactory requests and explicit scopes |
 | [Configuration](configuration/README.md) | Every budget and option, and why each default is what it is |
 | [Baselines](baselines/README.md) | Recording what a scope costs and reporting what changed |
 | [Provider support](providers/README.md) | What is integration-tested and what is merely captured |

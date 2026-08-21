@@ -4,6 +4,8 @@
   items:
     - name: How it works
       href: concepts/README.md
+    - name: Testing
+      href: testing/README.md
     - name: Configuration
       href: configuration/README.md
     - name: Baselines

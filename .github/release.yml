@@ -34,3 +34,7 @@ changelog:
       labels:
         - "type:chore"
         - "dependencies"
+
+    - title: "Other changes"
+      labels:
+        - "*"
