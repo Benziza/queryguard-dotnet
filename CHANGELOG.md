@@ -12,6 +12,11 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+### Added
+
+- Public validation notes record results from three ASP.NET Core projects and the package dependency
+  problem found during the work.
+
 ## [0.1.0-preview.6] - 2026-08-21
 
 The main ASP.NET Core testing path is simpler, and packages no longer require the newest framework

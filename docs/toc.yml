@@ -6,6 +6,8 @@
       href: concepts/README.md
     - name: Testing
       href: testing/README.md
+    - name: Public validation
+      href: case-studies/public-project-validation.md
     - name: Configuration
       href: configuration/README.md
     - name: Baselines
