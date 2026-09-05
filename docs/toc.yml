@@ -2,12 +2,8 @@
   href: index.md
 - name: Guide
   items:
-    - name: How it works
-      href: concepts/README.md
     - name: Testing
       href: testing/README.md
-    - name: Public validation
-      href: case-studies/public-project-validation.md
     - name: Configuration
       href: configuration/README.md
     - name: Baselines
@@ -18,8 +14,12 @@
       href: troubleshooting/README.md
     - name: When a finding is wrong
       href: troubleshooting/false-positives.md
+    - name: How it works
+      href: concepts/README.md
     - name: Benchmarks
       href: benchmarks.md
+    - name: Public project validation
+      href: case-studies/public-project-validation.md
 - name: Decisions
   href: decisions/
 - name: Contributing
