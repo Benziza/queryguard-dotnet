@@ -12,6 +12,11 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-05
+
+Bug fixes for SQL privacy, query counts, and long query fingerprints.
+Public APIs and report schemas are unchanged.
+
 ### Fixed
 
 - Compute built-in fingerprints from the full redacted SQL before shortening report text. Long
@@ -31,6 +36,20 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
   shorten SQL evidence and group more queries together. Fingerprints for affected SQL change;
   review related baselines and fingerprint allowlists after upgrading. Public APIs and report
   schemas are unchanged.
+
+### Changed
+
+- Simplify the README and documentation with shorter explanations and practical examples.
+- Update and group CodeQL actions, update Pages deployment, and check the logging dependency
+  minimum during package validation. Shipping dependency minimums stay unchanged.
+
+### Upgrading from 0.1.0
+
+- Update the QueryGuard packages you use to `0.1.1`.
+- Review fingerprint allowlists for long queries and SQL affected by the string-redaction fixes.
+  Their IDs can change. Copy new IDs only after confirming the repetition is still intentional.
+- Run measured tests again and review baseline differences before recording and committing a new
+  baseline. Corrected read counts and query grouping can change the results.
 
 ## [0.1.0] - 2026-08-21
 
@@ -342,7 +361,8 @@ release.
   `Properties/launchSettings.json`, and corrected the query and warning counts quoted in
   `samples/README.md` to what the sample actually logs.
 
-[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0...main
+[Unreleased]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.1...main
+[0.1.1]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.6...v0.1.0
 [0.1.0-preview.6]: https://github.com/Benziza/queryguard-dotnet/compare/v0.1.0-preview.5...v0.1.0-preview.6
 [0.1.0-preview.5]: https://github.com/Benziza/queryguard-dotnet/releases/tag/v0.1.0-preview.5
