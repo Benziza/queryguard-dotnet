@@ -107,6 +107,33 @@ statement and almost nothing on a long one.
 
 The 200-column row is a wide report query, not a typical one. A keyed lookup is the 3-column row.
 
+## Full SQL fingerprints (2026-09-05)
+
+This run measures complete redacted SQL hashing before display truncation at
+[`aa8f6f8`](https://github.com/Benziza/queryguard-dotnet/commit/aa8f6f829de774d46c4badb77c10633c09ec9feb).
+The 700-column case exceeds the default 4096-character display limit.
+
+```bash
+dotnet run -c Release --project benchmarks/QueryGuard.Benchmarks -- --filter "*FingerprintBenchmarks.FullFingerprint*" --job Short
+```
+
+Measured on Windows 11 (10.0.26200.9168), Intel Core Ultra 5 225F (10 cores), SDK 10.0.400,
+.NET 10.0.11, with BenchmarkDotNet 0.15.8. `ShortRun` uses one launch, three warmup iterations,
+and three measured iterations. No database or EF Core command execution is involved.
+
+| Columns | Mean | Error (99.9% CI half-width) | Allocated per operation |
+| --- | --- | --- | --- |
+| 3 | 0.65 us | 0.03 us | 1.98 KB |
+| 20 | 1.34 us | 0.33 us | 4.84 KB |
+| 200 | 9.05 us | 3.11 us | 36.85 KB |
+| 700 | 29.93 us | 8.91 us | 136.26 KB |
+
+Full-text hashing processes the complete redacted statement even when report text is shortened.
+These short-run estimates describe this environment; the earlier tables use their recorded source
+revision and environment. The [BenchmarkDotNet report](./benchmarks/2026-09-05-aa8f6f8/QueryGuard.Benchmarks.FingerprintBenchmarks-report-github.md)
+and [CSV output](./benchmarks/2026-09-05-aa8f6f8/QueryGuard.Benchmarks.FingerprintBenchmarks-report.csv)
+include the original results and runtime details.
+
 ## Stack-trace capture: why it is off by default
 
 This is the measurement [ADR-0007](./decisions/0007-stack-trace-policy.md) was waiting for.

@@ -14,6 +14,12 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Fixed
 
+- Compute built-in fingerprints from the full redacted SQL before shortening report text. Long
+  queries that differ after `MaxNormalizedSqlLength` now keep separate identities, and changing
+  that display limit no longer changes their IDs. Existing IDs for truncated queries change:
+  review fingerprint allowlists and re-record affected baselines. Short-query IDs, public APIs,
+  and report schemas stay unchanged; custom redactors keep their existing output contract.
+
 - Count reads correctly when strings, quoted identifiers, or comments contain semicolons followed
   by write keywords. Recognize writes after leading comments and require complete keyword tokens.
   This corrects read budgets on successful and failed EF Core commands without changing executed SQL.

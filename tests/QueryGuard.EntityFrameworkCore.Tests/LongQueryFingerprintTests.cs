@@ -9,6 +9,8 @@ namespace QueryGuard.EntityFrameworkCore.Tests;
 
 public class LongQueryFingerprintTests
 {
+    private static readonly string[] TableNames = ["Customers", "Suppliers"];
+
     [Fact]
     public async Task Wide_queries_on_different_tables_do_not_trigger_a_false_repetition_failure()
     {
@@ -23,9 +25,10 @@ public class LongQueryFingerprintTests
         await using var scope = QueryGuardScope.Start("wide reads",
             QueryGuardPolicy.Create("wide").WithMaxQueries(2).WithMaxOccurrencesPerFingerprint(1));
 
-        foreach (var table in new[] { "Customers", "Suppliers" })
+        var statements = TableNames
+            .Select(table => projection + $" FROM \"{table}\"");
+        foreach (var sql in statements)
         {
-            var sql = projection + $" FROM \"{table}\"";
             Assert.Equal(1, Assert.Single(await db.Database.SqlQueryRaw<int>(sql).ToListAsync()));
         }
 
