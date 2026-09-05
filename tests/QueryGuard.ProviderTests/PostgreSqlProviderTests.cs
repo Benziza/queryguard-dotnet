@@ -216,6 +216,32 @@ public sealed class PostgreSqlProviderTests : IAsyncLifetime
     private static QueryGuardSession NewSession()
         => new("provider-test", QueryGuardPolicy.Create("provider"));
 
+    [DockerFact]
+    public async Task Sql_tokens_inside_postgres_strings_and_nested_comments_still_count_as_reads()
+    {
+        await using var context = CreateContext();
+        var session = NewSession();
+        string[] statements =
+        [
+            "SELECT $$;DELETE$$ AS \"Value\"",
+            "SELECT $tag$;UPDATE$tag$ AS \"Value\"",
+            "SELECT E'prefix\\';DELETE' AS \"Value\"",
+            "SELECT 'ok' /* outer /* inner */ ;DROP */ AS \"Value\"",
+        ];
+
+        using (_accessor.Activate(session))
+        {
+            foreach (var sql in statements)
+            {
+                Assert.Single(await context.Database.SqlQueryRaw<string>(sql).ToListAsync());
+            }
+        }
+
+        var completed = session.Complete();
+        Assert.Equal(statements.Length, completed.CountedCommandCount);
+        Assert.All(completed.Records, record => Assert.Equal(QueryCommandKind.Reader, record.Kind));
+    }
+
     private ProviderDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<ProviderDbContext>()
