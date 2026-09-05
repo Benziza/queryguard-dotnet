@@ -5,7 +5,7 @@
 <h1 align="center">QueryGuard.NET</h1>
 
 <p align="center">
-  <strong>Your endpoint returns 200 OK. It also ran the same query 51 times.</strong>
+  Find repeated EF Core queries and catch query problems in tests.
 </p>
 
 <p align="center">
@@ -21,32 +21,30 @@
   <a href="./LICENSE">
     <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg">
   </a>
-  <a href="https://dotnet.microsoft.com/en-us/platform/support/policy">
-    <img alt="Targets .NET 8 and .NET 10" src="https://img.shields.io/badge/targets-net8.0%20%7C%20net10.0-512BD4.svg">
-  </a>
 </p>
 
-<p align="center">
-  <img src="./docs/assets/queryguard-demo.svg" width="820" alt="QueryGuard fails a query budget for GET /api/companies after one fingerprint runs 50 times.">
-</p>
+QueryGuard counts database queries and checks them against limits you set.
+For example, you can fail a test when the same query runs more than 5 times.
 
-QueryGuard counts the EF Core queries that your code runs, groups repeated SQL, and lets a test fail
-before an N+1 regression reaches production.
-
-It reports repeated-query candidates, not proof. Some repetition is correct. Intentional cases stay
-visible with a written reason.
+Repeated queries can be a sign of an N+1 problem. Some repeats are expected,
+so you can allow them with a reason.
 
 ## Quick start
 
-For an ASP.NET Core integration test, install the WebApplicationFactory helper:
+Add this package to your ASP.NET Core test project:
 
 ```bash
 dotnet add package QueryGuard.AspNetCore.Testing
 ```
 
-Open a measurement, run the request, and assert the result:
+Run a request and check its queries:
 
 ```csharp
+using Microsoft.AspNetCore.Mvc.Testing;
+using QueryGuard;
+using QueryGuard.AspNetCore.Testing;
+using QueryGuard.Testing;
+
 using var factory = new WebApplicationFactory<Program>();
 await using var guard = factory.TrackQueries<Program, AppDbContext>(
     "GET /api/companies",
@@ -59,99 +57,28 @@ response.EnsureSuccessStatusCode();
 QueryGuardAssert.Passes(await guard.CompleteAsync());
 ```
 
-The helper attaches QueryGuard to `AppDbContext`, preserves the test execution context, and prevents
-request middleware from opening a second scope. It has no test framework dependency, so it works with
-xUnit, NUnit, MSTest, and TUnit.
+Replace `Program`, `AppDbContext`, and the route with your app's values.
+This test fails if a query with the same SQL pattern runs more than 5 times.
 
-Testing a service or background job without `WebApplicationFactory`? Install `QueryGuard.Testing`,
-attach `.UseQueryGuard()` where the context is configured, and open an explicit `QueryGuardScope`.
-See the [testing guide](./docs/testing/README.md) for both paths.
+Works with xUnit, NUnit, MSTest, and TUnit.
+For services and background jobs, see the [testing guide](./docs/testing/README.md).
 
-| Package | Use it for |
+## Packages
+
+| Package | Use |
 | --- | --- |
-| `QueryGuard.AspNetCore.Testing` | Measuring real `WebApplicationFactory` requests |
-| `QueryGuard.Testing` | Explicit scopes and assertions around services or jobs |
-| `QueryGuard.AspNetCore` | Request middleware and route policies |
-| `QueryGuard.Reporting` | Console, JSON, JUnit, Markdown, and SARIF output |
-| `QueryGuard.Cli` | Recording and checking baselines in CI |
+| `QueryGuard.AspNetCore.Testing` | Test ASP.NET Core requests |
+| `QueryGuard.Testing` | Test services and background jobs |
+| `QueryGuard.AspNetCore` | Track queries during HTTP requests |
+| `QueryGuard.Reporting` | Export console, JSON, JUnit, Markdown, or SARIF reports |
+| `QueryGuard.Cli` | Save query counts and check for changes in CI |
 
-## Useful failures
+## Support
 
-```text
-QueryGuard FAILED: GET /api/companies (policy 'companies')
-  51 read queries in 2 distinct queries
-
-  [FAIL] max-occurrences-per-fingerprint: QG-FP-FDB5F469 executed 50 times; the budget is 5.
-          SQL: SELECT COUNT(*) FROM "Departments" AS "d" WHERE "d"."CompanyId" = ?
-          origin: samples/QueryGuard.SampleApi/Program.cs:line 89
-```
-
-The report shows the repeated fingerprint, normalized SQL, and the application line that ran it.
-Stack traces are captured once per distinct query in explicit test scopes. They stay off by default
-on request paths because they are much more expensive than normal capture.
-
-## Baselines
-
-If you do not know the right budget yet, record current behavior and compare it in CI:
-
-```bash
-dotnet tool install -g QueryGuard.Cli
-
-queryguard baseline record
-queryguard verify --summary artifacts/queryguard/summary.md
-```
-
-Add `--fail-on-regression` when a regression should fail the build. Without it, the tool reports the
-change and exits successfully.
-
-Publish the Markdown table as a job summary and sticky pull request comment:
-
-```yaml
-- uses: Benziza/queryguard-dotnet@v0.1.0
-  with:
-    summary-path: artifacts/queryguard/summary.md
-```
-
-See the [baseline guide](./docs/baselines/README.md) and [action guide](./action/README.md).
-
-## Support matrix
-
-| Component | Support |
-| --- | --- |
-| .NET | .NET 8 and .NET 10 |
-| EF Core | EF Core 8 and EF Core 10 |
-| Providers tested with real databases | SQLite, PostgreSQL, SQL Server, MySQL |
-| Other providers | Any relational EF Core provider through `DbCommandInterceptor` |
-
-MySQL tests use Oracle's `MySql.EntityFrameworkCore`. Pomelo does not have an EF Core 10 release yet.
-See [provider support](./docs/providers/README.md) for the exact claim and current caveats.
-
-## Tested in public projects
-
-`0.1.0-preview.6` was added to three public ASP.NET Core test suites before the stable release:
-
-| Project | Test stack | Request | Result |
-| --- | --- | --- | --- |
-| [CleanArchitecture](https://github.com/jasontaylordev/CleanArchitecture/tree/10f1a45df0d86bb87b083f3a0e249d755093fbbd) | NUnit, SQLite | `POST /api/Users/register` | 1 query, 1 group |
-| [SSW.VerticalSliceArchitecture](https://github.com/SSWConsulting/SSW.VerticalSliceArchitecture/tree/b3926fe461fa79fd81e163d851f1dec00a5ba84e) | xUnit, SQL Server | `GET /api/heroes` | 2 queries, 2 groups |
-| [CleanArchitecture](https://github.com/alex289/CleanArchitecture/tree/70a13e310abf8742b938a80dff48ae0735f6b5ef) | NUnit, SQL Server | `GET /api/v1/Tenant/{id}` | 2 queries, 2 groups |
-
-All three request tests passed with no repeated-query finding. The
-[validation notes](./docs/case-studies/public-project-validation.md) include the setup, the package
-compatibility problem the work found, and the limits of this check.
-
-## Scope and privacy
-
-QueryGuard is focused on query-count regressions.
-
-- It does not prove an N+1.
-- It does not observe Dapper or raw ADO.NET.
-- It does not collect execution plans or provide a profiler UI.
-- It does not rewrite queries or change HTTP responses.
-- The `0.1` public API is stable within the `0.1` release line. The project has not reached `1.0.0`.
-
-Parameter values and connection strings are not captured. Redaction runs before any reporter receives
-SQL. The JSON report has a `schemaVersion` so format changes are explicit.
+- .NET 8 and 10, with EF Core 8 and 10.
+- Tested with SQLite, PostgreSQL, SQL Server, and MySQL. See [provider details](./docs/providers/README.md).
+- EF Core only. Dapper and raw ADO.NET are not tracked.
+- Parameter values and connection strings are not captured. SQL is redacted before reporting.
 
 ## Try the sample
 
@@ -161,36 +88,17 @@ cd queryguard-dotnet
 dotnet test samples/QueryGuard.SampleTests
 ```
 
-The sample includes a 51-query endpoint, a one-query fix, a baseline comparison, and an intentional
-repetition with an allowlist reason.
+The sample shows a request that runs 51 queries and a fix that runs just one.
 
-## Documentation
+## Learn more
 
-Full documentation and the generated API reference are available at
-[benziza.github.io/queryguard-dotnet](https://benziza.github.io/queryguard-dotnet/).
-
-| Guide | Covers |
-| --- | --- |
-| [How it works](./docs/concepts/README.md) | Sessions, fingerprints, redaction, analysis |
-| [Testing](./docs/testing/README.md) | WebApplicationFactory requests and explicit scopes |
-| [Public validation](./docs/case-studies/public-project-validation.md) | Results from three public ASP.NET Core projects |
-| [Configuration](./docs/configuration/README.md) | Budgets and defaults |
-| [Baselines](./docs/baselines/README.md) | Recording and comparing query behavior |
-| [Troubleshooting](./docs/troubleshooting/README.md) | Missing capture, grouping, middleware order |
-| [False positives](./docs/troubleshooting/false-positives.md) | Allowlisting with a reason |
-| [Benchmarks](./docs/benchmarks.md) | Methodology and raw output |
-| [Decision records](./docs/decisions/README.md) | Design decisions and tradeoffs |
-| [API reference](https://benziza.github.io/queryguard-dotnet/api/) | Every public type |
-
-## Contributing
-
-Issues and focused pull requests are welcome. Small fixes can go straight to a pull request. Open an
-issue first for public API, capture, privacy, or detector changes. See [CONTRIBUTING.md](./CONTRIBUTING.md).
-
-False-positive reports are especially useful because they improve the defaults and become regression
-fixtures. Report security issues through [SECURITY.md](./SECURITY.md), not a public issue.
+- [Documentation and API reference](https://benziza.github.io/queryguard-dotnet/)
+- [Query limits and settings](./docs/configuration/README.md)
+- [Save and compare query counts in CI](./docs/baselines/README.md)
+- [GitHub Action](./action/README.md)
+- [Troubleshooting](./docs/troubleshooting/README.md)
+- [Contributing](./CONTRIBUTING.md) · [Report a security issue](./SECURITY.md)
 
 ## License
 
-MIT. The project takes product inspiration from [Bullet](https://github.com/flyerhzm/bullet) for Rails.
-The implementation is independent and uses EF Core's public interception API.
+[MIT](./LICENSE). Inspired by [Bullet](https://github.com/flyerhzm/bullet) for Rails.
