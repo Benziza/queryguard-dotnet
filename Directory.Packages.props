@@ -26,7 +26,7 @@
     <MicrosoftExtensionsLoggingVersion Condition="'$(TargetFramework)' == 'net8.0' and '$(MicrosoftExtensionsLoggingVersion)' == ''">8.0.3</MicrosoftExtensionsLoggingVersion>
     <MicrosoftExtensionsLoggingVersion Condition="'$(MicrosoftExtensionsLoggingVersion)' == ''">10.0.11</MicrosoftExtensionsLoggingVersion>
 
-    <AspNetCoreTestingVersion Condition="'$(IsPackable)' == 'true' and '$(TargetFramework)' == 'net8.0'">8.0.1</AspNetCoreTestingVersion>
+    <AspNetCoreTestingVersion Condition="'$(IsPackable)' == 'true' and '$(TargetFramework)' == 'net8.0'">8.0.30</AspNetCoreTestingVersion>
     <AspNetCoreTestingVersion Condition="'$(IsPackable)' == 'true' and '$(AspNetCoreTestingVersion)' == ''">10.0.0</AspNetCoreTestingVersion>
     <AspNetCoreTestingVersion Condition="'$(TargetFramework)' == 'net8.0' and '$(AspNetCoreTestingVersion)' == ''">8.0.30</AspNetCoreTestingVersion>
     <AspNetCoreTestingVersion Condition="'$(AspNetCoreTestingVersion)' == ''">10.0.11</AspNetCoreTestingVersion>
