@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,10 @@ public class CommandClassificationTests
     [InlineData("INSERT INTO \"T\" (\"A\") VALUES (@p0) RETURNING \"Id\";")]
     // A leading declaration, which SQL Server emits when an insert needs an OUTPUT table.
     [InlineData("DECLARE @inserted0 TABLE ([Id] int);\nINSERT INTO [T] ([A]) OUTPUT INSERTED.[Id] INTO @inserted0 VALUES (@p0);")]
+    [InlineData("SET NOCOUNT ON; /* tagged write */ UPDATE [T] SET [A] = @p0;")]
+    [InlineData("/* outer /* inner */ still comment */ DELETE FROM [T];")]
+    [InlineData("SELECT ';UPDATE'; DELETE FROM [T];")]
+    [InlineData("SELECT [a]];DELETE] FROM [T]; UPDATE [T] SET [A] = @p0;")]
     public async Task A_write_behind_a_directive_prologue_is_not_a_read(string commandText)
     {
         var record = await ExecuteAsync(commandText, expectSuccess: false);
@@ -52,6 +57,12 @@ public class CommandClassificationTests
     [Theory]
     [InlineData("SELECT [A] FROM [T] WHERE [Id] = @p0;")]
     [InlineData("SET NOCOUNT ON;\nSELECT [A] FROM [T];")]
+    [InlineData("SELECT $$;DELETE$$ FROM [T];")]
+    [InlineData("SELECT $tag$;UPDATE$tag$ FROM [T];")]
+    [InlineData("SELECT E'prefix\\';DELETE' FROM [T];")]
+    [InlineData("SELECT [a]];DELETE] FROM [T];")]
+    [InlineData("SELECT /* outer /* inner */ ;DELETE */ [A] FROM [T];")]
+    [InlineData("DELETE_LOG @p0;")]
     public async Task A_read_stays_a_read(string commandText)
     {
         var record = await ExecuteAsync(commandText, expectSuccess: false);
@@ -86,9 +97,10 @@ public class CommandClassificationTests
             {
                 _ = await db.Database.ExecuteSqlRawAsync(commandText);
             }
-            catch (SqliteException) when (!expectSuccess)
+            catch (Exception exception) when (!expectSuccess && exception is SqliteException or InvalidOperationException)
             {
-                // Expected: the statement is here for its shape, not to run.
+                // Expected: the statement is here for its shape, not to run. PostgreSQL dollar
+                // quotes can look like unbound SQLite parameters and raise InvalidOperationException.
             }
         }
 
