@@ -1,20 +1,21 @@
 # Testing with QueryGuard
 
-QueryGuard can measure a real ASP.NET Core request or a smaller block of application code. Both paths
-produce the same `QueryGuardResult` and use the same assertions.
+Measure an HTTP request, a service method, or a background job. Each returns a
+`QueryGuardResult` that you can check with the same assertions.
 
 ## ASP.NET Core integration tests
 
-Install the helper package:
+Install:
 
 ```bash
 dotnet add package QueryGuard.AspNetCore.Testing
 ```
 
-Measure a request made through `WebApplicationFactory`:
+Use your application's `Program` and `AppDbContext` types:
 
 ```csharp
 using Microsoft.AspNetCore.Mvc.Testing;
+using QueryGuard;
 using QueryGuard.AspNetCore.Testing;
 using QueryGuard.Testing;
 
@@ -31,37 +32,36 @@ var result = await guard.CompleteAsync();
 QueryGuardAssert.Passes(result);
 ```
 
-`TrackQueries` handles the setup that is easy to miss in an integration test:
+The test fails if a query runs more than five times.
 
-- it attaches QueryGuard to the selected `DbContext`
-- it sets `TestServerOptions.PreserveExecutionContext`
-- it uses the session accessor from the hosted application
-- it disables QueryGuard request middleware for the measurement, so there is only one active scope
-- it avoids adding the interceptor twice when the application already uses QueryGuard
+`TrackQueries` attaches the interceptor and sets up the test host. It also disables request
+middleware during the measurement to avoid overlapping scopes.
 
-Use the client exposed by `guard`. A client created directly from the original factory does not use the
-configured test host.
-
-If the application uses more than one context, choose the context whose commands the test should
-measure. Open separate measurements when a test needs separate budgets for separate contexts.
+Use **`guard.Client`** to send requests. Choose the `DbContext` you want to measure.
+Use separate measurements for contexts that need separate budgets.
 
 ## Services and background jobs
 
-Install the general testing package:
+Install:
 
 ```bash
 dotnet add package QueryGuard.Testing
 ```
 
-Attach QueryGuard when the context is configured:
+Attach QueryGuard where you configure the context:
 
 ```csharp
+using QueryGuard.EntityFrameworkCore;
+
 options.UseSqlite(connectionString).UseQueryGuard();
 ```
 
-Then open a scope around the code under test:
+Open a scope around the code under test:
 
 ```csharp
+using QueryGuard;
+using QueryGuard.Testing;
+
 await using var scope = QueryGuardScope.Start(
     "refresh company summary",
     QueryGuardPolicy.Create("company-summary")
@@ -74,12 +74,12 @@ var result = await scope.CompleteAsync();
 QueryGuardAssert.Passes(result);
 ```
 
-`QueryGuard.Testing` brings the EF Core integration with it. It does not reference xUnit, NUnit,
-MSTest, or TUnit.
+This allows up to three counted commands, with no repeated query.
+`QueryGuard.Testing` includes the EF Core integration and works with any test framework.
 
 ## Start with a baseline when the budget is unknown
 
-A new test often has no agreed query budget. Record the current result first and compare later runs:
+Save the current result and compare later runs. This example uses xUnit:
 
 ```csharp
 var baseline = QueryGuardBaseline.FromJson(await File.ReadAllTextAsync("queryguard-baseline.json"));
@@ -88,15 +88,15 @@ var comparison = QueryGuardBaselineComparison.Compare(baseline, [result]);
 Assert.Empty(comparison.Regressions);
 ```
 
-See [baselines](../baselines/README.md) for recording the file and publishing the comparison in CI.
+See [baselines](../baselines/README.md) to create the file and use it in CI.
 
 ## Common failures
 
 | Symptom | Check |
 | --- | --- |
-| Zero commands from a `WebApplicationFactory` request | Use `TrackQueries` and its `Client` |
-| Twice the expected command count | Do not run request middleware inside an explicit test measurement |
+| Zero commands from a request | Use `TrackQueries` and its `Client` |
+| Unexpected command counts | Check for duplicate interceptors or overlapping scopes |
 | Commands appear in the wrong scope | Complete one measurement before opening the next one |
-| The test passes but the report is missing in CI | Write reports to a path anchored at the repository root |
+| Report missing in CI | Use a report path based on the repository root |
 
-See [troubleshooting](../troubleshooting/README.md) for manual session wiring and lower-level details.
+See [troubleshooting](../troubleshooting/README.md) for manual setup.
