@@ -14,6 +14,10 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ### Fixed
 
+- Count reads correctly when strings, quoted identifiers, or comments contain semicolons followed
+  by write keywords. Recognize writes after leading comments and require complete keyword tokens.
+  This corrects read budgets on successful and failed EF Core commands without changing executed SQL.
+
 - Redact PostgreSQL dollar-quoted strings and escaped quotes in `E'...'` strings before SQL reaches
   reports. Normalization preserves these literal boundaries, including comments inside strings.
 - For a backslash-escaped quote in an ordinary string, redact the remaining SQL conservatively:
