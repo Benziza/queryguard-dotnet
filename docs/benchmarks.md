@@ -1,21 +1,27 @@
 # Benchmarks
 
-QueryGuard runs on the database command path, so "what does it cost?" deserves a measured answer rather
-than an assurance. This page is that answer, with the environment that produced it and the caveats that
-limit it.
+These benchmarks measure QueryGuard code with generated SQL. They do not include a database,
+network, HTTP request, or EF Core command execution.
 
-## How to read this page
-
-**These are microbenchmarks.** They measure QueryGuard's own code in isolation, with no database, no
-network, and no HTTP pipeline. A real EF Core query against a real database takes hundreds of
-microseconds to milliseconds; the numbers below are nanoseconds. Do not convert them into a percentage
-of request latency: that requires measuring *your* application, and the honest statement is that this
-page cannot tell you what QueryGuard costs in production.
-
-What it *can* tell you is the relative cost of QueryGuard's own choices, which is what the design
-decisions rest on.
+Use them to compare capture options. Measure your application to estimate request overhead.
+Short runs have wide error margins; treat these results as estimates.
 
 ## Environment
+
+The following tables, except the full SQL update, use this environment:
+
+| Setting | Value |
+| --- | --- |
+| Source | [`46ec17e`](https://github.com/Benziza/queryguard-dotnet/commit/46ec17ebb9704694e71eb67f73ead60e5556ecca) |
+| Date | 2026-08-20 |
+| BenchmarkDotNet | 0.15.8 |
+| Job | ShortRun: 3 warmup iterations, 3 measured iterations, 1 launch |
+| OS | Windows 11 (10.0.26200.9168/25H2) |
+| CPU | Intel Core Ultra 5 225F, 3.30 GHz, 10 physical / 10 logical cores |
+| Runtime | SDK 10.0.302, .NET 10.0.10, X64 RyuJIT `x86-64-v3` |
+| EF Core / provider | Not exercised / none |
+
+[Raw reports and CSV files](https://github.com/Benziza/queryguard-dotnet/tree/main/docs/benchmarks/2026-08-20-46ec17e)
 
 Reproduce with:
 
@@ -23,53 +29,18 @@ Reproduce with:
 dotnet run -c Release --project benchmarks/QueryGuard.Benchmarks -- --filter "*" --job Short
 ```
 
-| | |
-| --- | --- |
-| Source commit | [`46ec17e`](https://github.com/Benziza/queryguard-dotnet/commit/46ec17ebb9704694e71eb67f73ead60e5556ecca) |
-| Measured on | 2026-08-20 |
-| BenchmarkDotNet | 0.15.8 |
-| Job | `ShortRun`: 3 warmup, 3 iterations, 1 launch |
-| OS | Windows 11 (10.0.26200.9168/25H2) |
-| CPU | Intel Core Ultra 5 225F, 3.30 GHz, 10 physical / 10 logical cores |
-| SDK | .NET 10.0.302, host .NET 10.0.10, X64 RyuJIT `x86-64-v3` |
-| EF Core | Not exercised; see below |
-| Provider | None: these are in-process only |
+Use the default benchmark job on a quiet machine for more reliable measurements.
+CI uses `--job Dry` only to check that the benchmarks run.
 
-**EF Core is not on the measured path.** The benchmark project references it, but every scenario here
-drives QueryGuard's own types directly with pre-generated SQL strings. That is deliberate: including a
-real query would measure SQLite, not QueryGuard, and the interesting question is what QueryGuard adds.
-The cost of EF Core calling an interceptor at all belongs to EF Core.
+## No active scope
 
-**`ShortRun` was used deliberately**, and it matters: three iterations produce wide error margins,
-visible in the raw output where `Error` sometimes exceeds the mean. Treat every figure below as an order
-of magnitude, not a measurement. A number worth quoting publicly needs a default-job run on a quiet
-machine; this page exists to support design decisions, and for that the ratios are enough.
-
-**Raw output is published with the summary**:
-[`docs/benchmarks/2026-08-20-46ec17e/`](https://github.com/Benziza/queryguard-dotnet/tree/main/docs/benchmarks/2026-08-20-46ec17e) holds the GitHub-format
-tables and CSV exactly as BenchmarkDotNet wrote them, including the full environment header. A summary
-table without its raw output is a number nobody can check. CI also runs every benchmark once per pull
-request with `--job Dry` and uploads the artifacts: that proves the harness still runs, and nothing
-about timing.
-
-## Being installed costs nothing measurable
-
-The most important number here. This is what QueryGuard costs per command when it is registered but no
-scope is open: every request outside a measured path, and every request at all when
-`Enabled = false`.
+This measures the session lookup when no scope is open.
 
 | Commands | Mean | Allocated |
 | --- | --- | --- |
 | 1 | 1.11 ns | 0 B |
 | 10 | 7.35 ns | 0 B |
 | 100 | 91.81 ns | 0 B |
-
-About a nanosecond per command, zero allocation. That is one `AsyncLocal` read and a null check, which
-is the whole cost of the "stateless interceptor plus ambient accessor" design in
-[ADR-0002](./decisions/0002-session-propagation.md).
-
-It also supports the claim that installing QueryGuard does not change how an application behaves. If
-this row were expensive, that claim would be false.
 
 ## Capturing and analysing a scope
 
@@ -79,17 +50,12 @@ this row were expensive, that claim would be false.
 | 10 | 770 ns | 1,359 ns | 4,488 B |
 | 100 | 5,586 ns | 7,064 ns | 15,728 B |
 
-Per-command cost falls as the scope grows: roughly 270 ns for a single command, 77 ns each at ten, 56 ns
-each at a hundred, because the fixed cost of opening a scope amortises. Analysis adds between a quarter
-and three quarters on top depending on scope size, and it happens once when the scope closes rather than
-per command.
-
-At a hundred commands the whole scope costs about 7 µs. A hundred real database round trips cost several
-orders of magnitude more than that.
+Analysis runs once when the scope ends. These capture measurements do not include
+the separate fingerprint work below.
 
 ## Fingerprinting
 
-Normalize, redact, then hash: the work done once per intercepted command.
+Results at the August source revision:
 
 | Columns in the statement | Full | Normalize only | Redact only |
 | --- | --- | --- | --- |
@@ -97,29 +63,20 @@ Normalize, redact, then hash: the work done once per intercepted command.
 | 20 | 1,138 ns | 486 ns | 482 ns |
 | 200 | 7,199 ns | 3,189 ns | 3,459 ns |
 
-Cost grows with SQL length and no faster, which is what a single-pass scanner should do. A quadratic
-pass would put the 200-column row at far more than ten times the 20-column row; it is at about six
-times.
-
-Normalization and redaction cost about the same as each other, so neither is a hot spot to attack if
-this ever needs optimising. The remainder is hashing, whose fixed cost is a noticeable share of a short
-statement and almost nothing on a long one.
-
-The 200-column row is a wide report query, not a typical one. A keyed lookup is the 3-column row.
-
 ## Full SQL fingerprints (2026-09-05)
 
-This run measures complete redacted SQL hashing before display truncation at
+This update measures hashing the full redacted SQL before display truncation at
 [`aa8f6f8`](https://github.com/Benziza/queryguard-dotnet/commit/aa8f6f829de774d46c4badb77c10633c09ec9feb).
 The 700-column case exceeds the default 4096-character display limit.
+
+Environment: Windows 11 (10.0.26200.9168), Intel Core Ultra 5 225F (10 cores),
+SDK 10.0.400, .NET 10.0.11, BenchmarkDotNet 0.15.8.
+ShortRun used one launch, three warmup iterations, and three measured iterations.
+No database or EF Core command execution was involved.
 
 ```bash
 dotnet run -c Release --project benchmarks/QueryGuard.Benchmarks -- --filter "*FingerprintBenchmarks.FullFingerprint*" --job Short
 ```
-
-Measured on Windows 11 (10.0.26200.9168), Intel Core Ultra 5 225F (10 cores), SDK 10.0.400,
-.NET 10.0.11, with BenchmarkDotNet 0.15.8. `ShortRun` uses one launch, three warmup iterations,
-and three measured iterations. No database or EF Core command execution is involved.
 
 | Columns | Mean | Error (99.9% CI half-width) | Allocated per operation |
 | --- | --- | --- | --- |
@@ -128,44 +85,18 @@ and three measured iterations. No database or EF Core command execution is invol
 | 200 | 9.05 us | 3.11 us | 36.85 KB |
 | 700 | 29.93 us | 8.91 us | 136.26 KB |
 
-Full-text hashing processes the complete redacted statement even when report text is shortened.
-These short-run estimates describe this environment; the earlier tables use their recorded source
-revision and environment. The [BenchmarkDotNet report](./benchmarks/2026-09-05-aa8f6f8/QueryGuard.Benchmarks.FingerprintBenchmarks-report-github.md)
-and [CSV output](./benchmarks/2026-09-05-aa8f6f8/QueryGuard.Benchmarks.FingerprintBenchmarks-report.csv)
-include the original results and runtime details.
+[BenchmarkDotNet report](./benchmarks/2026-09-05-aa8f6f8/QueryGuard.Benchmarks.FingerprintBenchmarks-report-github.md)
+and [CSV output](./benchmarks/2026-09-05-aa8f6f8/QueryGuard.Benchmarks.FingerprintBenchmarks-report.csv).
 
 ## Stack-trace capture: why it is off by default
 
-This is the measurement [ADR-0007](./decisions/0007-stack-trace-policy.md) was waiting for.
-
-| Distinct fingerprints | Off (default) | On, first occurrence only | Slower by | More allocation by |
+| Distinct fingerprints | Off | On, first occurrence only | Slower by | More allocation by |
 | --- | --- | --- | --- | --- |
 | 1 | 722 ns | 15,720 ns | 22× | 18× |
 | 10 | 5,337 ns | 153,702 ns | 29× | 26× |
 
-Both scenarios record ten commands per fingerprint, so the *only* difference is one captured and filtered
-stack trace per distinct query.
+Each scenario records ten commands per fingerprint.
+Enabling one filtered trace per fingerprint made these scenarios 20–30 times slower.
 
-**One trace per fingerprint costs 20–30× the entire rest of the capture path, and allocates roughly 350 KB
-across ten fingerprints.** That settles the question: capture stays off by default, and the API
-deliberately offers no way to capture a trace per command: at ten commands per fingerprint that would
-be another order of magnitude.
-
-It also confirms the feature is worth keeping as an opt-in. When you are actively hunting the source of a
-repeated query, 150 µs on a development request is nothing, and knowing the call site is worth far more.
-
-What the numbers do *not* support is a claim that enabling it is cheap. It is not, and the documentation
-says so.
-
-## Claims this page does not make
-
-Per [docs/testing-strategy.md](./testing-strategy.md), the following will not appear in QueryGuard's
-documentation:
-
-- "Zero overhead": the no-scope path is close, but "close to zero" and "zero" are different claims.
-- "Negligible cost" without the number beside it.
-- "Fastest EF Core profiler": QueryGuard is not a profiler and this is not a comparison.
-- Any production latency figure derived from a microbenchmark.
-
-If you measure QueryGuard in a real application and the numbers differ from what you expected, that is
-worth an issue. Measurement from a real workload is more valuable than anything on this page.
+Request stack traces are off by default. Test scopes capture origins by default and allow
+`captureOrigin: false`. See [capture settings](./configuration/README.md#where-a-repeated-query-came-from).

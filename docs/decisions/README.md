@@ -1,11 +1,6 @@
 # Architecture Decision Records
 
-Every decision here was expensive to reverse once code depended on it, so it was written
-down before or alongside the implementation rather than reconstructed afterwards.
-
-Each record states the decision, what was rejected, why, what it costs, and, most
-importantly, the **trigger** that should make us revisit it. A decision without a revisit
-trigger is a belief, not an engineering choice.
+Design records explain each decision, its trade-offs, and when to review it.
 
 | ADR | Decision | Status |
 | --- | --- | --- |
