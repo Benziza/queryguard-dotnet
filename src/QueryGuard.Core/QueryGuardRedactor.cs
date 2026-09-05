@@ -200,7 +200,9 @@ public sealed class QueryGuardRedactor : IQueryGuardRedactor
     /// Single-pass and intentionally conservative. Quoted identifiers: <c>"Departments"</c> in
     /// SQLite and PostgreSQL, <c>[Departments]</c> in SQL Server, and <c>`Departments`</c> in MySQL, are
     /// left alone, because a table name is structure rather than data and removing it would make the
-    /// evidence unreadable. Doubled quotes inside a string literal are handled as escapes.
+    /// evidence unreadable. Literal boundaries are shared with the normalizer, including PostgreSQL
+    /// dollar quotes and escape strings. Ambiguous ordinary backslash quotes consume the remainder
+    /// conservatively because the database's SQL mode is not available here.
     /// </remarks>
     private string RedactLiterals(string sql)
     {
@@ -215,6 +217,11 @@ public sealed class QueryGuardRedactor : IQueryGuardRedactor
             {
                 case '\'':
                     index = AppendStringLiteral(sql, index, builder);
+                    continue;
+
+                case '$' when SqlStringLiteralScanner.TryDollarQuotedEnd(sql, index, out var literalEnd):
+                    AppendLiteral(sql, index, literalEnd, builder);
+                    index = literalEnd;
                     continue;
 
                 case '-' when index + 1 < sql.Length && sql[index + 1] == '-':
@@ -259,37 +266,21 @@ public sealed class QueryGuardRedactor : IQueryGuardRedactor
 
     private int AppendStringLiteral(string sql, int index, StringBuilder builder)
     {
-        var start = index;
-        index++; // opening quote
+        var end = SqlStringLiteralScanner.SingleQuotedEnd(sql, index);
+        AppendLiteral(sql, index, end, builder);
+        return end;
+    }
 
-        while (index < sql.Length)
-        {
-            if (sql[index] == '\'')
-            {
-                // A doubled quote is an escaped quote inside the literal, not the end of it.
-                if (index + 1 < sql.Length && sql[index + 1] == '\'')
-                {
-                    index += 2;
-                    continue;
-                }
-
-                index++;
-                break;
-            }
-
-            index++;
-        }
-
+    private void AppendLiteral(string sql, int start, int end, StringBuilder builder)
+    {
         if (_options.RedactStringLiterals)
         {
             builder.Append('\'').Append(LiteralPlaceholderChar).Append('\'');
         }
         else
         {
-            builder.Append(sql, start, index - start);
+            builder.Append(sql, start, end - start);
         }
-
-        return index;
     }
 
     private static int AppendQuotedIdentifier(string sql, int index, StringBuilder builder, char closingChar)
