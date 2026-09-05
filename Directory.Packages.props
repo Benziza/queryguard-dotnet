@@ -21,7 +21,7 @@
     <MicrosoftExtensionsVersion Condition="'$(TargetFramework)' == 'net8.0' and '$(MicrosoftExtensionsVersion)' == ''">8.0.2</MicrosoftExtensionsVersion>
     <MicrosoftExtensionsVersion Condition="'$(MicrosoftExtensionsVersion)' == ''">10.0.11</MicrosoftExtensionsVersion>
 
-    <MicrosoftExtensionsLoggingVersion Condition="'$(IsPackable)' == 'true' and '$(TargetFramework)' == 'net8.0'">8.0.2</MicrosoftExtensionsLoggingVersion>
+    <MicrosoftExtensionsLoggingVersion Condition="'$(IsPackable)' == 'true' and '$(TargetFramework)' == 'net8.0'">8.0.3</MicrosoftExtensionsLoggingVersion>
     <MicrosoftExtensionsLoggingVersion Condition="'$(IsPackable)' == 'true' and '$(MicrosoftExtensionsLoggingVersion)' == ''">10.0.0</MicrosoftExtensionsLoggingVersion>
     <MicrosoftExtensionsLoggingVersion Condition="'$(TargetFramework)' == 'net8.0' and '$(MicrosoftExtensionsLoggingVersion)' == ''">8.0.3</MicrosoftExtensionsLoggingVersion>
     <MicrosoftExtensionsLoggingVersion Condition="'$(MicrosoftExtensionsLoggingVersion)' == ''">10.0.11</MicrosoftExtensionsLoggingVersion>
