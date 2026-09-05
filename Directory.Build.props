@@ -42,7 +42,7 @@
 
   <!-- Shared version and identity information. -->
   <PropertyGroup>
-    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionPrefix>0.1.1</VersionPrefix>
     <Authors>Mohamed Benziza</Authors>
     <Company>Mohamed Benziza</Company>
     <Product>QueryGuard.NET</Product>
