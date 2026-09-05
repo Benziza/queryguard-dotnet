@@ -39,7 +39,14 @@ Normalization steps, all order-preserving:
    the `@p0` / `@__city_0` / `$1` / `?` families.
 4. Redact surviving string and numeric literals, which serves both fingerprint stability and
    the privacy contract in [ADR-0004](./0004-parameter-privacy.md).
-5. Hash the result and render a short, readable ID: `QG-FP-1A2B3C4D`.
+5. With the built-in redactor, hash the complete result and render a short, readable ID:
+   `QG-FP-1A2B3C4D`.
+6. Shorten only the retained SQL to `MaxNormalizedSqlLength`, adding the truncation marker.
+
+Hashing must precede display truncation: different statements can share the same leading 4096
+characters. Hashing that prefix incorrectly groups them and can fail a repetition budget.
+The full redacted text is transient; records and reports keep only the shortened text. Custom
+redactors retain their existing contract of hashing and retaining their returned SQL.
 
 Hard constraints:
 

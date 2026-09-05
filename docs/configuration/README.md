@@ -192,6 +192,21 @@ SQL mode. QueryGuard hides the remainder of that command in this case. This can 
 reported SQL and group more queries together. Use parameterized SQL to avoid this ambiguity.
 Setting `RedactStringLiterals = false` explicitly keeps string contents.
 
+## SQL display length and fingerprints
+
+With the built-in `QueryGuardRedactor`, `MaxNormalizedSqlLength` limits the SQL kept in records and
+reports. Its default is 4096 characters, followed by a truncation marker when text is shortened.
+The fingerprint ID uses the complete normalized, redacted SQL before shortening it. Two long queries
+can therefore show the same shortened SQL while having different IDs and separate query budgets.
+
+Changing the display limit does not change these IDs. Values are still redacted before hashing,
+so queries that differ only in redacted values continue to share a fingerprint. After upgrading,
+review allowlists and baselines for previously truncated queries because their IDs change.
+
+Custom `IQueryGuardRedactor` implementations keep their existing contract: the text returned by
+`RedactSql` is hashed and retained. QueryGuard cannot recover a suffix a custom redactor removed;
+use a custom `IQueryFingerprintFactory` if it needs a separate full-text hashing policy.
+
 ## In tests
 
 ```csharp
