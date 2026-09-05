@@ -1,32 +1,28 @@
 # Troubleshooting
 
-Four problems account for almost every question. They are in order of how often they come up.
-
-| Symptom | Jump to |
+| Problem | Go to |
 | --- | --- |
-| QueryGuard reports nothing at all | [No findings recorded](#no-findings-recorded) |
-| A finding looks wrong | [False positives](./false-positives.md) |
-| One logical query appears as several | [Fingerprints that do not group](#fingerprints-that-do-not-group) |
-| Every report says `(unmatched)` | [Middleware ordering](#middleware-ordering) |
+| No commands or findings | [Capture setup](#no-findings-recorded) |
+| A finding looks wrong | [Intentional repetition](./false-positives.md) |
+| One query has several IDs | [Fingerprint grouping](#fingerprints-that-do-not-group) |
+| Scope name is `(unmatched)` | [Middleware order](#middleware-ordering) |
+| Timing limits fail sometimes | [Duration budgets](#duration-budgets-firing-intermittently) |
+| Commands were dropped | [Scope completion](#the-report-says-commands-were-dropped) |
 
 ## No findings recorded
 
-The single most common report, and it is almost always one of five things.
+For `WebApplicationFactory` tests, start with
+[`TrackQueries` and `guard.Client`](../testing/README.md).
+For manual setup, check the following.
 
 ### 1. No scope was open
 
-QueryGuard captures nothing unless a session is active. That is deliberate: it stays silent rather
-than guessing which scope a command belongs to. A scope comes from either:
-
-- `app.UseQueryGuard()`, which opens one per request; or
-- `QueryGuardScope.Start(...)`, which opens one explicitly.
-
-With neither, the interceptor does one null check and returns.
+Capture needs an active session. Use `app.UseQueryGuard()` for requests or
+`QueryGuardScope.Start(...)` for an explicit scope.
 
 ### 2. The interceptor is not attached to the `DbContext`
 
-Registering QueryGuard's services is not enough. The interceptor has to be attached where EF Core will
-see it:
+Register QueryGuard services, then attach the interceptor:
 
 ```csharp
 builder.Services.AddDbContext<AppDbContext>((provider, db) =>
@@ -38,15 +34,13 @@ builder.Services.AddDbContext<AppDbContext>((provider, db) =>
 
 ### 3. The scope and the interceptor read different accessors
 
-The simplest fix is not to have two. `UseQueryGuard()` and `QueryGuardScope.Start` both default to the
-same ambient accessor, so this cannot happen unless you opt into it:
+Without DI, these APIs share the default accessor:
 
 ```csharp
 options.UseSqlite(connectionString).UseQueryGuard();
 ```
 
-It only applies when the interceptor came from a dependency injection container. Then hand the scope
-that container's accessor:
+If the interceptor comes from DI, pass the same container's accessor to the scope:
 
 ```csharp
 await using var scope = QueryGuardScope.Start(
@@ -57,11 +51,8 @@ await using var scope = QueryGuardScope.Start(
 
 ### 4. `TestServer` is not flowing `ExecutionContext`
 
-**This is the one that wastes the most time.** `TestServer` does not flow `ExecutionContext` into the
-request pipeline by default, and QueryGuard finds the active session through `AsyncLocal`. A scope
-opened in a test is therefore invisible to the interceptor running inside the request: the scope
-completes with zero commands, and an assertion about query counts fails for a reason that has nothing to
-do with query counts.
+A scope opened in a test needs its execution context to reach the request.
+`TrackQueries` handles this. For manual setup, configure it **before creating the client**:
 
 ```csharp
 protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -69,15 +60,12 @@ protected override void ConfigureWebHost(IWebHostBuilder builder)
         services.Configure<TestServerOptions>(options => options.PreserveExecutionContext = true));
 ```
 
-Setting `Server.PreserveExecutionContext` *after* `CreateClient()` does not work: the flag is captured
-when the client's handler is built, so it affects only the next client. That produces the confusing
-version of this problem, where some tests capture and some do not depending on execution order.
+Changing `Server.PreserveExecutionContext` after `CreateClient()` only affects later clients.
 
 ### 5. The middleware is shadowing your scope
 
-Both the middleware and an explicit scope open sessions, and the innermost one wins. In a test that
-opens its own scope against a host with `UseQueryGuard()` active, the middleware's per-request session
-shadows yours and your scope sees nothing. Disable it in the test host:
+Request middleware opens an inner session, which receives the commands instead of your test scope.
+Disable it in a host that uses explicit test scopes:
 
 ```csharp
 services.Configure<QueryGuardOptions>(options => options.Enabled = false);
@@ -85,62 +73,51 @@ services.Configure<QueryGuardOptions>(options => options.Enabled = false);
 
 ### Still nothing?
 
-- `QueryGuardOptions.Enabled` may be `false`: the sample gates it on `IsDevelopment()`.
-- The path may be excluded. `/health`, `/healthz`, `/metrics`, and `/favicon.ico` are ignored by default.
-- A clean request logs nothing unless `LogSummaryWhenClean` is set. That is not a bug; QueryGuard runs on
-  every request, and a clean summary each time is noise.
-- Writes are recorded but never grouped for repeated-query analysis. Fifty inserts produce no findings.
+- Request capture may be disabled through `QueryGuardOptions.Enabled`.
+- The path may be excluded: `/health`, `/healthz`, `/metrics`, and `/favicon.ico` are defaults.
+- Clean requests do not log unless `LogSummaryWhenClean` is enabled.
+- Writes are recorded but are excluded from repeated-query analysis.
 
 ## Fingerprints that do not group
 
-If one logical query appears as several fingerprints, a repeated-query pattern will not be reported:
-the tool goes quiet rather than wrong, which makes this failure mode easy to miss.
-
-Normalization is deliberately conservative: it collapses whitespace, removes non-directive comments,
-and replaces parameter references, but it never reorders tokens or rewrites identifiers. So two
-statements that differ in any other way are genuinely different fingerprints.
-
-Check the normalized SQL in the report. Common causes:
+Compare the normalized SQL in the report:
 
 | Cause | What to do |
 | --- | --- |
-| The queries really are different (different predicate, different projection) | Nothing: this is correct |
-| Different providers | Expected. Identifier quoting differs and is not rewritten |
-| Inlined literals differ and redaction is off | Leave `RedactNumericLiterals` and `RedactStringLiterals` on |
-| A `TagWith` tag differs between call sites | A tagged query is a distinct fingerprint by design |
-| Provider SQL varies in a way normalization does not cover | Open a [provider report](https://github.com/Benziza/queryguard-dotnet/issues/new?template=provider_report.yml) with the redacted SQL |
+| Different predicates or projections | Separate IDs are expected |
+| Different providers or identifier quoting | Separate IDs are expected |
+| Literal values differ and redaction is off | Check `RedactNumericLiterals` and `RedactStringLiterals` |
+| QueryGuard directives differ | Check tags and ignore reasons |
+| Provider SQL varies unexpectedly | Open a [provider report](https://github.com/Benziza/queryguard-dotnet/issues/new?template=provider_report.yml) |
 
-The last row is the useful one. A synthetic SQL sample from a provider becomes a fixture, which is the
-cheapest way to widen coverage.
+Ordinary comments are removed. QueryGuard directives are preserved.
+See [how fingerprints work](../concepts/README.md).
 
 ## Middleware ordering
 
-If every report is named `(unmatched)`, `UseQueryGuard()` is running before `UseRouting()`. The scope
-name comes from the matched endpoint's route pattern, and before routing there is no endpoint yet.
+Place QueryGuard after routing so scope names use the matched route:
 
 ```csharp
 app.UseRouting();
-app.UseQueryGuard();   // after routing
+app.UseQueryGuard();
 app.MapControllers();
 ```
 
-QueryGuard still works in the wrong order: it just loses the one label that makes a report useful.
+Running it before routing produces `(unmatched)` scope names.
 
 ## Duration budgets firing intermittently
 
-That is why they are off by default. Database timing varies with machine load, and a shared CI runner
-is the worst place to measure it. A duration budget belongs in an environment whose timing you control.
-If you need one in CI, set it generously and expect to revisit it.
+Database timing varies with load. Timing budgets are opt-in and default to warnings.
+Use a controlled environment for strict timing limits.
 
 ## The report says commands were dropped
 
-`RecordsDroppedAfterCompletion` means commands finished after the scope closed. Almost always
-fire-and-forget work started inside a request. The commands are genuinely outside the measured window,
-so they are counted and reported rather than silently added to a scope that had already been reported.
+`RecordsDroppedAfterCompletion` means commands finished after the scope closed.
+Await all measured work before completing the scope.
 
 ## Something else
 
 - Ask in [Discussions](https://github.com/Benziza/queryguard-dotnet/discussions).
-- File a [bug report](https://github.com/Benziza/queryguard-dotnet/issues/new?template=bug_report.yml)
-  with a minimal synthetic reproduction.
-- For a vulnerability, follow [SECURITY.md](https://github.com/Benziza/queryguard-dotnet/blob/main/SECURITY.md) rather than opening an issue.
+- Open a [bug report](https://github.com/Benziza/queryguard-dotnet/issues/new?template=bug_report.yml)
+  with a small, synthetic example.
+- Report vulnerabilities through [SECURITY.md](https://github.com/Benziza/queryguard-dotnet/blob/main/SECURITY.md).

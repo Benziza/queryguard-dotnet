@@ -1,116 +1,73 @@
 # How QueryGuard works
 
-Five concepts, in the order a command travels through them.
+QueryGuard captures EF Core commands inside a scope and checks them when the scope ends.
 
 ```text
-EF Core executes a command
-        │
-        ▼
-  Interceptor ─────► asks: is a scope open?  ── no ──► do nothing
-        │ yes
-        ▼
-   Fingerprint      normalize → redact → hash
-        │
-        ▼
-    Session         append a record (that is all, per command)
-        │
-        ▼  scope closes
-    Analyzer        group by fingerprint, evaluate the policy
-        │
-        ▼
-   Result           findings, ordered, already redacted
+EF Core command
+  → Active scope?
+      No  → Skip capture
+      Yes → Normalize SQL → Redact values → Create fingerprint → Record command
+  → Scope ends → Group queries → Check policy → Return result
 ```
 
 ## 1. The session is the unit of measurement
 
-A **session** is one HTTP request or one test. It is the thing a query count is a count *of*, and
-QueryGuard has nothing useful to say without one.
+A session groups commands for one request, test, or job:
 
-Sessions come from two places:
+- `app.UseQueryGuard()` opens a session for each measured request.
+- `QueryGuardScope.Start(...)` opens an explicit scope.
+- `TrackQueries(...)` measures requests in integration tests.
 
-- `app.UseQueryGuard()` opens one per request.
-- `QueryGuardScope.Start(...)` opens one explicitly, for a test or a background job.
-
-Both nest, and the innermost wins. **No open session means no capture**: QueryGuard stays silent rather
-than guessing which scope a command belongs to.
-
-A session is mutable while open and frozen when it completes. `CompletedQueryGuardSession` is a separate
-type precisely so "a completed session cannot change" is a compile-time guarantee rather than a
-convention.
+Nested scopes capture into the innermost session. Without an active session, nothing is captured.
+A completed session cannot be changed.
 
 ## 2. The interceptor is stateless
 
-EF Core registers a `DbCommandInterceptor` as a **singleton**. One instance sees commands from every
-concurrent request, every parallel test, and every fan-out inside a single request, so it cannot hold
-per-scope state. It asks `IQueryGuardSessionAccessor` which session the command it is looking at belongs
-to.
+The interceptor observes commands without changing SQL, results, or application exceptions.
+It gets the active session from `IQueryGuardSessionAccessor`.
 
-The default accessor is backed by `AsyncLocal<T>`, which flows with `ExecutionContext`. That is what makes
-`await` boundaries and `Task.Run` fan-out land in the right session without your code passing anything
-around.
+The default accessor uses `AsyncLocal<T>`. Sessions flow through `await` and `Task.Run`.
+Code that suppresses execution context flow needs extra setup.
+For `TestServer`, use `TrackQueries` or follow the
+[manual setup](../troubleshooting/README.md#4-testserver-is-not-flowing-executioncontext).
 
-The limitation is the same mechanism: work that suppresses context flow is not captured. In practice the
-one place this bites is `TestServer`, which does not flow context into requests unless asked. See
-[troubleshooting](../troubleshooting/README.md#4-testserver-is-not-flowing-executioncontext).
-
-The interceptor **observes**. It never modifies the generated SQL, suppresses a command, changes a result,
-or replaces an exception. See [ADR-0002](../decisions/0002-session-propagation.md) and
-[ADR-0006](../decisions/0006-aspnet-observe-only.md).
+See [session design](../decisions/0002-session-propagation.md).
 
 ## 3. A fingerprint decides what "the same query" means
 
-To say "this query ran 51 times", QueryGuard has to decide when two command texts are the same query.
-Raw text will not do: provider-generated parameter names differ between executions, and formatting
-differs between providers and EF versions.
+A fingerprint is a query ID such as `QG-FP-1A2B3C4D`. QueryGuard creates it by:
 
-The command text is **normalized** by collapsing whitespace, removing non-directive comments, and
-mapping every parameter syntax to one placeholder. It is then **redacted** and hashed into a short
-stable identifier like `QG-FP-1A2B3C4D`.
+1. Collapsing whitespace and removing comments except QueryGuard directives.
+2. Replacing parameter references with a common placeholder.
+3. Redacting values according to the capture settings.
+4. Hashing the normalized, redacted SQL.
 
-Normalization is deliberately conservative. It never reorders tokens, sorts clauses, canonicalizes
-aliases, or rewrites quoted identifiers, because the two failure modes are not symmetric:
+Token order, aliases, and quoted identifiers stay unchanged. SQL from different providers can
+have different IDs.
 
-- **Over-normalizing** merges genuinely different statements, so a report points at SQL your application
-  never ran. Actively misleading.
-- **Under-normalizing** splits one logical query into several groups, so a real pattern goes unreported.
-  The tool is merely quieter.
+The built-in redactor hashes the full SQL before shortening it for display.
+Two long queries can show the same shortened text but have different IDs.
+See [display limits](../configuration/README.md#sql-display-length-and-fingerprints).
 
-When in doubt, it does less. See [ADR-0005](../decisions/0005-sql-fingerprints.md).
+## 4. Redaction happens before reporting
 
-## 4. Redaction happens once, before anything can read the data
+By default, SQL string and number values are redacted, parameter values are not captured,
+and retained SQL samples are limited. Connection strings are not captured.
 
-Everything QueryGuard retains passes through one policy. Parameter values and connection strings have no
-field anywhere in the model, string and numeric literals surviving in SQL are replaced, retained samples
-are bounded, and stack traces are off unless asked for.
+Request stack traces are off by default. Test scopes capture query origins by default.
+See [capture settings](../configuration/README.md#capture-and-privacy).
 
-Centralizing this is the point: a reporter that had to *remember* to redact would eventually forget, and
-adding a reporter would be a way to introduce a leak. Because redaction happens before a result exists,
-no reporter, including one you write, can emit what was never captured.
+## 5. Analysis happens when the scope ends
 
-See [ADR-0004](../decisions/0004-parameter-privacy.md).
+QueryGuard groups recorded commands by fingerprint and checks the configured policy.
+The result contains counts, durations, SQL samples, and findings in a stable order.
 
-## 5. Analysis happens after the work, not during it
+Repeated SQL is a possible N+1 problem. A repetition warning alone does not fail a test;
+a rule with failure severity does. See [budgets](../configuration/README.md#budgets).
 
-Capture is one append per command. Grouping, budget evaluation, and finding creation happen once when
-the scope closes.
+## Next steps
 
-That split is why being installed costs about a nanosecond per command
-([benchmarks](../benchmarks.md)). It also means analysis can afford to sort and allocate, which is what
-makes deterministic ordering affordable: two runs over the same data produce byte-identical reports, so a
-snapshot test on a report is meaningful.
-
-A **finding** is evidence, not a verdict on your design. It carries the numbers that justify it:
-occurrence counts, expected against actual, timing, redacted SQL, so you can disagree with it on the
-facts. A repeated-query candidate is a *warning*, because repeated SQL is strong evidence and not proof.
-Making it a failure requires configuring a budget, deliberately.
-
-See [ADR-0003](../decisions/0003-detector-terminology.md).
-
-## Where to go next
-
-| | |
-| --- | --- |
-| Configure budgets and policies | [configuration](../configuration/README.md) |
-| A finding looks wrong | [false positives](../troubleshooting/false-positives.md) |
-| Provider support | [providers](../providers/README.md) |
-| Why any of this is the way it is | [decision records](../decisions/README.md) |
+- [Testing](../testing/README.md)
+- [Configuration](../configuration/README.md)
+- [Intentional repetition](../troubleshooting/false-positives.md)
+- [Design decisions](../decisions/README.md)

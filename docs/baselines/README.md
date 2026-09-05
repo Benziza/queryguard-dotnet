@@ -1,21 +1,46 @@
 # Baselines
 
-A query budget asks you for a number you probably do not have. `WithMaxQueries(10)` needs someone to
-know that ten is right, and on an endpoint nobody has measured, nobody does, so the number gets
-guessed, or set high enough never to fire, or set low and then raised until the build goes green.
-
-A baseline asks for nothing. It records what the code does today and reports what changed.
+A baseline saves current query counts. Later runs show what changed:
 
 ```text
 GET /api/companies
   3 -> 51 queries
 ```
 
-No threshold, no judgement needed to read it. And it is the shape of the thing a reviewer actually
-cares about: not *this endpoint is over budget* but *this pull request changed this endpoint*.
+Use a baseline when you do not know the right query budget yet.
+You can also use it alongside fixed budgets.
 
-Budgets and baselines are complementary. A budget is a line you refuse to cross. A baseline notices you
-moved.
+## Record and verify with the CLI
+
+Install the tool:
+
+```bash
+dotnet tool install -g QueryGuard.Cli
+```
+
+Have your tests write JSON reports:
+
+```csharp
+await new QueryGuardJsonReporter().WriteAsync(result, "artifacts/queryguard/companies.json");
+```
+
+Run the tests, then record the baseline:
+
+```bash
+queryguard baseline record
+```
+
+Commit `queryguard-baseline.json`. After later test runs, compare the new reports:
+
+```bash
+queryguard verify --summary artifacts/queryguard/summary.md
+```
+
+Add `--fail-on-regression` to return a non-zero exit code when counts increase.
+Without it, regressions are reported but do not fail the command.
+
+The CLI reads reports; it does not run tests. Recording updates measured scopes and keeps
+other baseline entries. Files that are not QueryGuard reports are skipped.
 
 ## The file
 
@@ -33,14 +58,9 @@ moved.
 }
 ```
 
-Counts only: no SQL, no timings. SQL would make the file a second copy of the report and would produce
-a diff on every unrelated schema change. Timings vary between a laptop and a busy runner, so a baseline
-containing them would report a regression whenever CI was loaded, which is how a check earns being
-ignored.
+The file stores counts, not SQL or timings. Entries are sorted by scope name.
 
-Entries are ordered by scope and the file ends with a newline, so its diff is reviewable. Commit it.
-
-## Recording one
+## Recording one in code
 
 ```csharp
 var baseline = QueryGuardBaseline.Empty;
@@ -53,8 +73,7 @@ foreach (var result in measuredResults)
 File.WriteAllText("queryguard-baseline.json", baseline.ToJson());
 ```
 
-`QueryGuardBaseline` is immutable. `Record` returns a new instance, so building one across a test run
-is safe without locking.
+`Record` returns a new baseline. Keep its return value.
 
 ## Comparing against one
 
@@ -64,61 +83,15 @@ var comparison = QueryGuardBaselineComparison.Compare(baseline, measuredResults)
 
 if (comparison.HasRegressions)
 {
-    // Your call. Fail the test, warn, or just publish the table.
+    // Fail the test, log a warning, or publish a report.
 }
 ```
 
-`Compare` does not fail anything. More queries is a fact; whether it is a defect is a judgement, and
-the library does not get to make it: the same reason a repeated-query finding is a warning rather than
-a failure.
-
-## Without writing any plumbing
-
-The library can do all of this from a test. The command-line tool does the file handling for you:
-
-```bash
-dotnet tool install -g QueryGuard.Cli
-```
-
-Have the test run write JSON reports:
-
-```csharp
-await new QueryGuardJsonReporter().WriteAsync(result, "artifacts/queryguard/companies.json");
-```
-
-Record once, and commit the file:
-
-```bash
-queryguard baseline record
-```
-
-Then on every run:
-
-```bash
-queryguard verify --summary artifacts/queryguard/summary.md
-```
-
-```text
-2 report(s), 2 scope(s) compared.
-  REGRESSION GET /api/companies: 3 -> 51
-             GET /api/users: unchanged
-
-1 scope(s) run more queries than the baseline.
-If that is intended, re-record the baseline and commit it.
-```
-
-Add `--fail-on-regression` to make that exit non-zero. Without it the tool reports and exits 0, because
-more queries is a fact and whether it is a defect is a judgement.
-
-Recording **merges** rather than replaces, so a run that measured three endpoints does not delete the
-baseline for every endpoint it did not exercise. Files that are not QueryGuard reports are skipped, so a
-coverage file in the same directory does not stop the run.
-
-The tool does not run your tests. Measurement happens in the test process where the `DbContext` lives; a
-tool that owned that would have to guess your test command, your target framework, and your fixture
-wiring.
+`Compare` returns results without throwing for regressions.
 
 ## In a pull request
+
+Render a Markdown summary:
 
 ```csharp
 var markdown = new QueryGuardBaselineMarkdownReporter().Render(comparison);
@@ -130,48 +103,27 @@ if (summary is not null)
 }
 ```
 
-Which produces this on the workflow run page:
+| Scope | Before | Now | Change |
+| --- | --: | --: | --- |
+| `GET /api/companies` | 3 | 51 | +48, most-repeated query +48 |
+| `GET /api/orders` | 8 | 8 | most-repeated query +7 |
+| `GET /api/users` | 4 | 4 | unchanged |
+| `GET /api/reports` | 12 | 3 | -9 (improved) |
 
-> ### QueryGuard
->
-> **2 scopes now run more queries than the baseline.** `GET /api/companies` went from 3 to 51.
->
-> | Scope | Before | Now | Change |
-> | --- | --: | --: | --- |
-> | `GET /api/companies` | 3 | 51 | +48, most-repeated query +48 |
-> | `GET /api/orders` | 8 | 8 | most-repeated query +7 |
-> | `GET /api/invoices` | - | 3 | new scope |
-> | `GET /api/users` | 4 | 4 | unchanged |
-> | `GET /api/reports` | 12 | 3 | -9 (improved) |
+A stable total can still hide more repetition, as the `orders` row shows.
+The baseline tracks the highest occurrence count separately.
 
-The `GET /api/orders` row is the one worth looking at twice. The read count did not move: **8 before,
-8 now**, but one query is now running seven more of them than it used to. Twenty distinct lookups
-becoming one query repeated twenty times leaves a total-count budget perfectly satisfied. That is why
-`topFingerprintOccurrences` is stored separately.
+For a pull request comment, see the
+[GitHub Action setup](https://github.com/Benziza/queryguard-dotnet/blob/main/action/README.md).
 
-## Rules that keep it usable
+## Comparison rules
 
-**A new scope is not a regression.** Otherwise the pull request that adds any endpoint fails for adding
-it, and the check gets disabled by the second person who hits it.
+- New scopes are shown as new, not as regressions.
+- Scopes missing from a run are ignored.
+- Lower counts are reported as improvements.
+- To accept an intended increase, record again and commit the diff.
+- Renaming a scope makes it a new entry; names are the comparison key.
+- Unsupported future schema versions are rejected.
+- To resolve a baseline merge conflict, rerun the relevant tests and record their results.
 
-**A scope missing from the run is ignored, not reported as removed.** A filtered test run would
-otherwise claim every endpoint it did not exercise had been deleted.
-
-**Improvements are reported too.** A pull request that fixes an N+1 gets to show it. A tool that only
-delivers bad news is one people stop reading.
-
-**Accepting a regression is deliberate.** Regenerate the file and commit it. The diff then shows a
-reviewer that a scope went from 3 to 51 and somebody decided that was fine, which is a much better
-record than a threshold quietly raised in a config file.
-
-## Things to know
-
-- **The file will occasionally conflict on merge.** It is generated and ordered, so regenerating is
-  always a valid resolution.
-- **Renaming a route loses that scope's history.** Scope names are the join key, so a rename reads as
-  one scope disappearing and another appearing: both non-events by the rules above.
-- **A future schema version is rejected, not guessed at.** Reading a baseline wrong is worse than
-  refusing to read it: a silently empty baseline reports every scope as new, which hides every
-  regression in the run.
-
-The reasoning behind all of this is in [ADR-0013](../decisions/0013-baseline-storage.md).
+See [baseline design](../decisions/0013-baseline-storage.md) for details.
