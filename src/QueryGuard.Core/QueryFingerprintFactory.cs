@@ -39,6 +39,9 @@ public sealed class QueryFingerprintFactory : IQueryFingerprintFactory
     /// </summary>
     /// <param name="redactor">
     /// The redactor applied after normalization. Defaults to a redactor with default capture options.
+    /// With <see cref="QueryGuardRedactor"/>, the full redacted SQL is hashed before display truncation.
+    /// Custom redactors retain their existing contract: their <see cref="IQueryGuardRedactor.RedactSql"/>
+    /// output is both hashed and retained.
     /// </param>
     /// <param name="normalizer">
     /// The normalizer applied first. Defaults to <see cref="SqlNormalizer"/>.
@@ -53,13 +56,23 @@ public sealed class QueryFingerprintFactory : IQueryFingerprintFactory
     /// <remarks>
     /// Normalize first, then redact. Normalization removes the provider noise that would otherwise
     /// split one logical query into several groups; redaction then removes the values, so no
-    /// un-redacted text is ever hashed or retained. Doing it the other way round would leave the
-    /// redactor's placeholders to be normalized, which is one indirection for no benefit.
+    /// un-redacted text is ever hashed or retained. The built-in redactor truncates only after hashing,
+    /// so the display limit cannot merge queries whose differences occur later in the statement.
     /// </remarks>
     public QueryFingerprint Create(string? commandText, QueryCommandKind kind)
     {
-        var normalized = _redactor.RedactSql(_normalizer.Normalize(commandText));
-        return new QueryFingerprint(ComputeId(normalized, kind), normalized);
+        var normalized = _normalizer.Normalize(commandText);
+        if (_redactor is QueryGuardRedactor builtInRedactor)
+        {
+            var redacted = builtInRedactor.RedactSqlForFingerprint(normalized);
+            var id = ComputeId(redacted, kind);
+            return new QueryFingerprint(id, builtInRedactor.TruncateSql(redacted));
+        }
+
+        // A custom policy may remove more than literals. Never bypass it or change shared options
+        // to recover text it chose not to return. Custom factories can supply other hashing policies.
+        var customRedacted = _redactor.RedactSql(normalized);
+        return new QueryFingerprint(ComputeId(customRedacted, kind), customRedacted);
     }
 
     private static string ComputeId(string normalizedSql, QueryCommandKind kind)
