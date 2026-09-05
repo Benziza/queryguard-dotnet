@@ -68,6 +68,11 @@ public sealed class SqlNormalizer : ISqlNormalizer
                     index = CopyStringLiteral(commandText, index, builder);
                     continue;
 
+                case '$' when SqlStringLiteralScanner.TryDollarQuotedEnd(commandText, index, out var literalEnd):
+                    builder.Append(commandText, index, literalEnd - index);
+                    index = literalEnd;
+                    continue;
+
                 case '"':
                     index = CopyDelimited(commandText, index, builder, '"');
                     continue;
@@ -153,25 +158,7 @@ public sealed class SqlNormalizer : ISqlNormalizer
     private static int CopyStringLiteral(string text, int index, StringBuilder builder)
     {
         var start = index;
-        index++;
-
-        while (index < text.Length)
-        {
-            if (text[index] == '\'')
-            {
-                // A doubled quote is an escaped quote inside the literal, not its end.
-                if (Peek(text, index + 1) == '\'')
-                {
-                    index += 2;
-                    continue;
-                }
-
-                index++;
-                break;
-            }
-
-            index++;
-        }
+        index = SqlStringLiteralScanner.SingleQuotedEnd(text, index);
 
         builder.Append(text, start, index - start);
         return index;
