@@ -132,6 +132,8 @@ public sealed class QueryGuardCaptureOptions
     /// Generated SQL for a wide projection can run to tens of kilobytes. Truncation keeps a report
     /// readable and keeps retention bounded, and it is always marked explicitly so nobody mistakes
     /// a truncated statement for the whole one.
+    /// With the built-in redactor, this limits retained text only; the fingerprint identifier is
+    /// computed from the complete redacted SQL before truncation.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">The value is less than one.</exception>
     public int MaxNormalizedSqlLength

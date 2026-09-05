@@ -55,18 +55,25 @@ public sealed class QueryGuardRedactor : IQueryGuardRedactor
 
     /// <inheritdoc />
     public string RedactSql(string? sql)
+        => TruncateSql(RedactSqlForFingerprint(sql));
+
+    /// <summary>
+    /// Redacts the complete input for hashing. Only the shortened result is retained in a fingerprint.
+    /// </summary>
+    internal string RedactSqlForFingerprint(string? sql)
     {
         if (string.IsNullOrEmpty(sql))
         {
             return string.Empty;
         }
 
-        var redacted = _options.RedactStringLiterals || _options.RedactNumericLiterals
+        return _options.RedactStringLiterals || _options.RedactNumericLiterals
             ? RedactLiterals(sql)
             : sql;
-
-        return Truncate(redacted, _options.MaxNormalizedSqlLength);
     }
+
+    internal string TruncateSql(string redactedSql)
+        => Truncate(redactedSql, _options.MaxNormalizedSqlLength);
 
     /// <inheritdoc />
     public string? FilterStackTrace(string? stackTrace)
