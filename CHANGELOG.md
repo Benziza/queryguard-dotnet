@@ -12,6 +12,16 @@ record: breaking changes, privacy-relevant behavior, and report-schema compatibi
 
 ## [Unreleased]
 
+### Fixed
+
+- Redact PostgreSQL dollar-quoted strings and escaped quotes in `E'...'` strings before SQL reaches
+  reports. Normalization preserves these literal boundaries, including comments inside strings.
+- For a backslash-escaped quote in an ordinary string, redact the remaining SQL conservatively:
+  its closing quote depends on the database's SQL mode, which QueryGuard does not know. This can
+  shorten SQL evidence and group more queries together. Fingerprints for affected SQL change;
+  review related baselines and fingerprint allowlists after upgrading. Public APIs and report
+  schemas are unchanged.
+
 ## [0.1.0] - 2026-08-21
 
 First stable release. The package API is stable within the `0.1` release line.

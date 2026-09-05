@@ -172,6 +172,17 @@ This is on in a scope and **off** on a request path, because it costs 20–30× 
 path: free in a test, not free in production. See
 [ADR-0007](../decisions/0007-stack-trace-policy.md) and [benchmarks](../benchmarks.md).
 
+## SQL string privacy
+
+String redaction covers single-quoted strings, PostgreSQL `E'...'` escape strings, and
+`$$...$$` or `$tag$...$tag$` strings. Quotes and comment markers inside these strings stay
+inside the literal during normalization, so their contents are removed before reporting.
+
+An ordinary string containing a backslash before a quote is ambiguous without the database's
+SQL mode. QueryGuard hides the remainder of that command in this case. This can shorten the
+reported SQL and group more queries together. Use parameterized SQL to avoid this ambiguity.
+Setting `RedactStringLiterals = false` explicitly keeps string contents.
+
 ## In tests
 
 ```csharp
