@@ -13,6 +13,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="QueryGuard.Reporting" />
     <InternalsVisibleTo Include="QueryGuard.Testing" />
+    <InternalsVisibleTo Include="QueryGuard.EntityFrameworkCore" />
   </ItemGroup>
 
 </Project>
