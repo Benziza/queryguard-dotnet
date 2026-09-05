@@ -57,3 +57,8 @@ updates:
     labels:
       - "type:chore"
       - "dependencies"
+    groups:
+      # init and analyze share configuration and must use the same action version.
+      codeql:
+        patterns:
+          - "github/codeql-action/*"
