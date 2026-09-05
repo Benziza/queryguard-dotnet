@@ -32,6 +32,11 @@ updates:
         update-types:
           - patch
     ignore:
+      # Tests already use 8.0.3. Do not raise the shipping floor from 8.0.2 for this patch.
+      # Dependabot treats this bare version as an exact match, not a minimum.
+      - dependency-name: "Microsoft.Extensions.Logging.Abstractions"
+        versions:
+          - "8.0.3"
       # Major EF Core upgrades change the supported target framework matrix and
       # require an ADR, not a dependency bump.
       - dependency-name: "Microsoft.EntityFrameworkCore.*"
