@@ -83,6 +83,17 @@ Draft pull requests are welcome. Keep the scope focused, explain unusually large
 review conversations before merge. The repository uses squash merges, so the final pull request title
 becomes the commit message.
 
+## Dependency updates
+
+Update all `github/codeql-action/*` steps together. `init` and `analyze` must use the same version.
+Dependabot groups their version updates in one pull request.
+
+In `Directory.Packages.props`, shipping projects use low supported dependency versions while tests
+and samples use newer patches. Review the `IsPackable` conditions before accepting a NuGet update.
+A patch update for tests should not raise the minimum version required by package consumers.
+Raise that minimum only when a security fix or required API makes it necessary, and update the
+matching checks in `eng/verify-packages.sh` with the reason in the pull request.
+
 ## Documentation site
 
 Build the local site with:

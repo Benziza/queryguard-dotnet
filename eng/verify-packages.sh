@@ -142,6 +142,13 @@ for name in "${EXPECTED_PACKAGES[@]}"; do
     fail "licence expression missing or not MIT"
   fi
 
+  if [ "$name" = "QueryGuard.Core" ]; then
+    require_dependency_version "$nuspec" "Microsoft.Extensions.Logging.Abstractions" "8.0.2" \
+      "net8.0 logging dependency starts at the supported floor"
+    require_dependency_version "$nuspec" "Microsoft.Extensions.Logging.Abstractions" "10.0.0" \
+      "net10.0 logging dependency starts at the supported floor"
+  fi
+
   if [ "$name" = "QueryGuard.EntityFrameworkCore" ]; then
     require_dependency_version "$nuspec" "Microsoft.EntityFrameworkCore.Relational" "8.0.1" \
       "net8.0 EF Core dependency starts at the supported floor"
