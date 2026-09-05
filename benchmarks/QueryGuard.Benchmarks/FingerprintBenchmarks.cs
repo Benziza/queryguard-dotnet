@@ -33,9 +33,9 @@ public class FingerprintBenchmarks
     /// Gets or sets how many columns the benchmarked statement projects.
     /// </summary>
     /// <remarks>
-    /// Three shapes: a keyed lookup, a typical entity projection, and a wide report query.
+    /// A keyed lookup, an entity projection, a wide report, and a query exceeding the SQL display limit.
     /// </remarks>
-    [Params(3, 20, 200)]
+    [Params(3, 20, 200, 700)]
     public int ColumnCount { get; set; }
 
     [GlobalSetup]
