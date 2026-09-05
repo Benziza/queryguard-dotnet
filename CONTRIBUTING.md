@@ -94,6 +94,10 @@ A patch update for tests should not raise the minimum version required by packag
 Raise that minimum only when a security fix or required API makes it necessary, and update the
 matching checks in `eng/verify-packages.sh` with the reason in the pull request.
 
+Dependabot ignores exactly `Microsoft.Extensions.Logging.Abstractions` 8.0.3: tests already use it,
+and the reviewed update only raised the shipping minimum from 8.0.2. Later patch versions remain
+eligible for review. Revisit this exact-version ignore if a security or compatibility need changes.
+
 ## Documentation site
 
 Build the local site with:
