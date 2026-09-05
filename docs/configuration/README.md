@@ -89,6 +89,15 @@ Note that "what a command does" is not the same as "which EF Core method execute
 runs `INSERT … RETURNING` through the reader path to read the generated key back: QueryGuard classifies
 that as a write anyway, or a budget of ten reads would mean something different on every provider.
 
+Only a complete write keyword at the start of a statement marks a reader command as a write.
+Strings, quoted identifiers, and comments are skipped when finding statement boundaries. For example,
+`SELECT ';DELETE'` counts as one read, while `/* tag */ INSERT ... RETURNING ...` counts as a write.
+SQL Server batches with `SET` statements before a write keep the same behavior.
+
+This is a lexical check, not a full SQL parser. CTEs and stored procedure bodies are not interpreted.
+If no clear write statement is found, QueryGuard keeps the execution kind supplied by EF Core;
+failed commands with no execution kind keep the existing read fallback.
+
 ## Capture and privacy
 
 ```csharp
