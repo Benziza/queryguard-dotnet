@@ -11,7 +11,7 @@
 
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <EntityFrameworkCoreVersion Condition="'$(IsPackable)' == 'true' and '$(TargetFramework)' == 'net8.0'">8.0.1</EntityFrameworkCoreVersion>
+    <EntityFrameworkCoreVersion Condition="'$(IsPackable)' == 'true' and '$(TargetFramework)' == 'net8.0'">8.0.30</EntityFrameworkCoreVersion>
     <EntityFrameworkCoreVersion Condition="'$(IsPackable)' == 'true' and '$(EntityFrameworkCoreVersion)' == ''">10.0.0</EntityFrameworkCoreVersion>
     <EntityFrameworkCoreVersion Condition="'$(TargetFramework)' == 'net8.0' and '$(EntityFrameworkCoreVersion)' == ''">8.0.30</EntityFrameworkCoreVersion>
     <EntityFrameworkCoreVersion Condition="'$(EntityFrameworkCoreVersion)' == ''">10.0.11</EntityFrameworkCoreVersion>
