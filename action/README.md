@@ -4,7 +4,7 @@ Publishes a QueryGuard query-count report to the job summary and, on a pull requ
 comment**: one comment that gets edited rather than a new one per push.
 
 ```yaml
-- uses: Benziza/queryguard-dotnet@v0.1.0
+- uses: Benziza/queryguard-dotnet@v0.1.1
 ```
 
 That is the whole thing.
@@ -48,7 +48,7 @@ jobs:
       - run: dotnet tool install -g QueryGuard.Cli
       - run: queryguard verify --summary artifacts/queryguard/summary.md
 
-      - uses: Benziza/queryguard-dotnet@v0.1.0
+      - uses: Benziza/queryguard-dotnet@v0.1.1
         with:
           summary-path: artifacts/queryguard/summary.md
 ```
