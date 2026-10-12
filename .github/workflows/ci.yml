@@ -105,7 +105,7 @@ jobs:
           --logger "trx;LogFileName=reporting-unit-tests.trx"
           --results-directory artifacts/test-results
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: unit-tests-${{ matrix.os }}
@@ -202,7 +202,7 @@ jobs:
           sarif_file: artifacts/queryguard/queryguard.sarif
           category: queryguard
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: integration-tests-${{ matrix.os }}
@@ -244,7 +244,7 @@ jobs:
           --logger "trx;LogFileName=provider-tests.trx"
           --results-directory artifacts/test-results
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: provider-tests
@@ -275,7 +275,7 @@ jobs:
 
       # Raw CSV, JSON, HTML and the full BenchmarkDotNet header, kept alongside the run that produced
       # them. A summary table without its raw output is a number nobody can check.
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: benchmark-artifacts
@@ -315,7 +315,7 @@ jobs:
       - name: Verify packages
         run: eng/verify-packages.sh artifacts/packages
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: packages
