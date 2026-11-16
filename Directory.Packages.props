@@ -63,7 +63,7 @@
       but its latest release is 9.0.0 and there is no EF Core 10 line, which this project targets. See
       docs/decisions/0009-provider-matrix.md for what that means for the claim being made.
     -->
-    <PackageVersion Include="MySql.EntityFrameworkCore" Version="10.0.9" />
+    <PackageVersion Include="MySql.EntityFrameworkCore" Version="10.0.12" />
     <PackageVersion Include="Testcontainers.MySql" Version="4.15.0" />
   </ItemGroup>
 
