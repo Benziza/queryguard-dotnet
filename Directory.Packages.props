@@ -28,7 +28,7 @@
 
     <AspNetCoreTestingVersion Condition="'$(IsPackable)' == 'true' and '$(TargetFramework)' == 'net8.0'">8.0.1</AspNetCoreTestingVersion>
     <AspNetCoreTestingVersion Condition="'$(IsPackable)' == 'true' and '$(AspNetCoreTestingVersion)' == ''">10.0.0</AspNetCoreTestingVersion>
-    <AspNetCoreTestingVersion Condition="'$(TargetFramework)' == 'net8.0' and '$(AspNetCoreTestingVersion)' == ''">8.0.30</AspNetCoreTestingVersion>
+    <AspNetCoreTestingVersion Condition="'$(TargetFramework)' == 'net8.0' and '$(AspNetCoreTestingVersion)' == ''">8.0.34</AspNetCoreTestingVersion>
     <AspNetCoreTestingVersion Condition="'$(AspNetCoreTestingVersion)' == ''">10.0.11</AspNetCoreTestingVersion>
 
     <CachingMemoryVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.1</CachingMemoryVersion>
