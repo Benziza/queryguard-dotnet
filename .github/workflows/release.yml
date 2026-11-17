@@ -123,7 +123,7 @@ jobs:
       - name: Verify packages
         run: eng/verify-packages.sh artifacts/packages
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: release-${{ steps.version.outputs.version }}
@@ -154,7 +154,7 @@ jobs:
       # No checkout of source and no second build: the packages published here are the bytes
       # `verify` produced and checked. Rebuilding would publish something that was never verified,
       # however unlikely the difference.
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: release-${{ needs.verify.outputs.version }}
           path: artifacts
